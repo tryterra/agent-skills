@@ -5,7 +5,7 @@ Cross-platform integration for **Apple Health** (iOS), **Samsung Health**, and *
 ## 1. Install and native setup
 
 ```bash
-flutter pub get terra_flutter_bridge
+flutter pub add terra_flutter_bridge
 ```
 
 Then complete the native setup for each platform you target.
@@ -59,7 +59,7 @@ Future<void> _initializeTerra() async {
 
 ## 3. Connect with initConnection
 
-Mint the single-use token from your backend first (`POST https://api.tryterra.co/v2/auth/generateAuthToken` with `dev-id` + `x-api-key`).
+Mint the single-use token from your backend first (`POST https://api.tryterra.co/v2/auth/generateAuthToken` with `dev-id` + `x-api-key`). The token expires in 3 minutes, so mint it just-in-time, not at app start.
 
 ```dart
 Future<void> _initialiseConnection() async {

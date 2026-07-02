@@ -39,7 +39,7 @@ Terra.instance(devId: "<YOUR_DEV_ID>", referenceId: "<REFERENCE_ID>") { manager,
 
 ## 3. Connect Apple Health with initConnection
 
-Mint the single-use token from your backend first (`POST https://api.tryterra.co/v2/auth/generateAuthToken` with `dev-id` + `x-api-key`).
+Mint the single-use token from your backend first (`POST https://api.tryterra.co/v2/auth/generateAuthToken` with `dev-id` + `x-api-key`). The token expires in 3 minutes, so mint it just-in-time, not at app start.
 
 ```swift
 let token = "<AUTH_TOKEN>"               // from your backend
@@ -125,14 +125,17 @@ func userTappedConnectAppleHealth() {
 
 ## Cross-device and reinstall behavior
 
-Connections key on `(deviceId, devId, referenceId)`. Same `referenceId` on a different device, or a reinstall that reset the vendor identifier, produces a **new** Terra `user_id`. Apple resets `identifierForVendor` only when the user deletes every app from your App Store team before reinstalling. The same real person can therefore reach your webhook under different `user_id`s sharing one `reference_id`:
+A second device, or a reinstall that reset the vendor identifier, authenticates with a new device identifier. (Apple resets `identifierForVendor` only when the user deletes every app from your App Store team before reinstalling.) When that new identifier arrives under a `referenceId` that already has an Apple Health connection for your dev-id, Terra API issues a **new** `user_id`, **deletes the previous connection**, and sends a `user_reauth` webhook so you can migrate:
 
 ```json
-{ "user": { "user_id": "<uid-A>", "reference_id": "user-42" } }   // iPhone
-{ "user": { "user_id": "<uid-B>", "reference_id": "user-42" } }   // iPad, same person
+{
+  "type": "user_reauth",
+  "old_user": { "user_id": "<uid-A>", "reference_id": "user-42" },
+  "new_user": { "user_id": "<uid-B>", "reference_id": "user-42" }
+}
 ```
 
-Terra API does not auto-link these (HealthKit data is device-local). Dedup by grouping on `reference_id`, or gate `initConnection` to one primary device.
+Handle `user_reauth` by re-pointing everything stored under `old_user.user_id` to `new_user.user_id`. There is only ever one active connection per `(dev-id, reference_id, provider)`. This replacement fires only when a `referenceId` is supplied; with an empty `referenceId` stale connections accumulate instead – one more reason to always set it.
 
 ## Filtering by source app (optional)
 
@@ -160,34 +163,22 @@ Disconnect via the same backend endpoint as web integrations (`DELETE /auth/deau
 
 ## Writing data
 
-`postActivity` (completed activity), `postBody` (body measurement), `postNutrition` (nutrition log) write into Apple Health. `postActivity` **requires `device_data` and iOS 14+**.
+`postActivity` (completed activity), `postBody` (body measurement), `postNutrition` (nutrition log) write into Apple Health. `postActivity` **requires `device_data` and iOS 14+** – writing fails without `device_data` in the payload.
 
 ```swift
-func postActivityData(terra: TerraManager) {
-    let activityData = TerraActivityData(
-        heart_rate_data: TerraHeartRateData(
-            summary: TerraHeartRateSummaryData(avg_hr_bpm: 140.0, max_hr_bpm: 180.0)
-        ),
-        metadata: TerraActivityMetaData(
-            type: TerraActivityType.RUNNING.rawValue,
-            end_time: Date().terraString,
-            start_time: Date().addingTimeInterval(-3600).terraString,
-            name: "Morning Run"
-        ),
-        device_data: TerraDeviceData(name: "Terra"),
-        distance_data: TerraActivityDistanceData(
-            summary: TerraDistanceSummaryData(distance_meters: 5000.0)
-        ),
-        calories_data: TerraCaloriesData(total_burned_calories: 600.0)
-    )
-    terra.postActivity(type: .APPLE_HEALTH, payload: activityData) { success, error in
-        guard success, error == nil else { return }
-        print("Activity posted")
-    }
-}
+let activityData = TerraActivityData(
+    metadata: TerraActivityMetaData(
+        type: TerraActivityType.RUNNING.rawValue,
+        end_time: Date().terraString,
+        start_time: Date().addingTimeInterval(-3600).terraString,
+        name: "Morning Run"
+    ),
+    device_data: TerraDeviceData(name: "Terra")   // required
+)
+terra.postActivity(type: .APPLE_HEALTH, payload: activityData) { success, error in /* ... */ }
 ```
 
-`postBody` and `postNutrition` follow the same shape with `TerraBodyData` / `TerraNutritionData` payloads. See the SDK reference linked from [the iOS docs](https://docs.tryterra.co/health-and-fitness-api/mobile-only-sources/ios-swift) for full field lists.
+`postBody` and `postNutrition` follow the same shape with `TerraBodyData` / `TerraNutritionData` payloads. Fetch [docs.tryterra.co/health-and-fitness-api/mobile-only-sources/ios-swift.md](https://docs.tryterra.co/health-and-fitness-api/mobile-only-sources/ios-swift.md) for the full payload field lists when building the request body.
 
 ## Planned workout sync (iOS 17+)
 

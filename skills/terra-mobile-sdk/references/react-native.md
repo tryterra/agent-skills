@@ -55,7 +55,7 @@ const initializeTerra = async () => {
 
 ## 3. Connect with initConnection
 
-Mint the single-use token from your backend first (`POST https://api.tryterra.co/v2/auth/generateAuthToken` with `dev-id` + `x-api-key`).
+Mint the single-use token from your backend first (`POST https://api.tryterra.co/v2/auth/generateAuthToken` with `dev-id` + `x-api-key`). The token expires in 3 minutes, so mint it just-in-time, not at app start.
 
 ```tsx
 import { Connections, initConnection } from 'terra-react';
@@ -141,26 +141,16 @@ Set the final `toWebhook` argument to `false` to receive the payload in the resp
 
 ## Writing data (Apple Health only)
 
-`postActivity` writes into Apple Health (Health Connect writes are not yet supported). **`device_data` is required.**
+`postActivity` writes into Apple Health (Health Connect writes are not yet supported). **`device_data` is required** – the write fails without it.
 
 ```tsx
 import { Activity, postActivity, Connections } from 'terra-react';
 
-const postActivityToAppleHealth = async () => {
-  const activityPayload: Activity = {
-    metadata: {
-      name: 'Morning Run',
-      start_time: '2024-11-01T07:30:00.000000+00:00',
-      end_time: '2024-11-01T08:30:00.000000+00:00',
-      type: 8, // RUNNING – see ActivityType enum in terra-react
-    },
-    device_data: { name: 'Terra' },
-    distance_data: { summary: { distance_meters: 5000 } },
-    calories_data: { total_burned_calories: 400 },
-  };
-  const resp = await postActivity(Connections.APPLE_HEALTH, activityPayload);
-  if (resp.error !== null) throw new Error('Failed to post activity to Apple Health');
+const activityPayload: Activity = {
+  metadata: { name: 'Morning Run', start_time: '...', end_time: '...', type: 8 /* RUNNING */ },
+  device_data: { name: 'Terra' },   // required
 };
+const resp = await postActivity(Connections.APPLE_HEALTH, activityPayload);
 ```
 
-See the SDK reference on [docs.tryterra.co](https://docs.tryterra.co/health-and-fitness-api/mobile-only-sources/react-native) for the full function and enum list.
+Fetch [docs.tryterra.co/health-and-fitness-api/mobile-only-sources/react-native.md](https://docs.tryterra.co/health-and-fitness-api/mobile-only-sources/react-native.md) for the full payload fields, function list, and `ActivityType` enum when building the request body.

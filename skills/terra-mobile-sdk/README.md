@@ -31,10 +31,10 @@ cp -r skills/terra-mobile-sdk ~/.claude/skills/
 ## Highlights
 
 - The mobile SDK is **only** for Apple Health, Samsung Health, and Health Connect – Google Fit is better read via the web API for reliability
-- Mint the single-use auth token from **your backend**; never ship the API key in a production client
+- Mint the single-use auth token (3-minute expiry) from **your backend**, just-in-time; never ship the API key in a production client
 - The permission popup fires **once** on Apple Health and Health Connect – calling `initConnection` again is a no-op
 - `schedulerOn` has **no effect on iOS**; iOS background delivery is controlled by `setUpBackgroundDelivery()` and only pushes dashboard-enabled data types
 - Samsung Health needs an approved partnership plus the `-keep class com.samsung.android.** { *; }` ProGuard rule (release builds crash without it)
-- Apple Health keys connections on `(deviceId, devId, referenceId)`, so one person across devices can produce multiple Terra user IDs sharing a `reference_id` – Terra API does not auto-link them
+- A new device or reinstall replaces the existing connection: Terra API issues a new `user_id`, deletes the old one, and sends a `user_reauth` webhook so you can migrate `old_user.user_id` to `new_user.user_id`
 
 Full API documentation: [docs.tryterra.co](https://docs.tryterra.co) (append `.md` to any docs URL for markdown).
