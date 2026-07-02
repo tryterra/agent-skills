@@ -124,3 +124,5 @@ All three support re-sync. COROS has no in-place update, so a re-sync re-POSTs a
 For full payload examples beyond the one above (trail running with course points, road biking with a speed target, the minimal 2-waypoint route), fetch the live page: https://docs.tryterra.co/routes-api-pre-release/sport-specific-examples.md
 
 Full docs: [Routes API overview](https://docs.tryterra.co/routes-api-pre-release/overview), [introduction](https://docs.tryterra.co/routes-api-pre-release/introduction), [core concepts](https://docs.tryterra.co/routes-api-pre-release/core-concepts), [provider compatibility](https://docs.tryterra.co/routes-api-pre-release/provider-compatibility). If the terra-docs MCP server (`https://docs.tryterra.co/~gitbook/mcp`) is connected, use its tools to search and fetch the docs instead.
+
+Note: the Routes docs space is pre-release and may not be published yet. If a page above returns "Page Not Found", rely on this skill's bundled references and verify against the live API.

@@ -37,7 +37,7 @@ Reference these guidelines when:
 ### 1. Webhook Handling (CRITICAL)
 
 - `webhooks-verify-raw-body` - Verify the signature header HMAC (terra-signature / X-Terra-Signature, read case-insensitively) over the raw unaltered body before parsing JSON
-- `webhooks-ack-within-timeout` - Return 200 within the timeout (8s default, configurable 1-30s per destination), process async
+- `webhooks-ack-within-timeout` - Return 200 within the timeout (8s default), process async
 - `webhooks-dedupe-terra-reference` - Deduplicate deliveries on X-Terra-Trace-Id; terra-reference is shared by all chunks of a large request
 - `webhooks-archive-raw-payloads` - Archive raw payloads to object storage, link rows via a payload key
 - `webhooks-handle-informational-events` - Route non-data events explicitly, unwrap s3_payload deliveries, never crash on unknown types

@@ -4,7 +4,7 @@ Biomarker standardization, UCUM unit codes, LOINC coverage, and common biomarker
 
 ## What is the biomarker key?
 
-Every extracted result is matched against Terra API's reference dataset of ~4,130 known biomarkers. When a match is found, `biomarker.key` is set to a canonical key – a stable, machine-readable identifier used to aggregate and compare results across labs, reports, and patients.
+Every extracted result is matched against Terra API's reference dataset of 4,000+ known biomarkers. When a match is found, `biomarker.key` is set to a canonical key – a stable, machine-readable identifier used to aggregate and compare results across labs, reports, and patients.
 
 ```json
 {
@@ -60,7 +60,7 @@ Note the multibyte `µ` in unit names – always parse response bodies as UTF-8.
 
 ## LOINC Codes
 
-When a matched biomarker has a corresponding [LOINC](https://loinc.org/) code, the result includes `biomarker.loinc_code` (useful for EHR interoperability). Coverage is partial – roughly 1,579 of the ~4,130 reference biomarkers currently carry a LOINC code, concentrated on common blood, serum, and urine analytes. Biomarkers without a mapping (many derived ratios, qualitative microbiology results, specialised assays with no specific LOINC term) carry no `loinc_code` – it can be absent or null even on a match, which is why it must never be used as the no-match signal.
+When a matched biomarker has a corresponding [LOINC](https://loinc.org/) code, the result includes `biomarker.loinc_code` (useful for EHR interoperability). Coverage is partial – many but not all reference biomarkers carry a LOINC code, concentrated on common blood, serum, and urine analytes. Biomarkers without a mapping (many derived ratios, qualitative microbiology results, specialised assays with no specific LOINC term) carry no `loinc_code` – it can be absent or null even on a match, which is why it must never be used as the no-match signal.
 
 ```json
 {
@@ -182,7 +182,7 @@ Frequently encountered biomarkers by category. For the complete dataset, downloa
 
 ## Full Biomarker Dataset
 
-The complete list of all ~4,130 supported biomarkers – each with its canonical key, display name, and associated metadata (including `loinc_code` where mapped) – is available as a downloadable file linked from the [Biomarker Reference](https://docs.tryterra.co/lab-reports/biomarker-reference) page. It is not bundled with this skill (~700 KB); fetch it from the live docs when you need to validate keys or look up LOINC mappings offline.
+The complete list of all 4,000+ supported biomarkers – each with its canonical key, display name, and associated metadata (including `loinc_code` where mapped) – is available as a downloadable file linked from the [Biomarker Reference](https://docs.tryterra.co/lab-reports/biomarker-reference) page. It is not bundled with this skill (~700 KB); fetch it from the live docs when you need to validate keys or look up LOINC mappings offline.
 
 ---
 

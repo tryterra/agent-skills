@@ -161,7 +161,7 @@ Read the reference file that matches your task before writing the request:
 
 Two things live in the docs rather than this skill, because they are large and change with the API:
 
-- **The complete Garmin exercise catalog** (1,624 names, also used for Hevy): fetch https://docs.tryterra.co/planned-workouts-api/overview/garmin-exercise-reference.md when you need to pick or verify a specific `exercise_name`.
-- **Sport-specific payload examples** (running, cycling, swimming, strength, multi-sport): fetch https://docs.tryterra.co/planned-workouts-api/overview/sport-specific-examples.md when you want a full working request body beyond the one in this file.
+- **The complete Garmin exercise catalog** (1,624 names, also used for Hevy): fetch https://docs.tryterra.co/planned-workouts-api/garmin-exercise-reference.md when you need to pick or verify a specific `exercise_name`.
+- **Sport-specific payload examples** (running, cycling, swimming, strength, multi-sport): fetch https://docs.tryterra.co/planned-workouts-api/sport-specific-examples.md when you want a full working request body beyond the one in this file.
 
 Full API documentation: [docs.tryterra.co/planned-workouts-api](https://docs.tryterra.co/planned-workouts-api) (append `.md` to any docs URL for a markdown version). If the terra-docs MCP server (`https://docs.tryterra.co/~gitbook/mcp`) is connected, use its tools to search and fetch the docs instead.

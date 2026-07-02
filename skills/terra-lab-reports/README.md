@@ -2,7 +2,7 @@
 
 Best practices and API reference for the [Terra Lab Reports API](https://docs.tryterra.co/lab-reports) (**pre-release**) – convert clinical lab report PDFs and images into structured, standardized biomarker data.
 
-OCR plus AI extraction, fuzzy-matched against a ~4,130-entry biomarker dataset to produce canonical biomarker keys, UCUM unit codes, and LOINC codes. This skill is a hybrid: a references-based `SKILL.md` (product overview, endpoints, data model, gotchas) plus a small `rules/` directory of standalone best-practice rules with incorrect/correct code examples.
+OCR plus AI extraction, fuzzy-matched against a 4,000+ entry biomarker dataset to produce canonical biomarker keys, UCUM unit codes, and LOINC codes. This skill is a hybrid: a references-based `SKILL.md` (product overview, endpoints, data model, gotchas) plus a small `rules/` directory of standalone best-practice rules with incorrect/correct code examples.
 
 ## Installation
 

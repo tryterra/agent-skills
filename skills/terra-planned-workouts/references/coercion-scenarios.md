@@ -2,7 +2,7 @@
 
 When a workout feature cannot be fully represented on a provider's platform, the Terra API makes adjustments and returns `coercion_warnings`. The workout is still created; some details may differ from what you requested. Coercion is a success path, not an error.
 
-Live docs: https://docs.tryterra.co/planned-workouts-api/overview/coercion-warnings
+Live docs: https://docs.tryterra.co/planned-workouts-api/coercion-warnings
 
 ## Response Format
 

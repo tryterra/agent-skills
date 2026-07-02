@@ -22,7 +22,7 @@ cp -r skills/terra-streaming ~/.claude/skills/
 - One websocket endpoint for both roles; the IDENTIFY `type` (0 producer, 1 consumer) sets the role
 - **Every token is single-use** – the server deletes it after IDENTIFY, so each reconnect needs a fresh one
 - `seq` is monotonic but **sparse** – gaps are normal, not lost data
-- REPLAY uses **exclusive** bounds; `after` is required, `before` is an optional upper bound (omit it to replay everything after `after`)
+- REPLAY uses **exclusive** bounds; `after` and `before` are both required (omitting `before` returns no messages)
 - Close codes 4000/4003/4004/1003 are client bugs – fix, don't retry-loop
 - Test end to end without hardware using a synthetic dashboard test user
 

@@ -2,7 +2,7 @@
 
 Not all providers support all features or operations. When a feature is not supported, the Terra API returns a coercion warning but still creates the workout. See references/coercion-scenarios.md for warning handling.
 
-Live docs: https://docs.tryterra.co/planned-workouts-api/overview/provider-compatibility
+Live docs: https://docs.tryterra.co/planned-workouts-api/provider-compatibility
 
 ## Operations Support
 

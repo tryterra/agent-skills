@@ -72,3 +72,5 @@ uvx --from skills-ref agentskills validate skills/*
 ```
 
 Also check that no SKILL.md exceeds 500 lines.
+
+CI also verifies every `docs.tryterra.co` URL cited in `skills/**` against the live docs (`npm run check-links`). GitBook returns HTTP 200 with a "Page Not Found" body for missing pages, so the script checks the body of each page's `.md` variant, not the status code. Doc spaces that exist in the gitbook source but are not published yet can be allowlisted in `scripts/check-doc-links.mjs` (`KNOWN_UNPUBLISHED`); remove the entry when the space goes live.

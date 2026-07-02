@@ -29,7 +29,7 @@ cp -r skills/terra-api ~/.claude/skills/
 ## Highlights
 
 - Verify the signature header (`terra-signature` / `X-Terra-Signature`, case-insensitive) over the **raw** request body, before JSON parsing
-- Ack webhooks within the timeout (8s default, configurable 1-30s), process async
+- Ack webhooks within the timeout (8s default), process async
 - Dedupe on `X-Terra-Trace-Id` – `terra-reference` is shared by every chunk of a large request
 - `data_enrichment` scores do NOT follow the superset guarantee – COALESCE upserts or you lose data
 - `user_reauth` issues a new Terra user ID – swap it or orphan the connection

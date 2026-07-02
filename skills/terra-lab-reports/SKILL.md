@@ -10,7 +10,7 @@ metadata:
 
 # Terra Lab Reports Best Practices
 
-Production guidelines and API reference for building with the Terra Lab Reports API (**pre-release**). It converts clinical lab report PDFs and images into structured, standardized biomarker data: OCR plus AI extraction, then fuzzy matching against a reference dataset of ~4,130 biomarkers that yields canonical biomarker keys, UCUM unit codes, and LOINC codes.
+Production guidelines and API reference for building with the Terra Lab Reports API (**pre-release**). It converts clinical lab report PDFs and images into structured, standardized biomarker data: OCR plus AI extraction, then fuzzy matching against a reference dataset of 4,000+ biomarkers that yields canonical biomarker keys, UCUM unit codes, and LOINC codes.
 
 **Pre-release: assume the contract may move.** Fetch the live docs pages before generating production request bodies or webhook parsers, and verify against the live API before shipping.
 
@@ -20,7 +20,7 @@ Upload a clinical lab report and receive structured biomarker results – extrac
 
 - **Input:** one file per request – PDF, PNG, JPEG, GIF, or WebP, up to 20 MB.
 - **Extraction:** OCR plus AI parsing pulls each result's name, value, units, flags, and reference ranges off the page.
-- **Standardization:** each extracted name is fuzzy-matched (threshold 0.85) against the ~4,130-entry biomarker dataset, producing a canonical biomarker key, a UCUM-compliant `ucum_code`, and (for ~1,579 of the ~4,130) a `loinc_code`.
+- **Standardization:** each extracted name is fuzzy-matched (threshold 0.85) against the 4,000+ entry biomarker dataset, producing a canonical biomarker key, a UCUM-compliant `ucum_code`, and (for the subset with a LOINC mapping) a `loinc_code`.
 - **Output:** a Session containing layered Results (source / biomarker / measurement / interpretation / reference ranges) grouped under report-level Panels, delivered as a `lab_report.completed` event (or `lab_report.failed` on terminal failure).
 
 ## Async Workflow and Status Lifecycle
@@ -111,7 +111,7 @@ Load these for full specs (each is self-contained):
 - [references/webhook-payload.md](references/webhook-payload.md) – the event envelope (`type`, `event_id`, `occurred_at`, `upload_id`, `data`), the idempotency keys, and the failure event. Read when building a webhook handler.
 - [references/biomarkers.md](references/biomarkers.md) – standardization, UCUM mappings, LOINC coverage, and common-biomarker tables by category. Read when working with keys, units, or LOINC codes.
 
-The full ~4,130-entry biomarker dataset (~700 KB) is not bundled; download it from the [Biomarker Reference](https://docs.tryterra.co/lab-reports/biomarker-reference) page.
+The full biomarker dataset (4,000+ entries, ~700 KB) is not bundled; download it from the [Biomarker Reference](https://docs.tryterra.co/lab-reports/biomarker-reference) page.
 
 ## Live Documentation
 

@@ -25,7 +25,7 @@ The producer connection (your app to the broker) uses the same endpoint and hand
 
 4. **READY.** On success the server replies `Op 4`; data then streams in as `Op 5 DISPATCH` payloads.
 
-**Consumer session cap.** A per-developer limit caps concurrent consumer connections; exceeding it closes the new connection with **4002**. The cap is a server-side config setting (it has run as low as 1; dashboard sessions do not count against it), so do not architect around any guaranteed number of concurrent consumers – on 4002, close an existing session or back off.
+**Consumer session cap.** A per-developer limit caps concurrent consumer connections; exceeding it closes the new connection with **4002**. Do not architect around any guaranteed number of concurrent consumers – on 4002, close an existing session or back off.
 
 ## DISPATCH semantics
 
@@ -43,7 +43,7 @@ If your connection drops and you miss data, use REPLAY (`Op 7`) after reconnecti
 2. Send REPLAY with `after` = the last `seq` you processed before the drop, and `before` = `firstLive`.
 3. Process the replayed DISPATCHes (they arrive as ordinary `Op 5` payloads), then resume live handling.
 
-- **`after` is required; `before` is optional.** `before` is an exclusive upper bound – omit it to replay everything after `after`. (Some docs copies still say both bounds are required; the shipped behavior and the AsyncAPI spec treat `before` as optional.)
+- **Both bounds are required.** A REPLAY that omits `before` returns no messages – always send both `after` and `before`.
 - Bounds are **exclusive**: `after: 28, before: 43` replays 29 through 42.
 - Replay reads from the Terra API data warehouse, so a payload becomes replayable a few seconds after it was delivered live. If a REPLAY returns fewer messages than expected, wait a moment and request it again. There is currently no retention limit on replayable data, though that may change.
 - If no live DISPATCH has arrived yet, there is nothing to backfill – wait for one before replaying.

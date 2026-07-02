@@ -1,8 +1,8 @@
 # Exercise Reference
 
-How `strength.exercise_name` is resolved. For the complete catalog of names (49 categories, 1,624 exercises), fetch the live page: https://docs.tryterra.co/planned-workouts-api/overview/garmin-exercise-reference.md
+How `strength.exercise_name` is resolved. For the complete catalog of names (49 categories, 1,624 exercises), fetch the live page: https://docs.tryterra.co/planned-workouts-api/garmin-exercise-reference.md
 
-Live docs: https://docs.tryterra.co/planned-workouts-api/overview/exercise-reference
+Live docs: https://docs.tryterra.co/planned-workouts-api/exercise-reference
 
 ## Overview
 
@@ -56,7 +56,7 @@ Garmin names work for Hevy too. Hevy tries, in order:
 
 ## Tips
 
-1. Confirm a name exists before using it on Garmin: fetch https://docs.tryterra.co/planned-workouts-api/overview/garmin-exercise-reference.md and search it.
+1. Confirm a name exists before using it on Garmin: fetch https://docs.tryterra.co/planned-workouts-api/garmin-exercise-reference.md and search it.
 2. If one variation fails, try another (common variations often resolve).
 3. Check coercion warnings; they tell you when a lookup failed.
 4. Use descriptive fallbacks: non-Garmin providers show your text as-is.
