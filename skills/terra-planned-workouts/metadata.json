@@ -1,0 +1,17 @@
+{
+  "version": "1.0.0",
+  "organization": "Terra API",
+  "date": "July 2026",
+  "abstract": "Guidance for the Terra API Planned Workouts product (pre-release): define a structured workout template once and push it to users' devices. Covers the two-phase create-then-plan workflow, the blocks/steps/targets data model, athlete-parameter personalization, the coercion model for provider feature gaps, per-provider operations and limits across Garmin, COROS, Wahoo, Suunto, TrainingPeaks, Huawei, Zepp, Hevy, and Apple, and the Garmin/Hevy exercise catalog.",
+  "references": [
+    "https://docs.tryterra.co/planned-workouts-api",
+    "https://docs.tryterra.co/planned-workouts-api/overview/introduction",
+    "https://docs.tryterra.co/planned-workouts-api/overview/core-concepts",
+    "https://docs.tryterra.co/planned-workouts-api/overview/athlete-parameters",
+    "https://docs.tryterra.co/planned-workouts-api/overview/sport-specific-examples",
+    "https://docs.tryterra.co/planned-workouts-api/overview/provider-compatibility",
+    "https://docs.tryterra.co/planned-workouts-api/overview/coercion-warnings",
+    "https://docs.tryterra.co/planned-workouts-api/overview/exercise-reference",
+    "https://docs.tryterra.co/planned-workouts-api/overview/garmin-exercise-reference"
+  ]
+}
