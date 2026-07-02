@@ -1,32 +1,86 @@
 ---
 name: terra-api
-description: Integrate Terra API – the unified health & fitness data API for 500+ wearables (Garmin, Fitbit, Oura, Whoop, Strava, Dexcom). Covers authentication, connecting users, webhooks, data models, and historical data. Use when building with Terra API, tryterra.co, or wearable/fitness/health data integrations.
+description: Best practices for integrating Terra API – the unified health & fitness data API for 500+ wearables (Garmin, Fitbit, Oura, Whoop, Apple Health, Strava, Dexcom). Use when building with Terra API or tryterra.co, handling terra-signature webhooks, storing wearable health data (activity, sleep, daily, body, nutrition), managing device connections, or merging data across multiple devices.
 license: MIT
 metadata:
   author: terra
-  version: "0.1.0"
+  version: "1.0.0"
 ---
 
-# Terra API
+# Terra API Best Practices
 
-> **Status: under construction.** This skill is a skeleton – the sections below outline the planned content. Until it is filled in, consult the live documentation at [docs.tryterra.co](https://docs.tryterra.co) (append `.md` to any docs URL for a markdown version; an index is available at [docs.tryterra.co/llms.txt](https://docs.tryterra.co/llms.txt)).
+Production-tested guidelines for building with Terra API. Contains 25 rules across 6 categories, prioritized by impact, distilled from a real multi-device integration.
 
-## Quickstart
+## When to Apply
 
-<!-- Planned: keys & dev-id setup → generate a widget session → configure a webhook destination → receive data events. -->
+Reference these guidelines when:
 
-## Authentication
+- Implementing or reviewing a Terra API webhook endpoint
+- Designing storage for wearable health data (activity, sleep, daily, body, nutrition, menstruation)
+- Building device connection flows (auth, deauth, reauth, scopes)
+- Merging data from multiple connected devices
+- Writing tests for a Terra API integration
 
-<!-- Planned: dev-id + x-api-key headers, Terra Widget vs custom UI (POST /auth/authenticateUser), mobile auth tokens, deauthentication. Detail will live in references/authentication.md. -->
+## Rule Categories by Priority
 
-## Webhooks
+| Priority | Category | Impact | Prefix |
+|----------|----------|--------|--------|
+| 1 | Webhook Handling | CRITICAL | `webhooks-` |
+| 2 | Data Handling & Idempotency | CRITICAL | `data-` |
+| 3 | Auth & Connection Lifecycle | HIGH | `auth-` |
+| 4 | Multi-Device Merging | MEDIUM | `devices-` |
+| 5 | SDK & Types | MEDIUM | `sdk-` |
+| 6 | Testing | LOW-MEDIUM | `testing-` |
 
-<!-- Planned: terra-signature HMAC verification (raw request body!), S3 payload mode, event types. Detail will live in references/webhooks.md. -->
+## Quick Reference
 
-## Data models
+### 1. Webhook Handling (CRITICAL)
 
-<!-- Planned: activity, sleep, body, daily, nutrition, menstruation, hormone, athlete – nullability and deduplication rules. Detail will live in references/data-models.md. -->
+- `webhooks-verify-raw-body` - Verify terra-signature HMAC over the raw unaltered body before parsing JSON
+- `webhooks-ack-within-timeout` - Return 200 within the 8-second timeout, process async
+- `webhooks-dedupe-terra-reference` - Deduplicate deliveries on the terra-reference header with a unique constraint
+- `webhooks-archive-raw-payloads` - Archive raw payloads to object storage, link rows via a payload key
+- `webhooks-handle-informational-events` - Log and acknowledge healthcheck/processing/rate-limit events, never crash on unknown types
 
-## Historical data
+### 2. Data Handling & Idempotency (CRITICAL)
 
-<!-- Planned: backfill requests, the 28-day async threshold, terra-reference correlation. Detail will live in references/historical-data.md. -->
+- `data-natural-keys` - Key activity/sleep by summary_id, daily-type data by (connection, date)
+- `data-date-part-only` - Slice the date from the ISO string before any timezone conversion
+- `data-superset-overwrite` - Standard fields follow the superset guarantee, latest delivery wins
+- `data-coalesce-enrichment-scores` - Enrichment scores break the superset guarantee, COALESCE so nulls never overwrite
+- `data-columns-over-blobs` - Extract metrics into typed columns, keep raw payloads in object storage
+- `data-timestamp-localization` - Respect the timestamp_localization flag, pick one storage policy deliberately
+
+### 3. Auth & Connection Lifecycle (HIGH)
+
+- `auth-reference-id` - Pass your user ID as reference_id, it is the join key in every webhook
+- `auth-handle-all-events` - Handle all six auth event types with idempotent upserts
+- `auth-reauth-id-swap` - user_reauth issues a new Terra user ID, swap old for new
+- `auth-parse-scopes` - Parse the comma-separated scope string, update on permission_change
+- `auth-reconcile-connections` - Reconcile against Terra API state on page mount, auth redirect, and a schedule
+- `auth-integrations-endpoint-headers` - Fetch the integrations catalogue with dev-id only, both headers return empty
+
+### 4. Multi-Device Merging (MEDIUM)
+
+- `devices-provider-priority` - Rank providers per data category with a default fallback list
+- `devices-priority-fill-in` - Take the first non-null value per metric walking down the priority list
+- `devices-dedupe-overlap` - Same type + >80% time overlap is the same session, keep the higher priority record
+- `devices-enrichment-provider-agnostic` - Enrichment scores are computed by Terra API for all providers and are comparable
+- `devices-source-attribution` - Carry a provider field on every merged value, label sources when 2+ connections
+
+### 5. SDK & Types (MEDIUM)
+
+- `sdk-v6-type-overrides` - Centralize type overrides for v6 enrichment fields the npm SDK lacks
+
+### 6. Testing (LOW-MEDIUM)
+
+- `testing-mock-boundaries` - Mock the SDK, database, and background tasks; make async processing eager
+- `testing-cover-event-edge-cases` - Test replays, empty data arrays, unknown users, type 0, enrichment nulls, reauth swaps
+
+## How to Use
+
+Read the individual rule file in `rules/` when working on that area, e.g. read `rules/webhooks-verify-raw-body.md` and its siblings before writing a webhook endpoint. Each rule has incorrect/correct code examples and links to the relevant [docs.tryterra.co](https://docs.tryterra.co) page (append `.md` to any docs URL for a markdown version).
+
+## Related Terra API Surfaces
+
+This skill covers the core Health & Fitness API integration. Terra API also offers mobile SDKs for on-device sources (Apple Health, Samsung Health, Health Connect), a realtime Streaming API over websockets, and an MCP server exposing health-data query tools to AI agents. See [docs.tryterra.co](https://docs.tryterra.co) for those surfaces.
