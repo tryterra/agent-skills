@@ -1,0 +1,20 @@
+{
+  "name": "terra-agent-skills",
+  "owner": {
+    "name": "Terra API",
+    "email": "dev@tryterra.co"
+  },
+  "metadata": {
+    "description": "Agent skills for building with Terra API",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "terra",
+      "description": "Skills for integrating Terra API – authentication, webhooks, data models, and historical health & fitness data",
+      "source": "./",
+      "strict": false,
+      "skills": ["./skills/terra-api"]
+    }
+  ]
+}

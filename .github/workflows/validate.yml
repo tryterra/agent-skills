@@ -1,0 +1,36 @@
+name: Validate skills
+
+on:
+  push:
+    branches: [main]
+    paths: ["skills/**"]
+  pull_request:
+    paths: ["skills/**"]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install skills-ref
+        run: pip install skills-ref
+
+      - name: Validate all skills
+        run: agentskills validate skills/*
+
+      - name: Check SKILL.md line counts
+        run: |
+          fail=0
+          for f in skills/*/SKILL.md; do
+            lines=$(wc -l < "$f")
+            if [ "$lines" -gt 500 ]; then
+              echo "::error file=$f::$f has $lines lines (max 500)"
+              fail=1
+            fi
+          done
+          exit $fail
