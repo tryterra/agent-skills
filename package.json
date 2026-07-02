@@ -1,6 +1,27 @@
 {
   "name": "@tryterra/agent-skills",
+  "version": "1.0.0",
+  "description": "Agent skills for anyone building with Terra API – the unified health & fitness data API for 500+ wearables and health data sources",
+  "author": "Terra Enabling Developers Ltd. (https://tryterra.co)",
+  "license": "MIT",
   "private": true,
+  "homepage": "https://github.com/tryterra/agent-skills#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tryterra/agent-skills.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tryterra/agent-skills/issues"
+  },
+  "keywords": [
+    "terra-api",
+    "agent-skills",
+    "ai-agents",
+    "claude-code",
+    "wearables",
+    "health-data",
+    "fitness-api"
+  ],
   "scripts": {
     "format": "prettier --write .",
     "format:check": "prettier --check ."

@@ -3,11 +3,24 @@ name: Validate skills
 on:
   push:
     branches: [main]
-    paths: ["skills/**", ".github/workflows/validate.yml"]
   pull_request:
-    paths: ["skills/**", ".github/workflows/validate.yml"]
 
 jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check formatting
+        run: npm run format:check
+
   validate:
     runs-on: ubuntu-latest
     steps:
