@@ -53,15 +53,17 @@ curl -X POST "https://access.tryterra.co/api/v2/routes/295581149349019648/push?u
 | -------- | ------------------------------ | ---------------------------------------------- |
 | `POST`   | `/routes`                      | Create a route template                        |
 | `GET`    | `/routes`                      | List all templates                             |
-| `GET`    | `/routes/{id}`                 | Get template details                           |
-| `PUT`    | `/routes/{id}`                 | Update template metadata (200)                 |
+| `PUT`    | `/routes/{id}`                 | Update the template, full update (200)         |
 | `PUT`    | `/routes/{id}?cascade`         | Update and re-push to all devices, async (202) |
 | `DELETE` | `/routes/{id}`                 | Delete a template                              |
 | `POST`   | `/routes/{id}/push?user_id=X`  | Push route to a user's device                  |
 | `GET`    | `/pushedRoutes?user_id=X`      | List a user's pushed routes                    |
+| `GET`    | `/pushedRoutes/{id}?user_id=X` | Get one pushed route                           |
 | `DELETE` | `/pushedRoutes/{id}?user_id=X` | Remove a pushed route                          |
 
-**Update semantics.** `PUT /routes/{id}` updates only the template's metadata and returns `200`; it does not touch already-pushed devices. Add `?cascade` to also re-push the updated route to every device it was sent to; this runs asynchronously and returns `202 Accepted`. Cascade re-push failures are logged but are not surfaced in the response, so a partial failure can happen silently. Confirm important cascades out of band (for example via `GET /pushedRoutes`).
+There is no `GET /routes/{id}`; to read a single template, use `GET /routes` – the list response returns full templates, filter by `route_id` client-side.
+
+**Update semantics.** `PUT /routes/{id}` is a full template update and returns `200`: it accepts and applies waypoints, `speed_meters_per_second`, and elevation as well as name, description, and sport. It does not touch already-pushed devices. Add `?cascade` to also re-push the updated route to every device it was sent to; this runs asynchronously and returns `202 Accepted`. Cascade is fire-and-forget: re-push failures are only logged server-side, never surfaced in the response or in `GET /pushedRoutes`, so a partial failure is invisible to the API. To confirm a device actually received the update, re-push to that user explicitly or verify out of band on the device.
 
 ## Data Model
 
@@ -86,11 +88,11 @@ curl -X POST "https://access.tryterra.co/api/v2/routes/295581149349019648/push?u
 | `elevation_meters` | No       | Metres above sea level                         |
 | `course_point`     | No       | POI marker at this waypoint, Garmin only       |
 
-**course_point** is `{ "type": ..., "name": ... }`. The 10 supported types: `generic`, `summit`, `valley`, `water`, `food`, `danger`, `first_aid`, `sprint`, `segment_start`, `segment_end`.
+**course_point** is `{ "type": ..., "name": ... }`. The API accepts 15 types at creation: `generic`, `summit`, `valley`, `water`, `food`, `danger`, `first_aid`, `sprint`, `segment_start`, `segment_end`, `left`, `right`, `straight`, `left_fork`, `right_fork`. Only the first 10 are forwarded to Garmin; the five turn directions are silently dropped from the Garmin push (see Gotchas).
 
-**Sports**: `running`, `trail_running`, `hiking`, `road_biking`, `mountain_biking`, `gravel_cycling`, `other`.
+**Sports** (8): `running`, `trail_running`, `hiking`, `cycling`, `road_biking`, `mountain_biking`, `gravel_cycling`, `other`. `cycling` is distinct from `road_biking` but maps to ROAD_CYCLING on Garmin.
 
-**Validation** (rejected on create): `name` non-empty, `sport` valid, at least 2 waypoints, latitude in -90..90, longitude in -180..180. **Sanity warnings** (accepted, but flagged): distance should be > 0 and speed should be within 0-15 m/s.
+**Validation** (hard `400` on create and update): `name` non-empty, max 255 chars; `description` max 2,000 chars; `sport` valid; 2 to 10,000 waypoints; latitude in -90..90; longitude in -180..180; `elevation_meters` in -500..9000; `speed_meters_per_second` > 0.
 
 ## Provider Matrix
 
@@ -110,7 +112,7 @@ All three support re-sync. COROS has no in-place update, so a re-sync re-POSTs a
 
 - **Garmin-only fields fail silently elsewhere.** `course_point`, `speed_meters_per_second`, and `description` are honored on Garmin but silently ignored by COROS and Wahoo. Do not depend on them unless every target user is on Garmin.
 - **Garmin elevation is all-or-nothing per route.** If some waypoints carry `elevation_meters` and others do not, Terra API drops all elevation values and lets Garmin's own elevation model fill them in. Supply elevation on every waypoint or none.
-- **An unsupported Garmin course-point type is a hard error**, not a warning; the push fails. Use only the 10 documented types.
+- **Course-point failures happen at different stages.** An invalid `type` string fails at `POST /routes` with `400` (creation-time enum validation). A valid type that Garmin does not support (`left`, `right`, `straight`, `left_fork`, `right_fork`) is silently dropped from the Garmin push – the push succeeds without those course points. For turn cues on Garmin, stick to the 10 Garmin-supported types.
 - **COROS is the most limited provider.** No delete (a delete only removes the record from Terra API's database; the route stays on the device), no retrieve, and it collapses all sports into two internal types (run and cycle), so the device display may not distinguish, say, gravel cycling from road biking.
 - **Pushing the same template repeatedly creates duplicate pushed routes.** Each push is a new pushed route; there is no dedup. Track `pushed_route_id` values yourself if you need to avoid duplicates on a device.
 - **Elevation is auto-computed when absent**, and the exact handling is provider-dependent.

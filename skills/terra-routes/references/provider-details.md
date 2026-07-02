@@ -8,10 +8,10 @@ Most complete support; design routes for Garmin first.
 
 - **Wire format**: JSON.
 - **Sports**: every sport type maps to a native Garmin course activity type.
-- **Features**: course points (all 10 POI types), `speed_meters_per_second` speed target, and `description` are all supported here and nowhere else.
+- **Features**: course points (10 of the API's 15 types), `speed_meters_per_second` speed target, and `description` are all supported here and nowhere else.
 - **Re-sync**: a re-sync issues a `PUT`, and falls back to `POST` if the route is missing on Garmin's side. This makes cascade re-pushes resilient to a route that was deleted on the device.
 - **Elevation normalization**: Garmin requires elevation on all waypoints or none. If waypoint elevation is mixed, Terra API drops all elevation values and lets Garmin's elevation model fill them in. Elevation inconsistencies are normalised automatically.
-- **Hard error**: an unsupported course-point type returns an error (not a warning), and the push fails. Restrict types to `generic`, `summit`, `valley`, `water`, `food`, `danger`, `first_aid`, `sprint`, `segment_start`, `segment_end`.
+- **Course points**: Garmin forwards `generic`, `summit`, `valley`, `water`, `food`, `danger`, `first_aid`, `sprint`, `segment_start`, `segment_end`. The other five types the API accepts at creation (`left`, `right`, `straight`, `left_fork`, `right_fork`) are silently dropped from the Garmin push, which still succeeds. Invalid type strings never reach Garmin; they fail at `POST /routes` with `400`.
 - **Delete**: supported; removes the route from the device.
 
 ## COROS
