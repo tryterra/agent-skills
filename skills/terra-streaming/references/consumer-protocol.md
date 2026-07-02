@@ -45,7 +45,7 @@ If your connection drops and you miss data, use REPLAY (`Op 7`) after reconnecti
 
 - **Both bounds are required.** A REPLAY that omits `before` returns no messages – always send both `after` and `before`.
 - Bounds are **exclusive**: `after: 28, before: 43` replays 29 through 42.
-- Replay reads from the Terra API data warehouse, so a payload becomes replayable a few seconds after it was delivered live. If a REPLAY returns fewer messages than expected, wait a moment and request it again. There is currently no retention limit on replayable data, though that may change.
+- A payload becomes replayable a few seconds after it was delivered live. If a REPLAY returns fewer messages than expected, wait a moment and request it again.
 - If no live DISPATCH has arrived yet, there is nothing to backfill – wait for one before replaying.
 
 ## Close codes and reconnecting

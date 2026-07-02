@@ -120,7 +120,6 @@ Append `.md` to any page URL for markdown. If the terra-docs MCP server (`https:
 - [What is Vantage API?](https://docs.tryterra.co/vantage-api-docs/readme)
 - [Account Setup and API Keys](https://docs.tryterra.co/vantage-api-docs/account-setup-and-api-keys)
 - [Ordering Your First Test](https://docs.tryterra.co/vantage-api-docs/getting-started/ordering-your-first-test)
-- [Working with Sandbox](https://docs.tryterra.co/vantage-api-docs/getting-started/publish-your-docs)
 - [Webhooks](https://docs.tryterra.co/vantage-api-docs/documentation/webhooks)
 - [Test Collection Methods](https://docs.tryterra.co/vantage-api-docs/documentation/test-collection-methods)
 - [Results](https://docs.tryterra.co/vantage-api-docs/documentation/results)
