@@ -9,7 +9,7 @@ tags: data, idempotency, schema
 
 **Impact: CRITICAL (wrong keys create duplicate rows on every re-delivery)**
 
-Terra API re-delivers data whenever a provider updates it, so inserts must be idempotent upserts keyed by the identifier Terra API itself uses for uniqueness. Activity and sleep records are unique by `metadata.summary_id`. Daily, body, nutrition, and menstruation records are unique per connection per calendar date. Surrogate UUID primary keys on data tables add nothing and invite duplicates because nothing stops two rows for the same summary.
+Terra API re-delivers data whenever a provider updates it, so inserts must be idempotent upserts keyed by the identifier Terra API itself uses for uniqueness. Only activity and sleep expose `metadata.summary_id`. Daily, body, nutrition, and menstruation expose only start/end times and are unique per connection per calendar date. Hormone payloads are flat (no `metadata` wrapper) and keyed by their top-level `timestamp`. Athlete is a profile snapshot with no summary key: store one per connection, latest wins. Surrogate UUID primary keys on data tables add nothing and invite duplicates because nothing stops two rows for the same summary.
 
 | Data type | Unique by |
 |---|---|
@@ -19,6 +19,11 @@ Terra API re-delivers data whenever a provider updates it, so inserts must be id
 | Body | (connection, date) |
 | Nutrition | (connection, date) |
 | Menstruation | (connection, date) |
+| Hormone | top-level `timestamp` (flat payload, no metadata wrapper) |
+| Athlete | one profile per connection, latest delivery wins |
+| Planned workout | `metadata.id` |
+
+Planned workouts and routes are write-to-device product surfaces, and lab reports are a separate product with their own pipeline; handle them only if you use those products.
 
 **Incorrect (surrogate key, plain insert):**
 

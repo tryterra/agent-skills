@@ -10,7 +10,7 @@ tags: testing, coverage, webhooks
 
 The Terra API failure modes that reach production are rarely the happy path; they are the odd deliveries. Use this coverage checklist for the webhook pipeline:
 
-- **Every event type**: all six data events, all six auth events, and the informational events (`healthcheck`, `processing`, `rate_limit_hit`, ...) each reach the right handler
+- **Every event type**: every data event, all eight auth events, the operational events (`large_request_processing`, `large_request_sending`), and `s3_payload` wrappers each reach the right handler
 - **Signature**: missing header rejected 401, invalid signature rejected 401, valid passes
 - **Dedup replay**: the same `terra-reference` delivered twice processes once and still returns 200
 - **Empty `data[]`**: a data event with no records completes without writes or errors

@@ -1,6 +1,6 @@
 ---
 name: terra-api
-description: Best practices for integrating Terra API – the unified health & fitness data API for 500+ wearables (Garmin, Fitbit, Oura, Whoop, Apple Health, Strava, Dexcom). Use when building with Terra API or tryterra.co, handling terra-signature webhooks, storing wearable health data (activity, sleep, daily, body, nutrition), managing device connections, or merging data across multiple devices.
+description: Best practices for integrating Terra API – the unified health & fitness data API for 500+ wearables (Garmin, Fitbit, Oura, Whoop, Apple Health, Strava, Dexcom). Use when building with Terra API or tryterra.co, handling terra-signature webhooks, storing wearable health data (activity, sleep, daily, body, nutrition, menstruation, hormone), managing device connections, or merging data across multiple devices.
 license: MIT
 metadata:
   author: terra
@@ -16,7 +16,7 @@ Production-tested guidelines for building with Terra API. Contains 25 rules acro
 Reference these guidelines when:
 
 - Implementing or reviewing a Terra API webhook endpoint
-- Designing storage for wearable health data (activity, sleep, daily, body, nutrition, menstruation)
+- Designing storage for wearable health data (activity, sleep, daily, body, nutrition, menstruation, hormone, athlete)
 - Building device connection flows (auth, deauth, reauth, scopes)
 - Merging data from multiple connected devices
 - Writing tests for a Terra API integration
@@ -40,11 +40,11 @@ Reference these guidelines when:
 - `webhooks-ack-within-timeout` - Return 200 within the 8-second timeout, process async
 - `webhooks-dedupe-terra-reference` - Deduplicate deliveries on the terra-reference header with a unique constraint
 - `webhooks-archive-raw-payloads` - Archive raw payloads to object storage, link rows via a payload key
-- `webhooks-handle-informational-events` - Log and acknowledge healthcheck/processing/rate-limit events, never crash on unknown types
+- `webhooks-handle-informational-events` - Route non-data events explicitly, unwrap s3_payload deliveries, never crash on unknown types
 
 ### 2. Data Handling & Idempotency (CRITICAL)
 
-- `data-natural-keys` - Key activity/sleep by summary_id, daily-type data by (connection, date)
+- `data-natural-keys` - Key activity/sleep by summary_id, daily-type data by (connection, date), hormone by timestamp
 - `data-date-part-only` - Slice the date from the ISO string before any timezone conversion
 - `data-superset-overwrite` - Standard fields follow the superset guarantee, latest delivery wins
 - `data-coalesce-enrichment-scores` - Enrichment scores break the superset guarantee, COALESCE so nulls never overwrite
@@ -54,7 +54,7 @@ Reference these guidelines when:
 ### 3. Auth & Connection Lifecycle (HIGH)
 
 - `auth-reference-id` - Pass your user ID as reference_id, it is the join key in every webhook
-- `auth-handle-all-events` - Handle all six auth event types with idempotent upserts
+- `auth-handle-all-events` - Handle all eight auth event types with idempotent upserts
 - `auth-reauth-id-swap` - user_reauth issues a new Terra user ID, swap old for new
 - `auth-parse-scopes` - Parse the comma-separated scope string, update on permission_change
 - `auth-reconcile-connections` - Reconcile against Terra API state on page mount, auth redirect, and a schedule
@@ -83,4 +83,4 @@ Read the individual rule file in `rules/` when working on that area, e.g. read `
 
 ## Related Terra API Surfaces
 
-This skill covers the core Health & Fitness API integration. Terra API also offers mobile SDKs for on-device sources (Apple Health, Samsung Health, Health Connect), a realtime Streaming API over websockets, and an MCP server exposing health-data query tools to AI agents. See [docs.tryterra.co](https://docs.tryterra.co) for those surfaces.
+This skill covers the core Health & Fitness API integration. Terra API also offers mobile SDKs for on-device sources (Apple Health, Samsung Health, Health Connect), a realtime Streaming API over websockets, an MCP server exposing health-data query tools to AI agents, planned workouts and routes (write-to-device products), and lab reports. See [docs.tryterra.co](https://docs.tryterra.co) for those surfaces.
