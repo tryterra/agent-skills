@@ -32,7 +32,7 @@ cp -r skills/terra-planned-workouts ~/.claude/skills/
 | `references/provider-compatibility.md` | Operations matrix and per-provider feature support and behaviors |
 | `references/coercion-scenarios.md` | Coercion warning catalog, handling patterns, prevention checklist |
 | `references/exercise-reference.md` | Exercise name normalization and not-found behavior |
-| `references/garmin-exercises.md` | The complete Garmin catalog (49 categories, 1,624 names); also resolves for Hevy |
-| `references/examples.md` | Copy-paste request payloads for running, cycling, swimming, strength, multi-sport |
+
+The full Garmin exercise catalog and the sport-specific payload examples are not bundled; the skill directs agents to fetch the live `.md` doc pages, which stay current with the API.
 
 Full API documentation: [docs.tryterra.co/planned-workouts-api](https://docs.tryterra.co/planned-workouts-api) (append `.md` to any docs URL for markdown).

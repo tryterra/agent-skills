@@ -2,6 +2,7 @@
 name: terra-planned-workouts
 description: Build with the Terra API Planned Workouts product (pre-release) – define a structured workout once and Terra API pushes it to users' devices. Use when pushing planned or structured workouts to Garmin, COROS, Wahoo, Suunto, TrainingPeaks, Huawei, Zepp, Hevy, or Apple watches, building training plans or workout templates, working with intervals, warmups, targets (HR, power, pace, cadence, RPE, zones), FTP or threshold-based personalization, athlete parameters, swimming or strength templates, or handling provider coercion warnings when a device cannot represent a feature.
 license: MIT
+compatibility: Requires network access to docs.tryterra.co for the full Garmin exercise catalog and payload examples
 metadata:
   author: terra
   version: "1.0.0"
@@ -151,7 +152,10 @@ Read the reference file that matches your task before writing the request:
 - **`references/provider-compatibility.md`** – the full operations matrix (create/update/retrieve/delete per provider) plus each provider's sport, target, completion, and structure support and special behaviors. Read this before targeting a specific provider.
 - **`references/coercion-scenarios.md`** – the full catalog of coercion scenarios, handling patterns (log / surface / ignore), and a prevention checklist. Read this before relying on a feature a provider may not support.
 - **`references/exercise-reference.md`** – exercise name normalization rules, the Garmin/Hevy flexibility table, and what happens when a name is not found. Read this before building a strength template.
-- **`references/garmin-exercises.md`** – the complete Garmin catalog: all 49 category names with exercise counts and every exercise name. Lookup material; these names also resolve for Hevy. Read this to pick a valid `exercise_name`.
-- **`references/examples.md`** – copy-paste request payloads for running, cycling, swimming, strength, and multi-sport. Read this for a working starting point.
+
+Two things live in the docs rather than this skill, because they are large and change with the API:
+
+- **The complete Garmin exercise catalog** (1,624 names, also used for Hevy): fetch https://docs.tryterra.co/planned-workouts-api/overview/garmin-exercise-reference.md when you need to pick or verify a specific `exercise_name`.
+- **Sport-specific payload examples** (running, cycling, swimming, strength, multi-sport): fetch https://docs.tryterra.co/planned-workouts-api/overview/sport-specific-examples.md when you want a full working request body beyond the one in this file.
 
 Full API documentation: [docs.tryterra.co/planned-workouts-api](https://docs.tryterra.co/planned-workouts-api) (append `.md` to any docs URL for a markdown version).
