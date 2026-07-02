@@ -37,7 +37,7 @@ cp -r skills/terra-api ~/.claude/skills/
 |---|---|---|
 | [`terra-api`](skills/terra-api) | 21 best-practice rules: webhooks & signature verification, data idempotency, connection lifecycle, multi-device data, testing | ✅ Ready |
 | [`terra-mobile-sdk`](skills/terra-mobile-sdk) | Mobile SDK: Apple Health, Samsung Health, Health Connect (iOS, Android, React Native, Flutter) | ✅ Ready |
-| `terra-streaming` | Realtime streaming: websockets, Real-Time SDK, live sensor data | Planned |
+| [`terra-streaming`](skills/terra-streaming) | Realtime streaming: websockets, Real-Time SDK, live sensor data (iOS, Android, React Native, Flutter, Wear OS) | ✅ Ready |
 | [`terra-routes`](skills/terra-routes) | Routes API: push GPS courses with waypoints to Garmin, COROS, Wahoo devices | 🧪 Pre-release |
 
 ## Contributing

@@ -1,0 +1,14 @@
+{
+  "version": "1.0.0",
+  "organization": "Terra API",
+  "date": "July 2026",
+  "abstract": "Best practices for the Terra API Streaming (Real-Time) API: the producer/broker/consumer architecture, the websocket handshake and opcodes, single-use token minting, heartbeats and close codes, replay/backfill, and per-platform RT SDK setup for iOS, Android, React Native, Flutter, and Wear OS.",
+  "references": [
+    "https://docs.tryterra.co/streaming-api",
+    "https://docs.tryterra.co/streaming-api/getting-started",
+    "https://docs.tryterra.co/streaming-api/connect-wearable-to-sdk",
+    "https://docs.tryterra.co/streaming-api/your-app-greater-than-terra",
+    "https://docs.tryterra.co/streaming-api/terra-greater-than-your-backend",
+    "https://docs.tryterra.co/streaming-api/connect-wearable-to-sdk/wear-os"
+  ]
+}
