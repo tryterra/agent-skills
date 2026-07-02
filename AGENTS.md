@@ -40,6 +40,8 @@ Rules:
 
 ## Writing the body
 
+- **Skills are not doc copies.** Terra API docs are LLM-friendly (append `.md` to any docs.tryterra.co URL; index at docs.tryterra.co/llms.txt), so an agent can always fetch the current spec. A skill's value is what the agent lacks: distilled workflows, gotchas, incorrect/correct patterns, decision tables, defaults, and cross-product boundaries. The content test: *would the agent get this wrong without this instruction?* If not, cut it.
+- **Bundle the stable, point to the volatile.** Keep bundled: gotchas (inline in SKILL.md), decision aids (which endpoint/provider for which job, routing tables mapping goal to doc URL), workflows and defaults, deterministic scripts. Point to the live `.md` doc page for: exact request/response shapes, field lists, enum values, and payload examples – bundled copies of those drift the moment the API changes. Make fetch instructions conditional and precise ("fetch <url>.md when building the request body"), and declare the dependency with the `compatibility` frontmatter field (e.g. `Requires network access to docs.tryterra.co for full API schemas`).
 - **Keep SKILL.md under 500 lines** (~5k tokens). Agents load the whole body when the skill activates; every token competes for attention.
 - **Gotchas belong in the body**, not in references – surprising, environment-specific facts (e.g. "HMAC verification must use the raw unaltered request body") are the highest-value content and the agent may not know to load a reference file for them.
 - **Provide defaults, not menus.** Pick one recommended approach; mention alternatives in a sentence.
