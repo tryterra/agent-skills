@@ -1,6 +1,6 @@
 # Vantage API Endpoint Routing
 
-Which endpoint does what, and where to fetch the current request/response schema. Base URLs: `https://vantage.tryterra.co` (production), `https://vantage-sandbox.tryterra.co` (sandbox). All endpoints use HTTP Basic auth (`Authorization: Basic <base64(CLIENT_ID:CLIENT_SECRET)>`). Errors follow the RFC 7807 problem-detail format.
+Which endpoint does what, and where to fetch the current request/response schema. Sources: [API reference core resources](https://docs.tryterra.co/vantage-api-reference/core-resources/orders) (per-resource pages linked in the table below), [ordering your first test](https://docs.tryterra.co/vantage-api-docs/getting-started/ordering-your-first-test). Base URLs: `https://vantage.tryterra.co` (production), `https://vantage-sandbox.tryterra.co` (sandbox). All endpoints use HTTP Basic auth (`Authorization: Basic <base64(CLIENT_ID:CLIENT_SECRET)>`). Errors follow the RFC 7807 problem-detail format.
 
 For exact field lists, validation limits, and full request/response examples, fetch the live `.md` page in the table below (append nothing; the URLs are already markdown). Do not rely on remembered field names: the product is evolving and the live page is authoritative.
 
@@ -26,6 +26,6 @@ A worked end-to-end ordering example lives at https://docs.tryterra.co/vantage-a
 - **`currency` is an ISO 4217 numeric code** (e.g. `840` = USD), not an alpha code; prices are integer cents.
 - **`client_order_reference_id` is your own unique order identifier** – pick a scheme that lets you reconcile webhooks with your system.
 - **New orders start at** `order_status: "order.payment_processing"` with each item at `results_status: "results.awaiting_sample"`; progress arrives via webhooks (see references/webhooks.md).
-- **Path prefixes are inconsistent in the docs**: the reference pages abbreviate (`/orders`), but the real paths are under `/api/v1`. The exception is the end-user activation flow (`GET /activate`, `POST /activate/kit`), which is served without the `/api/v1` prefix and is distinct from the sandbox simulation endpoint `POST /api/v1/orders/activate?kit_id={supplier_item_id}`.
+- **Path prefixes are inconsistent in the docs**: the reference pages abbreviate (`/orders`), but the real paths are under `/api/v1`. The exception is the end-user activation flow (`GET /activate`, `POST /activate/kit`), which is served without the `/api/v1` prefix. The kit's QR code embeds `GET /api/v1/orders/activate?kit_id={supplier_item_id}`, which redirects to that activation form; in the sandbox you open this URL in a browser (using the `supplier_item_id` from the sandbox webhook) and complete the form to stand in for the user scanning the QR code.
 - **Legacy host note**: existing Terra API diagnostics customers may configure their webhook URL against the diagnostics host (`PATCH https://diagnostics-sandbox.tryterra.co/api/v1/clients/webhook-url`) using their existing credentials.
 - **Webhook URLs must be HTTPS**; PATCH with an empty string clears the URL.

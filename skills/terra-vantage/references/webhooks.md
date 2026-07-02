@@ -13,7 +13,7 @@ Every payload carries `event_id` and `timestamp` in addition to the fields below
 
 ### Fulfillment events (`event_type: "order.status_changed"`)
 
-`fulfillment.payment_processing` is the default state returned when the order is placed; it is not delivered as a separate webhook.
+The initial payment-processing state is never delivered as a webhook; it appears only in the order-placement response, as `order_status: "order.payment_processing"`. Note that the docs' event-type table spells some event names with British "fulfilment" while the payload examples use American "fulfillment"; match on the payload spelling (`fulfillment.*`).
 
 **`fulfillment.payment_complete`** – payment confirmed.
 
@@ -39,7 +39,7 @@ Every payload carries `event_id` and `timestamp` in addition to the fields below
 
 ### Results events (`event_type: "order_item.results_status_change"`)
 
-These carry `order_id`, `order_item_id`, `results_status`, `variant_id`, and a `test_taker` object (`id`, `email`, `name`, `phone`, `country_code`), plus `event_id` and `timestamp`.
+These carry `order_id`, `order_item_id`, `results_status`, `variant_id`, and a `test_taker` object (`test_taker_id`, `first_name`, `last_name`, `email`, `phone_number`, `country_code`), plus `event_id` and `timestamp`. In the payload examples, `test_taker_id` is a string while `country_code` and `phone_number` are integers.
 
 | `results_status`                     | When it fires                                          | Extra fields |
 | ------------------------------------ | ------------------------------------------------------ | ------------ |

@@ -59,7 +59,7 @@ Each order sets a `collection_type` that determines how the sample is taken and 
 | `AT_HOME`          | Kit shipped to the recipient; they self-collect and follow the kit instructions | `shipping_address`      |
 | `GO_TO_LAB`        | Mobile phlebotomy; a registered nurse collects the sample at a lab | `requested_lab_address` |
 
-For `GO_TO_LAB`, the requested lab address is used as a proxy to route the order to the closest available lab; the resolved lab comes back as `confirmed_lab_address`. A variant advertises which methods it supports in `availableCollectionTypes`, so confirm support before offering a method to a user.
+For `GO_TO_LAB`, the requested lab address is used as a proxy to route the order to the closest available lab; the resolved lab comes back as `confirmed_lab_address`. A variant advertises which methods it supports in `availableCollectionTypes`, so confirm support before offering a method to a user; note this field is an array of integer enum codes (int32), not the `AT_HOME`/`GO_TO_LAB` strings used in the order request, so do not compare it against those strings.
 
 ## Kit Activation
 
@@ -98,7 +98,7 @@ Every event type, its full payload, the status enums, and the signature verifica
 
 The sandbox at `https://vantage-sandbox.tryterra.co` receives the same webhooks as production, with a few simulation aids:
 
-- **Activation must be simulated.** For suppliers that use end-user kit activation, call `POST /api/v1/orders/activate?kit_id={supplier_item_id}` to stand in for the user activating the kit. The `supplier_item_id` arrives on the sandbox webhook.
+- **Activation is a browser flow, not an API call.** For suppliers that use end-user kit activation, the kit's QR code embeds an activation URL. To stand in for the user scanning it, open `https://vantage-sandbox.tryterra.co/api/v1/orders/activate?kit_id={supplier_item_id}` in a browser (the `supplier_item_id` arrives on the sandbox webhook) and complete the activation form it redirects to. The same URL exists in production; only the manual navigation is the sandbox stand-in.
 - **Sandbox webhooks add `supplier_item_id`.** This field is present in sandbox payloads and not in production.
 - **Results are auto-generated.** After a successful activation, the sandbox sends two webhooks 1 to 2 minutes apart: `results.sample_processing_in_lab`, then `results.results_ready`. You may instead receive `results.sample_rejected` to exercise the failure path.
 
