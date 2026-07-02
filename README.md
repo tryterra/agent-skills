@@ -43,6 +43,20 @@ cp -r skills/terra-api ~/.claude/skills/
 | [`terra-lab-reports`](skills/terra-lab-reports) | Lab Reports API: parse lab report PDFs/images into standardized biomarkers (LOINC, UCUM) | 🧪 Pre-release |
 | [`terra-vantage`](skills/terra-vantage) | Vantage API: order blood/DNA test kits, track fulfillment, deliver and acknowledge FHIR results | ✅ Ready |
 
+## Terra API docs MCP server
+
+The full documentation is also exposed as an MCP server at `https://docs.tryterra.co/~gitbook/mcp`, which gives agents search and retrieval over the live docs. Connect it alongside these skills:
+
+```bash
+# Claude Code
+claude mcp add terra-docs --scope user --transport http https://docs.tryterra.co/~gitbook/mcp
+
+# Codex
+codex mcp add terra-docs --url https://docs.tryterra.co/~gitbook/mcp
+```
+
+The skills point at live `.md` doc pages for volatile spec detail; with the MCP connected, agents can search and fetch those pages through it instead of raw URL fetches.
+
 ## Contributing
 
 See [AGENTS.md](AGENTS.md) for the authoring guide – repo layout, SKILL.md conventions, and how to validate. The Terra API docs are LLM-friendly: append `.md` to any [docs.tryterra.co](https://docs.tryterra.co) URL for markdown, or start from [docs.tryterra.co/llms.txt](https://docs.tryterra.co/llms.txt).

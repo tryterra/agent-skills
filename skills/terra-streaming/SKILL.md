@@ -87,6 +87,8 @@ Read the reference for the surface you are building.
 - [references/flutter.md](references/flutter.md) – read when the producer app is Flutter (note the `startRealtimeToApp` vs `startRealtimeToServer` split).
 - [references/wear-os.md](references/wear-os.md) – read when streaming from a Wear OS watch paired to an Android phone.
 
+Full docs: [docs.tryterra.co/streaming-api](https://docs.tryterra.co/streaming-api/getting-started) (append `.md` to any docs URL for a markdown version). If the terra-docs MCP server (`https://docs.tryterra.co/~gitbook/mcp`) is connected, use its tools to search and fetch the docs instead.
+
 ## Decisions that are yours to make
 
 The docs deliberately leave these open; pick what fits your app rather than assuming a default:

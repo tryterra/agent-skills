@@ -107,6 +107,8 @@ The full 4,200+ biomarker dataset (~700 KB JSON) is not bundled; download it fro
 
 ## Live Documentation
 
+Append `.md` to any page URL for markdown. If the terra-docs MCP server (`https://docs.tryterra.co/~gitbook/mcp`) is connected, use its tools to search and fetch these pages instead.
+
 - [Overview](https://docs.tryterra.co/lab-reports)
 - [Quick Start](https://docs.tryterra.co/lab-reports/quickstart)
 - [Core Concepts](https://docs.tryterra.co/lab-reports/core-concepts)

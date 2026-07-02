@@ -82,4 +82,4 @@ Read the file for the platform you are building on:
 - **`references/react-native.md`** – read when integrating **terra-react**: install, iOS + Android native setup, `initTerra`/`initConnection`, the AppDelegate background-delivery edit, `postActivity` (Apple Health only).
 - **`references/flutter.md`** – read when integrating **terra_flutter_bridge**: `flutter pub`, native setup, `TerraFlutter` API, AppDelegate background delivery, getters.
 
-Full docs: [docs.tryterra.co](https://docs.tryterra.co) (append `.md` to any docs URL for a markdown version). Where a signature or enum is not shown here, see the SDK reference linked from [docs.tryterra.co](https://docs.tryterra.co/health-and-fitness-api/mobile-only-sources).
+Full docs: [docs.tryterra.co](https://docs.tryterra.co) (append `.md` to any docs URL for a markdown version). Where a signature or enum is not shown here, see the SDK reference linked from [docs.tryterra.co](https://docs.tryterra.co/health-and-fitness-api/mobile-only-sources). If the terra-docs MCP server (`https://docs.tryterra.co/~gitbook/mcp`) is connected, use its tools to search and fetch the docs instead.

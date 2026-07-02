@@ -115,6 +115,8 @@ The sandbox at `https://vantage-sandbox.tryterra.co` receives the same webhooks 
 
 ## Live Documentation
 
+Append `.md` to any page URL for markdown. If the terra-docs MCP server (`https://docs.tryterra.co/~gitbook/mcp`) is connected, use its tools to search and fetch these pages instead.
+
 - [What is Vantage API?](https://docs.tryterra.co/vantage-api-docs/readme)
 - [Account Setup and API Keys](https://docs.tryterra.co/vantage-api-docs/account-setup-and-api-keys)
 - [Ordering Your First Test](https://docs.tryterra.co/vantage-api-docs/getting-started/ordering-your-first-test)

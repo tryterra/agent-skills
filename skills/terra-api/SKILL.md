@@ -71,7 +71,7 @@ Reference these guidelines when:
 
 ## How to Use
 
-Read the individual rule file in `rules/` when working on that area, e.g. read `rules/webhooks-verify-raw-body.md` and its siblings before writing a webhook endpoint. Each rule has incorrect/correct code examples and links to the relevant [docs.tryterra.co](https://docs.tryterra.co) page (append `.md` to any docs URL for a markdown version).
+Read the individual rule file in `rules/` when working on that area, e.g. read `rules/webhooks-verify-raw-body.md` and its siblings before writing a webhook endpoint. Each rule has incorrect/correct code examples and links to the relevant [docs.tryterra.co](https://docs.tryterra.co) page (append `.md` to any docs URL for a markdown version). If the terra-docs MCP server (`https://docs.tryterra.co/~gitbook/mcp`) is connected, use its tools to search and fetch those pages instead.
 
 ## Related Terra API Surfaces
 
