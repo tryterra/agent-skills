@@ -4,7 +4,7 @@
     {
       "title": "Terra API",
       "description": "Skills for integrating Terra API – the unified health & fitness data API.",
-      "skills": ["terra-api", "terra-mobile-sdk", "terra-streaming", "terra-planned-workouts", "terra-routes", "terra-lab-reports"]
+      "skills": ["terra-api", "terra-mobile-sdk", "terra-streaming", "terra-planned-workouts", "terra-routes", "terra-lab-reports", "terra-vantage"]
     }
   ]
 }

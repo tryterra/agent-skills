@@ -41,6 +41,7 @@ cp -r skills/terra-api ~/.claude/skills/
 | [`terra-planned-workouts`](skills/terra-planned-workouts) | Planned Workouts API: push structured workouts with intervals and targets to wearables | 🧪 Pre-release |
 | [`terra-routes`](skills/terra-routes) | Routes API: push GPS courses with waypoints to Garmin, COROS, Wahoo devices | 🧪 Pre-release |
 | [`terra-lab-reports`](skills/terra-lab-reports) | Lab Reports API: parse lab report PDFs/images into standardized biomarkers (LOINC, UCUM) | 🧪 Pre-release |
+| [`terra-vantage`](skills/terra-vantage) | Vantage API: order blood/DNA test kits, track fulfillment, deliver and acknowledge FHIR results | ✅ Ready |
 
 ## Contributing
 
