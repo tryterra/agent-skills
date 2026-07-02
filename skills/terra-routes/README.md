@@ -22,7 +22,8 @@ cp -r skills/terra-routes ~/.claude/skills/
 | -------------------------------- | -------------------------------------------------------------------------------------------------- |
 | `SKILL.md`                       | Two-phase workflow, endpoints, data model, provider matrix, and gotchas                            |
 | `references/provider-details.md` | Per-provider behavior for Garmin, COROS, and Wahoo: re-sync, elevation, delete, sport mapping     |
-| `references/examples.md`         | Copy-paste curl per sport, plus course points, speed target, minimal route, and cascade update     |
+
+Full payload examples are not bundled; the skill directs agents to fetch the live sport-specific-examples `.md` page, which stays current with the API.
 
 ## Highlights
 

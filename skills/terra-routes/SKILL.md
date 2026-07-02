@@ -2,6 +2,7 @@
 name: terra-routes
 description: Push GPS routes to users' fitness devices with Terra API Routes (pre-release). Use when creating GPS courses or navigation routes, defining waypoints and course points, pushing a route to Garmin, COROS, or Wahoo devices, handling GPX or FIT route formats, or building turn-by-turn navigation onto wearables. Covers the create-then-push workflow, the RouteTemplate and Waypoint data model, per-provider wire formats and feature gaps, cascade re-pushes, and route deletion.
 license: MIT
+compatibility: Requires network access to docs.tryterra.co for full payload examples
 metadata:
   author: terra
   version: "1.0.0"
@@ -118,6 +119,7 @@ All three support re-sync. COROS has no in-place update, so a re-sync re-POSTs a
 ## References
 
 - `references/provider-details.md` – per-provider behavior: Garmin PUT-then-POST re-sync and elevation normalization, Wahoo stable `terra-{pushed_route_id}` external ID and granular sport mapping, COROS unique-GPX-per-push and `provider_route_id` meaning. Read when a route behaves differently across devices or you are debugging a re-sync or delete.
-- `references/examples.md` – copy-paste curl for each sport, including trail running with course points, road biking with a speed target, and the minimal 2-waypoint route. Read when you need a working request body to adapt.
+
+For full payload examples beyond the one above (trail running with course points, road biking with a speed target, the minimal 2-waypoint route), fetch the live page: https://docs.tryterra.co/routes-api-pre-release/sport-specific-examples.md
 
 Full docs: [Routes API overview](https://docs.tryterra.co/routes-api-pre-release/overview), [introduction](https://docs.tryterra.co/routes-api-pre-release/introduction), [core concepts](https://docs.tryterra.co/routes-api-pre-release/core-concepts), [provider compatibility](https://docs.tryterra.co/routes-api-pre-release/provider-compatibility).
