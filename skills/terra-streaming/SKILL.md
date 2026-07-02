@@ -2,6 +2,7 @@
 name: terra-streaming
 description: Best practices for the Terra API Streaming (Real-Time) API – live, roughly per-second biometric data from wearables over websockets. Use when building realtime streaming with Terra API, TerraRT SDKs, or wss://ws.tryterra.co; streaming live heart rate, steps, distance, acceleration, ECG, HRV, calories, location, or gyroscope; pairing a wearable over BLE or ANT+; producing sensor data from a mobile app; consuming a live stream on a backend; or streaming from an Apple Watch or Wear OS watch. Covers the producer/broker/consumer architecture, the websocket handshake and opcodes, token minting, close codes, replay/backfill, and per-platform SDK setup (iOS, Android, React Native, Flutter, Wear OS).
 license: MIT
+compatibility: Requires network access to docs.tryterra.co for the full websocket protocol reference
 metadata:
   author: terra
   version: "1.0.0"
@@ -41,29 +42,22 @@ Every websocket connection authenticates with a short-lived token minted by your
 | Token | Endpoint | Used by | IDENTIFY type |
 |-------|----------|---------|---------------|
 | Phone-registration | `POST https://api.tryterra.co/v2/auth/generateAuthToken` | RT SDK `initConnection` (registers the phone as a producer) | n/a (SDK-managed) |
-| Producer | `POST /auth/user?id=<terra_user_id>` | producer connection sending data | 0 (USER) |
-| Consumer / developer | `POST /auth/developer` | your backend consumer | 1 (DEVELOPER) |
+| Producer | `POST https://ws.tryterra.co/auth/user?id=<terra_user_id>` | producer connection sending data | 0 (USER) |
+| Consumer / developer | `POST https://ws.tryterra.co/auth/developer` | your backend consumer | 1 (DEVELOPER) |
 
-The producer endpoint needs the Terra user ID in the `id` query parameter; retrieve it from the SDK's `getUserId`.
+Note the hosts: only `generateAuthToken` lives on the main API (`api.tryterra.co`). The producer and consumer token endpoints are served over HTTPS by the websocket host (`ws.tryterra.co`) and do **not** exist on `api.tryterra.co`. For the exact request/response schemas, fetch [the REST endpoints reference](https://docs.tryterra.co/reference/streaming-api/api-endpoints.md) when building the request.
+
+The phone-registration token is single-use and **expires 3 minutes** after minting (returned as `expires_in`), so mint it just-in-time – when the app is about to call `initConnection`, not at app startup or ahead of a queue. The producer endpoint needs the Terra user ID in the `id` query parameter; retrieve it from the SDK's `getUserId`.
 
 ## The websocket
 
-There is one endpoint for both roles: `wss://ws.tryterra.co/connect`. The IDENTIFY `type` field (0 producer, 1 consumer) decides which role the connection plays. The SDKs open and drive the producer connection for you; you write the consumer connection by hand against the protocol in [references/consumer-protocol.md](references/consumer-protocol.md).
+There is one endpoint for both roles: `wss://ws.tryterra.co/connect`. The IDENTIFY `type` field (0 producer, 1 consumer) decides which role the connection plays. The SDKs open and drive the producer connection for you; you write the consumer connection by hand against the walkthrough in [references/consumer-protocol.md](references/consumer-protocol.md).
 
-| Opcode | Name | Direction | Meaning |
-|--------|------|-----------|---------|
-| 0 | HEARTBEAT | client to server | keep-alive ping |
-| 1 | HEARTBEAT_ACK | server to client | keep-alive acknowledgement |
-| 2 | HELLO | server to client | sent on connect, carries `heartbeat_interval` |
-| 3 | IDENTIFY | client to server | authenticate with token and type |
-| 4 | READY | server to client | authentication succeeded |
-| 5 | DISPATCH | server to client | a realtime data payload |
-| 6 | SUBMIT | client to server | producer data submission (SDK-abstracted) |
-| 7 | REPLAY | client to server | request missed data by sequence range |
+The protocol is opcode-framed: HELLO and heartbeats, then IDENTIFY and READY, then DISPATCH data payloads, with REPLAY for backfill (SUBMIT is producer-side and SDK-abstracted). For the full opcode table and exact JSON payload shapes, fetch [terra-greater-than-your-backend.md](https://docs.tryterra.co/streaming-api/terra-greater-than-your-backend.md) when writing the frames.
 
 ## Protocol gotchas
 
-These are the things that bite. Full detail and the close-code table are in [references/consumer-protocol.md](references/consumer-protocol.md).
+These are the things that bite. The step-by-step consumer walkthrough is in [references/consumer-protocol.md](references/consumer-protocol.md).
 
 - **IDENTIFY within 15 seconds** of connecting or the server closes with **4000**.
 - **Tokens are deleted after a successful IDENTIFY.** A dropped connection cannot reuse its token; mint a fresh one before reconnecting.
@@ -80,7 +74,7 @@ These are the things that bite. Full detail and the close-code table are in [ref
 
 Read the reference for the surface you are building.
 
-- [references/consumer-protocol.md](references/consumer-protocol.md) – **read this before writing the backend consumer.** Full handshake (HELLO, heartbeats, IDENTIFY, READY, DISPATCH), the DISPATCH payload shape, REPLAY usage, and the close-code table.
+- [references/consumer-protocol.md](references/consumer-protocol.md) – **read this before writing the backend consumer.** The handshake walkthrough (HELLO, heartbeats, IDENTIFY, READY, DISPATCH), DISPATCH field semantics, the REPLAY backfill recipe, and close-code handling, with pointers to the live doc for exact payload shapes.
 - [references/ios.md](references/ios.md) – read when the producer app is native iOS or you are wiring an Apple Watch. Apple Developer Program membership is required.
 - [references/android.md](references/android.md) – read when the producer app is native Android, including ANT+ and programmatic device scans.
 - [references/react-native.md](references/react-native.md) – read when the producer app is React Native.

@@ -4,7 +4,7 @@ Streaming from a Wear OS watch with the `terra-wearos` library. Source: [connect
 
 ## How it fits together
 
-`terra-wearos` runs **on the Wear OS watch app** and streams the watch's sensor data over Bluetooth to your Android phone, which runs [`TerraRTAndroid`](https://github.com/tryterra/TerraRTAndroid) and forwards it to the Terra broker. The two libraries are used together: the watch is the sensor source, the phone is the producer. Set up the phone side per [android.md](android.md).
+`terra-wearos` runs **on the Wear OS watch app** and streams the watch's sensor data over Bluetooth to your Android phone, which runs [`TerraRTAndroid`](https://github.com/tryterra/TerraRTAndroid) and forwards it to the Terra API broker. The two libraries are used together: the watch is the sensor source, the phone is the producer. Set up the phone side per [android.md](android.md).
 
 ## Install (watch app)
 
@@ -52,18 +52,18 @@ terra.stopStream()
 
 You can run an exercise on the watch and have its data streamed to the phone.
 
-**`prepareExercise` only warms up the sensors – it does not start streaming.** It is recommended but optional:
+**You must prepare the exercise before starting it.** `prepareExercise` only warms up the sensors – it does not start streaming:
 
 ```kotlin
 terra.prepareExercise(
     type: ExerciseTypes,
     dataTypes: Set<DataTypes>,
     shouldEnableGPS: Boolean,   // optional, default false – warms the location sensor
-    callback: (Boolean) -> Unit // optional but recommended
+    callback: (Boolean) -> Unit // optional but recommended – fires when preparation completes
 )
 ```
 
-`startExercise` begins the session and **automatically starts streaming**:
+After preparation, `startExercise` begins the session and **automatically starts streaming**:
 
 ```kotlin
 terra.startExercise(
