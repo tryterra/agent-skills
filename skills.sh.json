@@ -4,7 +4,7 @@
     {
       "title": "Terra API",
       "description": "Skills for integrating Terra API – the unified health & fitness data API.",
-      "skills": ["terra-api"]
+      "skills": ["terra-api", "terra-routes"]
     }
   ]
 }
