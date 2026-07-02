@@ -23,16 +23,16 @@ cp -r skills/terra-lab-reports ~/.claude/skills/
 | `SKILL.md`                       | Product overview, async lifecycle, endpoints, data model, gotchas, rule index |
 | `rules/`                         | Seven best-practice rules with incorrect/correct examples             |
 | `references/api-reference.md`    | Goal-to-endpoint routing with live spec links and key semantics        |
-| `references/webhook-payload.md`  | The flat webhook shape, idempotency/correlation keys, and how failures surface via polling |
+| `references/webhook-payload.md`  | The event envelope (`type`, `event_id`, `occurred_at`, `upload_id`, `data`), idempotency keys, and the failure event |
 | `references/biomarkers.md`       | Standardization, UCUM mappings, LOINC coverage, common-biomarker tables |
 
 ### Rules
 
 | Rule                                  | Impact | Summary                                                        |
 | ------------------------------------- | ------ | -------------------------------------------------------------- |
-| `webhooks-dedupe-session-id`          | HIGH   | Dedupe on `session_id` + content; a reprocess reuses the same `session_id` |
-| `data-keep-unmatched-biomarkers`      | HIGH   | Never discard an absent `biomarker_key`; fall back to `original_name` |
-| `data-filter-ranges-by-demographics`  | HIGH   | Filter reference ranges by sex/age/context before interpreting |
+| `webhooks-dedupe-event-id`            | HIGH   | Dedupe on `event_id`; a reprocess mints a new one with the same `session_id` |
+| `data-keep-unmatched-biomarkers`      | HIGH   | Never discard a null `biomarker.key`; fall back to `source.name` |
+| `data-filter-ranges-by-demographics`  | HIGH   | Use `applied_range` first, then filter ranges by sex/age/context |
 | `data-store-ids-as-strings`           | MEDIUM | Snowflake session IDs lose precision as JS numbers            |
 | `data-parse-utf8`                     | MEDIUM | Data contains `µ`, `×`, `±`, superscripts – parse as UTF-8    |
 | `api-poll-at-most-every-5s`           | MEDIUM | Webhooks for production; poll no faster than every 5 seconds  |
@@ -40,11 +40,12 @@ cp -r skills/terra-lab-reports ~/.claude/skills/
 
 ## Highlights
 
-- Upload returns the `session_id` directly (`202` with `current_status: "processing"`) – one file, one session; there is no `upload_id`
-- Webhooks fire only on success and carry a **flat** payload; detect `failed` by polling the session
-- `biomarker_key` and `loinc_code` are **omitted** when unmatched, never present-but-null
-- `flag` is a raw lab string, not an enum – and all enums are open (handle unknown values)
-- Presigned file URLs are embedded inline in the GET-session response and expire – re-fetch the session to re-mint
+- Upload returns an `upload_id` (`202` with `current_status: "processing"`), not a `session_id` – one upload can fan out to several sessions
+- Every webhook is an **event envelope**: `lab_report.completed` or `lab_report.failed`, with `event_id` to dedupe on and `upload_id` to correlate
+- Results are layered (`source` / `biomarker` / `measurement` / `interpretation` / `reference_ranges`), identical between webhook and GET
+- `biomarker.key` is **null** when unmatched – the sole no-match signal; never key off `loinc_code`
+- All enums are open (handle unknown values); `source.flag` is the raw lab string, `interpretation.flag` the coded signal
+- Presigned file URLs live on the `/files` sub-resource and expire – re-fetch to re-mint
 
 ## Full Documentation
 

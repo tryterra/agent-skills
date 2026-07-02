@@ -2,7 +2,7 @@
   "version": "1.0.0",
   "organization": "Terra API",
   "date": "July 2026",
-  "abstract": "Best practices and API reference for the Terra Lab Reports API (pre-release): converting clinical lab report PDFs and images into structured, standardized biomarker data with canonical biomarker keys, UCUM unit codes, and LOINC codes. Covers the async upload/standardize/deliver lifecycle, webhook and polling delivery, the Session to Results to Reference Ranges data model, unmatched-biomarker handling, snowflake IDs, and idempotent webhook processing.",
+  "abstract": "Best practices and API reference for the Terra Lab Reports API (pre-release): converting clinical lab report PDFs and images into structured, standardized biomarker data with canonical biomarker keys, UCUM unit codes, and LOINC codes. Covers the async upload/standardize/deliver lifecycle, the lab_report.completed / lab_report.failed event envelope, the layered result model (source, biomarker, measurement, interpretation, reference ranges), unmatched-biomarker handling, snowflake IDs, and idempotent webhook processing.",
   "references": [
     "https://docs.tryterra.co/lab-reports",
     "https://docs.tryterra.co/lab-reports/quickstart",

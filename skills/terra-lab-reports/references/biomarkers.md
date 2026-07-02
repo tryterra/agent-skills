@@ -2,24 +2,24 @@
 
 Biomarker standardization, UCUM unit codes, LOINC coverage, and common biomarker tables for the Terra Lab Reports API (pre-release).
 
-## What is `biomarker_key`?
+## What is the biomarker key?
 
-Every extracted result is matched against Terra API's reference dataset of ~4,130 known biomarkers. When a match is found, `biomarker_key` is set to a canonical key – a stable, machine-readable identifier used to aggregate and compare results across labs, reports, and patients.
+Every extracted result is matched against Terra API's reference dataset of ~4,130 known biomarkers. When a match is found, `biomarker.key` is set to a canonical key – a stable, machine-readable identifier used to aggregate and compare results across labs, reports, and patients.
 
 ```json
-{ "original_name": "Haemoglobin (Hb)", "display_name": "Hemoglobin", "biomarker_key": "hemoglobin" }
+{ "source": { "name": "Haemoglobin (Hb)" }, "biomarker": { "key": "hemoglobin", "display_name": "Hemoglobin" } }
 ```
 
-### When is `biomarker_key` absent?
+### When is `biomarker.key` null?
 
-`biomarker_key` is present only when the system confidently matches the extracted name. It is **omitted entirely** (not present-but-null) when matching fails – common with lab-specific proprietary test names, uncommon or newly introduced assays, ambiguous abbreviations, and composite panels reported as a single line item. When it is absent, `original_name` and `display_name` still contain the extracted text – use `original_name` as a display fallback and never discard the result.
+`biomarker.key` is non-null only when the system confidently matches the extracted name. It is **null** when matching fails – common with lab-specific proprietary test names, uncommon or newly introduced assays, ambiguous abbreviations, and composite panels reported as a single line item. It is the sole no-match signal (do not key off `loinc_code`, which can be null on a match). When it is null, `source.name` and `biomarker.display_name` still contain the extracted text – use `source.name` as a display fallback and never discard the result.
 
 ## How Matching Works
 
-1. `original_name` is extracted from the file via OCR and AI parsing.
+1. `source.name` is extracted from the file via OCR and AI parsing.
 2. The name is compared against the reference dataset using fuzzy string matching (confidence threshold 0.85).
-3. On a high-confidence match, the canonical `biomarker_key`, `display_name`, and related metadata (including `loinc_code` where available) are assigned.
-4. With no confident match, `biomarker_key` is omitted from the result.
+3. On a high-confidence match, the canonical `biomarker.key`, `display_name`, and related metadata (including `loinc_code` where available) are assigned.
+4. With no confident match, `biomarker.key` is null on the result.
 
 The matching accounts for common variations:
 
@@ -34,7 +34,7 @@ The matching accounts for common variations:
 
 ## UCUM Unit Codes
 
-Terra API maps lab units to [UCUM](https://ucum.org/) codes wherever possible – the international standard for machine-readable unit representation in healthcare. When mapping is not possible (proprietary or ambiguous units), `ucum_code` is omitted and `display_units` still shows exactly what the report printed.
+Terra API maps lab units to [UCUM](https://ucum.org/) codes wherever possible – the international standard for machine-readable unit representation in healthcare. When mapping is not possible (proprietary or ambiguous units), `measurement.ucum_code` is omitted and `measurement.units` / `source.units` still show exactly what the report printed.
 
 | Report Units | `ucum_code` | Description                     |
 | ------------ | ----------- | ------------------------------- |
@@ -57,27 +57,30 @@ Note the multibyte `µ` in unit names – always parse response bodies as UTF-8.
 
 ## LOINC Codes
 
-When a matched biomarker has a corresponding [LOINC](https://loinc.org/) code, the result includes a `loinc_code` (useful for EHR interoperability). Coverage is partial – roughly 1,579 of the ~4,130 reference biomarkers currently carry a LOINC code, concentrated on common blood, serum, and urine analytes. Biomarkers without a mapping (many derived ratios, qualitative microbiology results, specialised assays with no specific LOINC term) have `loinc_code` omitted entirely.
+When a matched biomarker has a corresponding [LOINC](https://loinc.org/) code, the result includes `biomarker.loinc_code` (useful for EHR interoperability). Coverage is partial – roughly 1,579 of the ~4,130 reference biomarkers currently carry a LOINC code, concentrated on common blood, serum, and urine analytes. Biomarkers without a mapping (many derived ratios, qualitative microbiology results, specialised assays with no specific LOINC term) carry no `loinc_code` – it can be absent or null even on a match, which is why it must never be used as the no-match signal.
 
 ```json
-{ "display_name": "Hemoglobin", "biomarker_key": "hemoglobin", "loinc_code": "718-7" }
+{ "biomarker": { "key": "hemoglobin", "display_name": "Hemoglobin", "loinc_code": "718-7" } }
 ```
 
-## Result Types and Bounded Values
+## Measurement Types and Bounded Values
 
-| Type          | `value` | `qualitative_value` | `value_gt` / `value_lt`   | Example                       |
-| ------------- | ------- | ------------------- | ------------------------- | ----------------------------- |
-| `numeric`     | number  | –                   | – (or set for bounds)     | Hemoglobin: 14.2 g/dL         |
-| `qualitative` | –       | string              | –                         | HIV screen: Non-Reactive      |
-| `text`        | –       | –                   | –                         | Morphology: Normal appearance |
+`measurement.type` names which sibling field carries the value – read that one field, never probe several:
 
-For numeric results where the lab reports a bound rather than an exact value:
+| `measurement.type` | Value field                          | Example                       |
+| ------------------ | ------------------------------------ | ----------------------------- |
+| `numeric`          | `numeric` (number)                   | Hemoglobin: 14.2 g/dL         |
+| `bounded`          | `bounded` `{ operator, value }`      | hs-CRP: `<0.01`               |
+| `qualitative`      | `qualitative` `{ text, code }`       | HIV screen: Non-Reactive      |
+| `text`             | `text` (string)                      | Morphology: Normal appearance |
 
-| Report Shows | `value` | `value_gt` | `value_lt` |
-| ------------ | ------- | ---------- | ---------- |
-| `14.2`       | 14.2    | –          | –          |
-| `>5.0`       | –       | 5.0        | –          |
-| `<0.01`      | –       | –          | 0.01       |
+For results where the lab reports a bound rather than an exact value:
+
+| Report Shows | `measurement`                                          |
+| ------------ | ------------------------------------------------------ |
+| `14.2`       | `{ "type": "numeric", "numeric": 14.2 }`               |
+| `>5.0`       | `{ "type": "bounded", "bounded": { "operator": "gt", "value": 5.0 } }` |
+| `<0.01`      | `{ "type": "bounded", "bounded": { "operator": "lt", "value": 0.01 } }` |
 
 ## Common Biomarkers
 
@@ -85,7 +88,7 @@ Frequently encountered biomarkers by category. For the complete dataset, downloa
 
 ### Complete Blood Count (CBC)
 
-| `biomarker_key`                   | Display Name           | Typical Units | `ucum_code` |
+| `biomarker.key`                   | Display Name           | Typical Units | `ucum_code` |
 | ----------------------------- | ---------------------- | ------------- | ----------- |
 | `hemoglobin`                  | Hemoglobin             | g/dL          | `g/dL`      |
 | `hematocrit`                  | Hematocrit             | %             | `%`         |
@@ -100,7 +103,7 @@ Frequently encountered biomarkers by category. For the complete dataset, downloa
 
 ### Metabolic Panel
 
-| `biomarker_key`                            | Display Name    | Typical Units | `ucum_code`        |
+| `biomarker.key`                            | Display Name    | Typical Units | `ucum_code`        |
 | -------------------------------------- | --------------- | ------------- | ------------------ |
 | `glucose_fasting`                      | Fasting Glucose | mg/dL         | `mg/dL`            |
 | `hemoglobin_a1c`                       | HbA1c           | %             | `%`                |
@@ -114,7 +117,7 @@ Frequently encountered biomarkers by category. For the complete dataset, downloa
 
 ### Lipid Panel
 
-| `biomarker_key`         | Display Name      | Typical Units | `ucum_code` |
+| `biomarker.key`         | Display Name      | Typical Units | `ucum_code` |
 | ------------------- | ----------------- | ------------- | ----------- |
 | `cholesterol_total` | Total Cholesterol | mg/dL         | `mg/dL`     |
 | `hdl_cholesterol`   | HDL Cholesterol   | mg/dL         | `mg/dL`     |
@@ -123,7 +126,7 @@ Frequently encountered biomarkers by category. For the complete dataset, downloa
 
 ### Thyroid
 
-| `biomarker_key`                   | Display Name | Typical Units | `ucum_code` |
+| `biomarker.key`                   | Display Name | Typical Units | `ucum_code` |
 | ----------------------------- | ------------ | ------------- | ----------- |
 | `thyroid_stimulating_hormone` | TSH          | mIU/L         | `m[IU]/L`   |
 | `free_thyroxine`              | Free T4      | ng/dL         | `ng/dL`     |
@@ -131,7 +134,7 @@ Frequently encountered biomarkers by category. For the complete dataset, downloa
 
 ### Hormones
 
-| `biomarker_key`          | Display Name       | Typical Units | `ucum_code` |
+| `biomarker.key`          | Display Name       | Typical Units | `ucum_code` |
 | -------------------- | ------------------ | ------------- | ----------- |
 | `testosterone_total` | Total Testosterone | ng/dL         | `ng/dL`     |
 | `testosterone_free`  | Free Testosterone  | pg/mL         | `pg/mL`     |
@@ -141,7 +144,7 @@ Frequently encountered biomarkers by category. For the complete dataset, downloa
 
 ### Vitamins and Minerals
 
-| `biomarker_key`            | Display Name | Typical Units | `ucum_code` |
+| `biomarker.key`            | Display Name | Typical Units | `ucum_code` |
 | ---------------------- | ------------ | ------------- | ----------- |
 | `vitamin_d_25_hydroxy` | Vitamin D    | ng/mL         | `ng/mL`     |
 | `vitamin_b12`          | Vitamin B12  | pg/mL         | `pg/mL`     |
@@ -151,7 +154,7 @@ Frequently encountered biomarkers by category. For the complete dataset, downloa
 
 ### Liver
 
-| `biomarker_key`                  | Display Name    | Typical Units | `ucum_code` |
+| `biomarker.key`                  | Display Name    | Typical Units | `ucum_code` |
 | ---------------------------- | --------------- | ------------- | ----------- |
 | `alanine_aminotransferase`   | ALT             | IU/L          | `[IU]/L`    |
 | `aspartate_aminotransferase` | AST             | IU/L          | `[IU]/L`    |
@@ -162,7 +165,7 @@ Frequently encountered biomarkers by category. For the complete dataset, downloa
 
 ### Inflammation
 
-| `biomarker_key`                      | Display Name | Typical Units | `ucum_code` |
+| `biomarker.key`                      | Display Name | Typical Units | `ucum_code` |
 | -------------------------------- | ------------ | ------------- | ----------- |
 | `c_reactive_protein`             | CRP          | mg/L          | `mg/L`      |
 | `c_reactive_protein_hs`          | hs-CRP       | mg/L          | `mg/L`      |
