@@ -2,6 +2,7 @@
 name: terra-vantage
 description: Order at-home and go-to-lab diagnostic tests and deliver results with the Terra Vantage API. Use when ordering blood tests or DNA tests, integrating at-home test kits, placing diagnostics orders, browsing test products and variants, handling kit activation, tracking fulfillment and shipping, receiving results-status webhooks, fetching FHIR-format lab results, or acknowledging results (a mandatory compliance step before patients can view them). Covers the product-to-order-to-results workflow, HTTP Basic auth, the AT_HOME vs GO_TO_LAB collection methods, webhook events and HMAC signature verification, the sandbox environment, and the manual partner onboarding required to get started.
 license: MIT
+compatibility: Requires network access to docs.tryterra.co for current endpoint schemas
 metadata:
   author: terra
   version: "1.0.0"
@@ -47,7 +48,7 @@ An integration walks a test from catalog to acknowledged result. Products are a 
 
 Placing an order returns an `order_id`, a `recipient_id`, and one `order_item_id` per item. The order starts at `order_status: "order.payment_processing"` and each item starts at `results_status: "results.awaiting_sample"`. Track everything downstream by `order_item_id`, since results, activation, and acknowledgment are all per-item.
 
-Full request and response shapes for every endpoint, including the products data model, order payloads, and status codes, are in [references/api-reference.md](references/api-reference.md). Read it before implementing any endpoint call.
+[references/api-reference.md](references/api-reference.md) maps each goal to its endpoint and to the live doc page carrying the current request/response schema; read it before implementing any endpoint call, and fetch the linked `.md` page when building a request body (field lists change as the product evolves, so the live page is authoritative).
 
 ## Collection Methods
 
