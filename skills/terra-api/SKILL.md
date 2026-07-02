@@ -9,7 +9,7 @@ metadata:
 
 # Terra API Best Practices
 
-Production-tested guidelines for building with Terra API. Contains 25 rules across 6 categories, prioritized by impact, distilled from a real multi-device integration.
+Production-tested guidelines for building with Terra API. Contains 24 rules across 5 categories, prioritized by impact, distilled from a real multi-device integration.
 
 ## When to Apply
 
@@ -29,8 +29,7 @@ Reference these guidelines when:
 | 2 | Data Handling & Idempotency | CRITICAL | `data-` |
 | 3 | Auth & Connection Lifecycle | HIGH | `auth-` |
 | 4 | Multi-Device Merging | MEDIUM | `devices-` |
-| 5 | SDK & Types | MEDIUM | `sdk-` |
-| 6 | Testing | LOW-MEDIUM | `testing-` |
+| 5 | Testing | LOW-MEDIUM | `testing-` |
 
 ## Quick Reference
 
@@ -68,11 +67,7 @@ Reference these guidelines when:
 - `devices-enrichment-provider-agnostic` - Enrichment scores are computed by Terra API for all providers and are comparable
 - `devices-source-attribution` - Carry a provider field on every merged value, label sources when 2+ connections
 
-### 5. SDK & Types (MEDIUM)
-
-- `sdk-v6-type-overrides` - Centralize type overrides for v6 enrichment fields the npm SDK lacks
-
-### 6. Testing (LOW-MEDIUM)
+### 5. Testing (LOW-MEDIUM)
 
 - `testing-mock-boundaries` - Mock the SDK, database, and background tasks; make async processing eager
 - `testing-cover-event-edge-cases` - Test replays, empty data arrays, unknown users, type 0, enrichment nulls, reauth swaps

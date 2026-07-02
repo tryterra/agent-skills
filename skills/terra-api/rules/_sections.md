@@ -25,12 +25,7 @@ The section ID (in parentheses) is the filename prefix used to group rules.
 **Impact:** MEDIUM
 **Description:** Users connect multiple sources. Priority rankings, per-metric fill-in, and overlap dedup produce one coherent view with the best sensor winning per category.
 
-## 5. SDK & Types (sdk)
-
-**Impact:** MEDIUM
-**Description:** The terra-api npm SDK trails the live API. Centralized type overrides keep end-to-end type safety without scattered casts.
-
-## 6. Testing (testing)
+## 5. Testing (testing)
 
 **Impact:** LOW-MEDIUM
 **Description:** Boundary mocks and an edge-case checklist make the webhook pipeline testable without live devices, tunnels, or databases.
