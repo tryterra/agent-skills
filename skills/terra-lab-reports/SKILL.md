@@ -2,6 +2,7 @@
 name: terra-lab-reports
 description: Best practices and API reference for Terra Lab Reports (pre-release) – convert clinical lab report PDFs and images into structured, standardized biomarker data. Use when parsing blood test results, extracting biomarkers, mapping to LOINC or UCUM unit codes, handling reference ranges, or working with PDF lab results and lab report OCR. Covers the async upload/standardize/deliver lifecycle, webhook and polling delivery, the Session to Results to Reference Ranges data model, null-biomarker handling, snowflake IDs, and idempotent event processing.
 license: MIT
+compatibility: Requires network access to docs.tryterra.co for full endpoint specs, payload examples, and enum tables
 metadata:
   author: terra
   version: "1.0.0"
@@ -47,7 +48,7 @@ Base URL `https://access.tryterra.co/api`. Every request needs both headers: `de
 | POST   | `/v2/lab-reports/{session_id}/reprocess`    | Re-run extraction/standardization; emits a NEW `event_id`.       |
 | DELETE | `/v2/lab-reports/{session_id}`              | Soft-delete; `204`.                                              |
 
-Full request/response/error specs, including the RFC 7807 error shape and status codes (400/401/413/429/500), are in [references/api-reference.md](references/api-reference.md). Read it before implementing any endpoint call. Live docs: [API Reference](https://docs.tryterra.co/lab-reports/api-reference).
+[references/api-reference.md](references/api-reference.md) routes each goal to its endpoint and notes the semantics the spec page treats lightly; read it before implementing any endpoint call. For full request/response/error specs (RFC 7807 shapes, status codes), fetch the live page when building the call: [API Reference](https://docs.tryterra.co/lab-reports/api-reference) (append `.md` for markdown).
 
 ## Data Model
 
@@ -58,7 +59,7 @@ A hierarchy: **Session → Results[] → Reference Ranges[] → Context**.
 - **Reference Range** – `lower_bound`, `upper_bound`, `classification`, and a `context`.
 - **Context** – `sex`, `age_lower`, `age_upper`, `pregnancy_status`, `cycle_phase`, `gestational_week_lower`/`_upper`, `reference_population`, `modifiers[]`.
 
-Field-level types and every enum table live in [references/webhook-payload.md](references/webhook-payload.md). Live docs: [Core Concepts](https://docs.tryterra.co/lab-reports/core-concepts).
+Delivery envelope semantics are in [references/webhook-payload.md](references/webhook-payload.md); for field-level types and the enum tables (which are open and grow over time), fetch the live [Core Concepts](https://docs.tryterra.co/lab-reports/core-concepts) page (append `.md` for markdown).
 
 ### Key Data Semantics
 
@@ -98,8 +99,8 @@ Read the relevant rule in `rules/` before writing that code. Each is a standalon
 
 Load these for full specs (each is self-contained):
 
-- [references/api-reference.md](references/api-reference.md) – every endpoint's request, response, and error specs. Read before calling any endpoint.
-- [references/webhook-payload.md](references/webhook-payload.md) – event envelope, complete success and failure payloads, and all enum tables. Read when building a webhook handler or parsing results.
+- [references/api-reference.md](references/api-reference.md) – goal-to-endpoint routing plus the semantics the spec page treats lightly. Read before calling any endpoint; fetch the linked live page for full request/response shapes.
+- [references/webhook-payload.md](references/webhook-payload.md) – event envelope semantics, the idempotency and correlation keys, and the failure-code retriability split. Read when building a webhook handler; fetch the linked live page for complete payload examples and enum tables.
 - [references/biomarkers.md](references/biomarkers.md) – standardization, UCUM mappings, LOINC coverage, and common-biomarker tables by category. Read when working with slugs, units, or LOINC codes.
 
 The full 4,200+ biomarker dataset (~700 KB JSON) is not bundled; download it from the [Biomarker Reference](https://docs.tryterra.co/lab-reports/biomarker-reference) page.

@@ -22,8 +22,8 @@ cp -r skills/terra-lab-reports ~/.claude/skills/
 | -------------------------------- | --------------------------------------------------------------------- |
 | `SKILL.md`                       | Product overview, async lifecycle, endpoints, data model, gotchas, rule index |
 | `rules/`                         | Seven best-practice rules with incorrect/correct examples             |
-| `references/api-reference.md`    | Full endpoint request/response/error specs                            |
-| `references/webhook-payload.md`  | Event envelope, success/failure payloads, enum tables                 |
+| `references/api-reference.md`    | Goal-to-endpoint routing with live spec links and key semantics        |
+| `references/webhook-payload.md`  | Envelope semantics, idempotency keys, failure retriability (live links for payloads/enums) |
 | `references/biomarkers.md`       | Standardization, UCUM mappings, LOINC coverage, common-biomarker tables |
 
 ### Rules
