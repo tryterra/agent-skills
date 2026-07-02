@@ -2,7 +2,7 @@
 
 Best practices for integrating [Terra API](https://tryterra.co) – the unified health & fitness data API for 500+ wearables and health data sources.
 
-21 rules across 5 categories, distilled from a production multi-device integration. Each rule is a standalone file with incorrect/correct code examples, prioritized by impact so agents (and humans) fix the critical things first.
+Rules across 5 categories, distilled from a production multi-device integration. Each rule is a standalone file with incorrect/correct code examples, prioritized by impact so agents (and humans) fix the critical things first.
 
 ## Installation
 
@@ -28,7 +28,7 @@ cp -r skills/terra-api ~/.claude/skills/
 
 ## Highlights
 
-- Verify `X-Terra-Signature` over the **raw** request body, before JSON parsing
+- Verify the signature header (`terra-signature` / `X-Terra-Signature`, case-insensitive) over the **raw** request body, before JSON parsing
 - Ack webhooks within the timeout (8s default, configurable 1-30s), process async
 - Dedupe on `X-Terra-Trace-Id` – `terra-reference` is shared by every chunk of a large request
 - `data_enrichment` scores do NOT follow the superset guarantee – COALESCE upserts or you lose data

@@ -25,7 +25,7 @@ The producer connection (your app to the broker) uses the same endpoint and hand
 
 4. **READY.** On success the server replies `Op 4`; data then streams in as `Op 5 DISPATCH` payloads.
 
-**Consumer session cap.** A per-developer limit caps concurrent consumer connections; exceeding it closes the new connection with **4002** – close the previous session first. The cap is currently **1** but is a server-side setting that may be raised, so do not hard-code an assumption of exactly one consumer.
+**Consumer session cap.** A per-developer limit caps concurrent consumer connections; exceeding it closes the new connection with **4002**. The cap is a server-side config setting (it has run as low as 1; dashboard sessions do not count against it), so do not architect around any guaranteed number of concurrent consumers – on 4002, close an existing session or back off.
 
 ## DISPATCH semantics
 
@@ -43,7 +43,7 @@ If your connection drops and you miss data, use REPLAY (`Op 7`) after reconnecti
 2. Send REPLAY with `after` = the last `seq` you processed before the drop, and `before` = `firstLive`.
 3. Process the replayed DISPATCHes (they arrive as ordinary `Op 5` payloads), then resume live handling.
 
-- **Both `after` and `before` are required.** A REPLAY without `before` returns no messages.
+- **`after` is required; `before` is optional.** `before` is an exclusive upper bound – omit it to replay everything after `after`. (Some docs copies still say both bounds are required; the shipped behavior and the AsyncAPI spec treat `before` as optional.)
 - Bounds are **exclusive**: `after: 28, before: 43` replays 29 through 42.
 - Replay reads from the Terra API data warehouse, so a payload becomes replayable a few seconds after it was delivered live. If a REPLAY returns fewer messages than expected, wait a moment and request it again. There is currently no retention limit on replayable data, though that may change.
 - If no live DISPATCH has arrived yet, there is nothing to backfill – wait for one before replaying.
@@ -53,4 +53,4 @@ If your connection drops and you miss data, use REPLAY (`Op 7`) after reconnecti
 The codes split into two groups; fetch the live doc for the verbatim code table.
 
 - **Client bugs – fix the client, do not retry-loop:** **4000** (no IDENTIFY within 15 s), **4003** (more than one IDENTIFY per connection), **4004** (invalid opcode, or one not valid for the session type, e.g. SUBMIT on a consumer), and **1003** (malformed frame). A blind reconnect just loops on the same error.
-- **Safe to reconnect after the remedy:** **4001** (bad or expired token – mint a fresh one), **4002** (session cap – close the other consumer first), **4005** (missed heartbeat – fix your cadence, then reconnect). **1000** (normal) and **1011** (server internal error) are standard closes.
+- **Safe to reconnect after the remedy:** **4001** (bad or expired token – mint a fresh one), **4002** (session cap – close an existing consumer or back off), **4005** (missed heartbeat – fix your cadence, then reconnect). **1000** (normal) and **1011** (server internal error) are standard closes.

@@ -1,6 +1,6 @@
 ---
 name: terra-api
-description: Best practices for integrating Terra API – the unified health & fitness data API for 500+ wearables (Garmin, Fitbit, Oura, Whoop, Apple Health, Strava, Dexcom). Use when building with Terra API or tryterra.co, handling X-Terra-Signature (terra-signature) webhooks, storing wearable health data (activity, sleep, daily, body, nutrition, menstruation, hormone), managing device connections, or merging data across multiple devices.
+description: Best practices for integrating Terra API – the unified health & fitness data API for 500+ wearables (Garmin, Fitbit, Oura, Whoop, Apple Health, Strava, Dexcom). Use when building with Terra API or tryterra.co, handling terra-signature (X-Terra-Signature) webhooks, storing wearable health data (activity, sleep, daily, body, nutrition, menstruation, hormone), managing device connections, or merging data across multiple devices.
 license: MIT
 compatibility: Requires network access to docs.tryterra.co for full API schemas
 metadata:
@@ -10,7 +10,7 @@ metadata:
 
 # Terra API Best Practices
 
-Production-tested guidelines for building with Terra API. Contains 21 rules across 5 categories, prioritized by impact, distilled from a real multi-device integration.
+Production-tested guidelines for building with Terra API. Contains rules across 5 categories, prioritized by impact, distilled from a real multi-device integration.
 
 ## When to Apply
 
@@ -36,7 +36,7 @@ Reference these guidelines when:
 
 ### 1. Webhook Handling (CRITICAL)
 
-- `webhooks-verify-raw-body` - Verify the X-Terra-Signature HMAC over the raw unaltered body before parsing JSON
+- `webhooks-verify-raw-body` - Verify the signature header HMAC (terra-signature / X-Terra-Signature, read case-insensitively) over the raw unaltered body before parsing JSON
 - `webhooks-ack-within-timeout` - Return 200 within the timeout (8s default, configurable 1-30s per destination), process async
 - `webhooks-dedupe-terra-reference` - Deduplicate deliveries on X-Terra-Trace-Id; terra-reference is shared by all chunks of a large request
 - `webhooks-archive-raw-payloads` - Archive raw payloads to object storage, link rows via a payload key
