@@ -2,7 +2,7 @@
 
 Order at-home and go-to-lab diagnostic tests and deliver results with the [Terra API](https://tryterra.co) Vantage API. Vantage is a platform for managing blood test and DNA diagnostic products, processing orders, and delivering test results in FHIR format, so healthcare providers, laboratories, and partners can embed diagnostic testing into their own applications while Terra API handles kit suppliers, logistics, compliance, and results standardization.
 
-Availability is currently the United Kingdom and the USA (Germany, Spain, and France coming soon), and onboarding is manual: new customers contact Terra API for credentials, and prospective clients or suppliers contact Terra API. Credentials work in the sandbox first, with production credentials issued later.
+Availability is currently the United Kingdom and the USA (Germany, Spain, and France coming soon), and onboarding is manual: contact Terra API for credentials (see [Account Setup and API Keys](https://docs.tryterra.co/vantage-api-docs/account-setup-and-api-keys)). Credentials work in the sandbox first, with production credentials issued later.
 
 This skill covers the product-to-order-to-results workflow, HTTP Basic authentication, the `AT_HOME` vs `GO_TO_LAB` collection methods, kit activation, webhook events with HMAC signature verification, the mandatory results-acknowledgment step, and the sandbox environment. Facts are drawn from the Terra Vantage API documentation.
 

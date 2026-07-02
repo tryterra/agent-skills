@@ -11,7 +11,7 @@ metadata:
 
 The Vantage API is a platform for managing blood test and DNA diagnostic products, processing orders, and delivering test results. It lets healthcare providers, laboratories, and partners embed diagnostic testing directly into their own applications while Terra API handles the operational complexity: kit supplier integrations (no minimum order requirements), logistics and shipping, compliance, and results standardization into FHIR format. The stated goal is to add biological context to the metrics wearables already provide, and to remove the lab agreements, logistics, and compliance work that normally block launching white-label testing.
 
-**Availability and onboarding.** Vantage is available in the United Kingdom and the USA, with Germany, Spain, and France listed as coming soon. Onboarding is manual, not self-service: new customers contact Terra API with payment details and a webhook endpoint to receive credentials, and prospective clients or kit suppliers contact Terra API. Credentials work in the sandbox first; production credentials are issued later.
+**Availability and onboarding.** Vantage is available in the United Kingdom and the USA, with Germany, Spain, and France listed as coming soon. Onboarding is manual, not self-service: contact Terra API to receive credentials (see [Account Setup and API Keys](https://docs.tryterra.co/vantage-api-docs/account-setup-and-api-keys)). Credentials work in the sandbox first; production credentials are issued later.
 
 ## Authentication
 
