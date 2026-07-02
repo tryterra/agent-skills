@@ -9,7 +9,7 @@ tags: data, upserts, data-enrichment
 
 **Impact: CRITICAL (plain overwrites silently erase scores)**
 
-`data_enrichment` scores (stress, strain, resilience, cardiovascular, immune, respiratory, sleep and readiness scores) are computed server-side by Terra API and do NOT follow the superset guarantee: a later webhook for the same day can arrive with null enrichment even though an earlier delivery carried values. If score columns use the same plain-overwrite upsert as biomarkers, those nulls erase real scores and your dashboards regress randomly. Upsert score columns with `COALESCE(excluded.col, table.col)` so an incoming null preserves the stored value, while incoming values still update normally.
+`data_enrichment` scores (stress, strain, resilience, cardio load (RCRS, run-cardiorespiratory strain), immunity, respiratory, sleep and readiness scores) are computed server-side by Terra API and do NOT follow the superset guarantee: a later webhook for the same day can arrive with null enrichment even though an earlier delivery carried values. If score columns use the same plain-overwrite upsert as biomarkers, those nulls erase real scores and your dashboards regress randomly. Upsert score columns with `COALESCE(excluded.col, table.col)` so an incoming null preserves the stored value, while incoming values still update normally.
 
 **Incorrect (one overwrite strategy for everything):**
 

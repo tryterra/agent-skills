@@ -9,7 +9,7 @@ tags: webhooks, performance, reliability
 
 **Impact: CRITICAL (slow handlers cause retries and duplicate deliveries)**
 
-Terra API expects a 200 response within its 8-second webhook timeout. If your handler does archival, database writes, and downstream processing before responding, large payloads or a slow database push you past the timeout, Terra API treats the delivery as failed, and you receive retries for events you actually processed. Do the minimum inline (verify signature, record the event for deduplication), return 200, and run the heavy work asynchronously in a background task or queue.
+Terra API expects a 200 response within the webhook timeout: 8 seconds by default, configurable per destination but clamped to 1-30 seconds. If your handler does archival, database writes, and downstream processing before responding, large payloads or a slow database push you past the timeout, Terra API treats the delivery as failed, and you receive retries for events you actually processed. Do the minimum inline (verify signature, record the event for deduplication), return 200, and run the heavy work asynchronously in a background task or queue.
 
 **Incorrect (processing everything before responding):**
 
@@ -19,7 +19,7 @@ app.post("/api/terra/webhook", async (c) => {
   await archiveRawPayload(event);      // object storage write
   await upsertHealthData(event);       // database writes for every record
   await updateConnectionStatus(event); // more writes
-  return c.text("ok", 200);            // may arrive after the 8s timeout
+  return c.text("ok", 200);            // may arrive after the timeout (8s default)
 });
 ```
 

@@ -13,6 +13,8 @@ Not every webhook carries health data. Terra API also sends operational events: 
 
 One event type wraps real data rather than carrying it inline: `s3_payload`. When your destination uses ping-mode delivery, the payload is uploaded to cloud storage and the webhook body contains a download URL instead of the data. Fetch the URL to obtain the actual payload, then process it through the normal data path.
 
+One data event has a different shape: `athlete` payloads carry a single `athlete` object, not a `data` array, so a generic `event.data.map(...)` path throws on them. Branch on the type before assuming an array.
+
 **Incorrect (assuming every event carries data):**
 
 ```typescript
@@ -30,7 +32,7 @@ const DATA_EVENTS = [
   "nutrition", "sleep", "planned_workout", "lab_report", "route",
 ];
 const AUTH_EVENTS = [
-  "auth", "auth_success", "auth_failed", "deauth", "user_reauth",
+  "auth", "auth_cancelled", "deauth", "user_reauth",
   "access_revoked", "permission_change", "connection_error",
 ];
 
@@ -39,6 +41,7 @@ async function processEvent(event: TerraWebhookEvent) {
     const payload = await fetch(event.url).then((r) => r.json()); // ping-mode wrapper
     return processEvent(payload);
   }
+  if (event.type === "athlete") return handleAthlete(event.athlete); // object, no data[]
   if (DATA_EVENTS.includes(event.type)) return handleDataEvent(event);
   if (AUTH_EVENTS.includes(event.type)) return handleAuthEvent(event);
   // large_request_processing, large_request_sending, and anything new:

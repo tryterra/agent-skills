@@ -2,7 +2,7 @@
   "version": "1.0.0",
   "organization": "Terra API",
   "date": "July 2026",
-  "abstract": "Production-tested best practices for integrating Terra API: webhook verification and idempotency, health data storage strategies, connection lifecycle handling, multi-device merging, SDK type gaps, and testing.",
+  "abstract": "Production-tested best practices for integrating Terra API: webhook verification and idempotency, health data storage strategies, connection lifecycle handling, multi-device merging, and testing.",
   "references": [
     "https://docs.tryterra.co",
     "https://docs.tryterra.co/health-and-fitness-api/integration-setup/setting-up-data-destinations/webhooks",

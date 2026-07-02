@@ -1,31 +1,32 @@
 ---
-title: Fetch the Integrations Catalogue Without an API Key
+title: Send dev-id When Fetching the Integrations Catalogue
 impact: HIGH
-impactDescription: sending both headers returns an empty catalogue
+impactDescription: without dev-id you get every provider, not your enabled set
 tags: auth, integrations, api
 ---
 
-## Fetch the Integrations Catalogue Without an API Key
+## Send dev-id When Fetching the Integrations Catalogue
 
-**Impact: HIGH (sending both headers returns an empty catalogue)**
+**Impact: HIGH (without dev-id you get every provider, not your enabled set)**
 
-The detailed integrations endpoint (`GET /integrations/detailed`, `detailedfetch` in the SDK) behaves differently depending on which headers you send. With `dev-id` alone it returns your dev-scoped catalogue: only the providers enabled for your account, with names, icons, and supported data types. With both `dev-id` and `x-api-key` it returns EMPTY. This is the opposite of the usual "more auth, more data" intuition and produces a baffling blank provider list. Keep two client configurations: an authenticated one (`dev-id` + `x-api-key`) for real API calls (auth URL generation, deauth, user info, data requests) and a keyless one (`dev-id` only) for the public catalogue.
+The detailed integrations endpoint (`GET /integrations/detailed`, `detailedfetch` in the SDK) is public: it requires no API key and reads only the `dev-id` header. With `dev-id` it returns your dev-scoped catalogue – only the providers enabled for your account, with names, icons, supported scopes, and data types. Without `dev-id` it returns the full list of every provider Terra API supports, all marked active. That full list looks plausible, so a connect screen built from it silently offers providers your users cannot actually connect. Always send `dev-id`; sending `x-api-key` as well is harmless but unnecessary on this endpoint.
 
-**Incorrect (one fully-authenticated client for everything):**
-
-```typescript
-const client = new TerraClient({ devId: env.TERRA_DEV_ID, apiKey: env.TERRA_API_KEY });
-const catalogue = await client.integrations.detailedfetch(); // empty result
-```
-
-**Correct (keyless client for the catalogue):**
+**Incorrect (no dev-id, e.g. a plain browser fetch):**
 
 ```typescript
-const client = new TerraClient({ devId: env.TERRA_DEV_ID, apiKey: env.TERRA_API_KEY });
-const publicClient = new TerraClient({ devId: env.TERRA_DEV_ID }); // no API key
-
-const catalogue = await publicClient.integrations.detailedfetch(); // enabled providers
-const authUrl = await client.authentication.authenticateuser({ ... }); // authed calls
+// Public endpoint, so this "works" – but returns EVERY provider
+// Terra API supports, not the ones enabled for your account.
+const catalogue = await fetch("https://api.tryterra.co/v2/integrations/detailed")
+  .then((r) => r.json());
+renderConnectScreen(catalogue.providers); // offers providers users can't connect
 ```
 
-Reference: [API reference](https://docs.tryterra.co/reference)
+**Correct (dev-id header scopes the catalogue to your account):**
+
+```typescript
+const catalogue = await fetch("https://api.tryterra.co/v2/integrations/detailed", {
+  headers: { "dev-id": env.TERRA_DEV_ID },
+}).then((r) => r.json()); // only providers enabled for your dev account
+```
+
+Reference: fetch the docs index at [docs.tryterra.co/llms.txt](https://docs.tryterra.co/llms.txt) to locate the current integrations endpoint reference when building the request or parsing the response.

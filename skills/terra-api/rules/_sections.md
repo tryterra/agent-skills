@@ -18,7 +18,7 @@ The section ID (in parentheses) is the filename prefix used to group rules.
 ## 3. Auth & Connection Lifecycle (auth)
 
 **Impact:** HIGH
-**Description:** Connections change state through six event types and can drift when webhooks are missed. Correct lifecycle handling and reconciliation keep your database matching Terra API's actual state.
+**Description:** Connections change state through seven event types and can drift when webhooks are missed. Correct lifecycle handling and reconciliation keep your database matching Terra API's actual state.
 
 ## 4. Multi-Device Data (devices)
 

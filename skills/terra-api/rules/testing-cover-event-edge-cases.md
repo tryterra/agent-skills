@@ -10,9 +10,9 @@ tags: testing, coverage, webhooks
 
 The Terra API failure modes that reach production are rarely the happy path; they are the odd deliveries. Use this coverage checklist for the webhook pipeline:
 
-- **Every event type**: every data event, all eight auth events, the operational events (`large_request_processing`, `large_request_sending`), and `s3_payload` wrappers each reach the right handler
+- **Every event type**: every data event, all seven auth events, the operational events (`large_request_processing`, `large_request_sending`), and `s3_payload` wrappers each reach the right handler
 - **Signature**: missing header rejected 401, invalid signature rejected 401, valid passes
-- **Dedup replay**: the same `terra-reference` delivered twice processes once and still returns 200
+- **Dedup replay**: the same `X-Terra-Trace-Id` delivered twice processes once and still returns 200; two chunks sharing one `terra-reference` both process
 - **Empty `data[]`**: a data event with no records completes without writes or errors
 - **Missing `user_id`**: malformed payloads are logged and acknowledged, not crashed on
 - **Unknown Terra user**: data for a user you have no connection row for (webhook raced ahead of auth, or a missed reauth swap)
@@ -30,7 +30,7 @@ it("stores a daily payload", async () => { ... }); // the only webhook test
 **Correct (edge cases as first-class tests):**
 
 ```typescript
-it("returns 200 without reprocessing a replayed terra-reference", ...);
+it("returns 200 without reprocessing a replayed X-Terra-Trace-Id", ...);
 it("acknowledges events with an empty data array", ...);
 it("keeps stored scores when enrichment arrives null", ...);
 it("maps activity type 0 correctly", ...);
