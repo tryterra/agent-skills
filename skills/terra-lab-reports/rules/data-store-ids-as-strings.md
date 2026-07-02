@@ -14,17 +14,17 @@ tags: data, ids, serialization
 **Incorrect (coercing the ID to a number loses precision):**
 
 ```javascript
-const sessionId = Number(event.data.session_id); // 297405620317847552 -> 297405620317847550
+const sessionId = Number(payload.session_id); // 297405620317847552 -> 297405620317847550
 await db.reports.insert({ session_id: sessionId });
 ```
 
 **Correct (keep it a string throughout):**
 
 ```javascript
-const sessionId = event.data.session_id; // "297405620317847552"
+const sessionId = payload.session_id; // "297405620317847552"
 await db.reports.insert({ session_id: sessionId }); // string column
 ```
 
-The `upload_id` is already an opaque string; the same rule applies to any ID field – compare and store them as strings.
+The same rule applies to any ID field – compare and store them as strings.
 
 Reference: [Best Practices – Storing Session IDs](https://docs.tryterra.co/lab-reports/best-practices)

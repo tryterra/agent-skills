@@ -2,24 +2,24 @@
 
 Biomarker standardization, UCUM unit codes, LOINC coverage, and common biomarker tables for the Terra Lab Reports API (pre-release).
 
-## What is `biomarker`?
+## What is `biomarker_key`?
 
-Every extracted result is matched against Terra API's reference dataset of 4,200+ known biomarkers. When a match is found, `biomarker` is set to a canonical slug – a stable, machine-readable identifier used to aggregate and compare results across labs, reports, and patients.
+Every extracted result is matched against Terra API's reference dataset of ~4,130 known biomarkers. When a match is found, `biomarker_key` is set to a canonical key – a stable, machine-readable identifier used to aggregate and compare results across labs, reports, and patients.
 
 ```json
-{ "original_name": "Haemoglobin (Hb)", "display_name": "Hemoglobin", "biomarker": "hemoglobin" }
+{ "original_name": "Haemoglobin (Hb)", "display_name": "Hemoglobin", "biomarker_key": "hemoglobin" }
 ```
 
-### When is `biomarker` null?
+### When is `biomarker_key` absent?
 
-`biomarker` is always present, and is `null` when the system cannot confidently match the extracted name. This happens with lab-specific proprietary test names, uncommon or newly introduced assays, ambiguous abbreviations, and composite panels reported as a single line item. When it is `null`, `original_name` and `display_name` still contain the extracted text – use `original_name` as a display fallback and never discard the result.
+`biomarker_key` is present only when the system confidently matches the extracted name. It is **omitted entirely** (not present-but-null) when matching fails – common with lab-specific proprietary test names, uncommon or newly introduced assays, ambiguous abbreviations, and composite panels reported as a single line item. When it is absent, `original_name` and `display_name` still contain the extracted text – use `original_name` as a display fallback and never discard the result.
 
 ## How Matching Works
 
 1. `original_name` is extracted from the file via OCR and AI parsing.
-2. The name is compared against the reference dataset using fuzzy string matching.
-3. On a high-confidence match, the canonical `biomarker` slug, `display_name`, and related metadata (including `loinc_code` where available) are assigned.
-4. With no confident match, `biomarker` is set to `null`.
+2. The name is compared against the reference dataset using fuzzy string matching (confidence threshold 0.85).
+3. On a high-confidence match, the canonical `biomarker_key`, `display_name`, and related metadata (including `loinc_code` where available) are assigned.
+4. With no confident match, `biomarker_key` is omitted from the result.
 
 The matching accounts for common variations:
 
@@ -57,10 +57,10 @@ Note the multibyte `µ` in unit names – always parse response bodies as UTF-8.
 
 ## LOINC Codes
 
-When a matched biomarker has a corresponding [LOINC](https://loinc.org/) code, the result includes a `loinc_code` (useful for EHR interoperability). Coverage is partial – roughly 1,600 of the 4,200+ reference biomarkers currently carry a LOINC code, concentrated on common blood, serum, and urine analytes. Biomarkers without a mapping (many derived ratios, qualitative microbiology results, specialised assays with no specific LOINC term) have `loinc_code` present-but-null.
+When a matched biomarker has a corresponding [LOINC](https://loinc.org/) code, the result includes a `loinc_code` (useful for EHR interoperability). Coverage is partial – roughly 1,579 of the ~4,130 reference biomarkers currently carry a LOINC code, concentrated on common blood, serum, and urine analytes. Biomarkers without a mapping (many derived ratios, qualitative microbiology results, specialised assays with no specific LOINC term) have `loinc_code` omitted entirely.
 
 ```json
-{ "display_name": "Hemoglobin", "biomarker": "hemoglobin", "loinc_code": "718-7" }
+{ "display_name": "Hemoglobin", "biomarker_key": "hemoglobin", "loinc_code": "718-7" }
 ```
 
 ## Result Types and Bounded Values
@@ -85,7 +85,7 @@ Frequently encountered biomarkers by category. For the complete dataset, downloa
 
 ### Complete Blood Count (CBC)
 
-| `biomarker`                   | Display Name           | Typical Units | `ucum_code` |
+| `biomarker_key`                   | Display Name           | Typical Units | `ucum_code` |
 | ----------------------------- | ---------------------- | ------------- | ----------- |
 | `hemoglobin`                  | Hemoglobin             | g/dL          | `g/dL`      |
 | `hematocrit`                  | Hematocrit             | %             | `%`         |
@@ -100,7 +100,7 @@ Frequently encountered biomarkers by category. For the complete dataset, downloa
 
 ### Metabolic Panel
 
-| `biomarker`                            | Display Name    | Typical Units | `ucum_code`        |
+| `biomarker_key`                            | Display Name    | Typical Units | `ucum_code`        |
 | -------------------------------------- | --------------- | ------------- | ------------------ |
 | `glucose_fasting`                      | Fasting Glucose | mg/dL         | `mg/dL`            |
 | `hemoglobin_a1c`                       | HbA1c           | %             | `%`                |
@@ -114,7 +114,7 @@ Frequently encountered biomarkers by category. For the complete dataset, downloa
 
 ### Lipid Panel
 
-| `biomarker`         | Display Name      | Typical Units | `ucum_code` |
+| `biomarker_key`         | Display Name      | Typical Units | `ucum_code` |
 | ------------------- | ----------------- | ------------- | ----------- |
 | `cholesterol_total` | Total Cholesterol | mg/dL         | `mg/dL`     |
 | `hdl_cholesterol`   | HDL Cholesterol   | mg/dL         | `mg/dL`     |
@@ -123,7 +123,7 @@ Frequently encountered biomarkers by category. For the complete dataset, downloa
 
 ### Thyroid
 
-| `biomarker`                   | Display Name | Typical Units | `ucum_code` |
+| `biomarker_key`                   | Display Name | Typical Units | `ucum_code` |
 | ----------------------------- | ------------ | ------------- | ----------- |
 | `thyroid_stimulating_hormone` | TSH          | mIU/L         | `m[IU]/L`   |
 | `free_thyroxine`              | Free T4      | ng/dL         | `ng/dL`     |
@@ -131,7 +131,7 @@ Frequently encountered biomarkers by category. For the complete dataset, downloa
 
 ### Hormones
 
-| `biomarker`          | Display Name       | Typical Units | `ucum_code` |
+| `biomarker_key`          | Display Name       | Typical Units | `ucum_code` |
 | -------------------- | ------------------ | ------------- | ----------- |
 | `testosterone_total` | Total Testosterone | ng/dL         | `ng/dL`     |
 | `testosterone_free`  | Free Testosterone  | pg/mL         | `pg/mL`     |
@@ -141,7 +141,7 @@ Frequently encountered biomarkers by category. For the complete dataset, downloa
 
 ### Vitamins and Minerals
 
-| `biomarker`            | Display Name | Typical Units | `ucum_code` |
+| `biomarker_key`            | Display Name | Typical Units | `ucum_code` |
 | ---------------------- | ------------ | ------------- | ----------- |
 | `vitamin_d_25_hydroxy` | Vitamin D    | ng/mL         | `ng/mL`     |
 | `vitamin_b12`          | Vitamin B12  | pg/mL         | `pg/mL`     |
@@ -151,7 +151,7 @@ Frequently encountered biomarkers by category. For the complete dataset, downloa
 
 ### Liver
 
-| `biomarker`                  | Display Name    | Typical Units | `ucum_code` |
+| `biomarker_key`                  | Display Name    | Typical Units | `ucum_code` |
 | ---------------------------- | --------------- | ------------- | ----------- |
 | `alanine_aminotransferase`   | ALT             | IU/L          | `[IU]/L`    |
 | `aspartate_aminotransferase` | AST             | IU/L          | `[IU]/L`    |
@@ -162,7 +162,7 @@ Frequently encountered biomarkers by category. For the complete dataset, downloa
 
 ### Inflammation
 
-| `biomarker`                      | Display Name | Typical Units | `ucum_code` |
+| `biomarker_key`                      | Display Name | Typical Units | `ucum_code` |
 | -------------------------------- | ------------ | ------------- | ----------- |
 | `c_reactive_protein`             | CRP          | mg/L          | `mg/L`      |
 | `c_reactive_protein_hs`          | hs-CRP       | mg/L          | `mg/L`      |
@@ -170,7 +170,7 @@ Frequently encountered biomarkers by category. For the complete dataset, downloa
 
 ## Full Biomarker Dataset
 
-The complete list of all 4,200+ supported biomarkers – each with its canonical key, display name, and associated metadata (including `loinc_code` where mapped) – is available as a downloadable JSON file linked from the [Biomarker Reference](https://docs.tryterra.co/lab-reports/biomarker-reference) page. It is not bundled with this skill (the file is ~700 KB); fetch it from the live docs when you need to validate slugs or look up LOINC mappings offline.
+The complete list of all ~4,130 supported biomarkers – each with its canonical key, display name, and associated metadata (including `loinc_code` where mapped) – is available as a downloadable file linked from the [Biomarker Reference](https://docs.tryterra.co/lab-reports/biomarker-reference) page. It is not bundled with this skill (~700 KB); fetch it from the live docs when you need to validate keys or look up LOINC mappings offline.
 
 ---
 

@@ -9,7 +9,7 @@ tags: api, polling, webhooks
 
 **Impact: MEDIUM (tight polling loops waste requests and hit rate limits)**
 
-Webhooks are the intended production path: they are real-time and waste no requests, and they are the reliable completion signal (a `GET ?upload_id=` right after upload is eventually consistent and can return an empty or partial list). Use polling only in development or as a fallback when your webhook endpoint is unavailable. When you must poll `GET /v2/lab-reports/{session_id}`, poll no faster than every 5 seconds and stop on a terminal status – processing typically takes 30 seconds to 3 minutes, so a sub-second loop just burns rate limit for no faster answer.
+Webhooks are the intended production path for success: they are real-time and waste no requests. But webhooks fire only on success, so polling is also how you detect a `failed` session – there is no failure webhook. Use polling in development, as a fallback when your webhook endpoint is unavailable, and to observe failures. When you poll `GET /v2/lab-reports/{session_id}`, poll no faster than every 5 seconds and stop on a terminal status – processing typically takes 30 seconds to 3 minutes, so a sub-second loop just burns rate limit for no faster answer.
 
 **Incorrect (busy-waiting with no delay):**
 
@@ -26,7 +26,7 @@ while True:
 ```python
 import time
 
-TERMINAL = {"sent", "partially_sent", "failed", "cancelled", "deleted"}
+TERMINAL = {"sent", "failed", "cancelled", "deleted"}
 while True:
     status = get_session(session_id)["current_status"]
     if status in TERMINAL:

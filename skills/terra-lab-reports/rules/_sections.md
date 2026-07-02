@@ -8,7 +8,7 @@ The section ID (in parentheses) lists the filename prefixes used to group rules.
 ## 1. Webhooks & Delivery (webhooks, api-poll)
 
 **Impact:** HIGH
-**Description:** Webhooks are the reliable completion signal for lab reports, and reprocessing emits new events. Correct deduplication and a sane polling fallback keep delivery exactly-once without hammering the API.
+**Description:** Webhooks are the completion signal for successful lab reports (failures surface only via polling), and reprocessing emits a new webhook with the same session_id. Correct deduplication and a sane polling fallback keep delivery exactly-once without hammering the API.
 
 ## 2. Data Handling & API Usage (data, api)
 
