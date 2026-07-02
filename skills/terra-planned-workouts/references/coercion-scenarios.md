@@ -106,7 +106,7 @@ The provider does not support the intensity type; it is mapped to a supported on
 
 ### Sync window (Zepp)
 
-The workout is scheduled outside Zepp's 7-day window (today to today + 6 days). It is stored in Terra's database but not pushed until it enters the window, and only when a subsequent write or delete for that user triggers a refresh. There is no background sync.
+The workout is scheduled outside Zepp's 7-day window (today to today + 6 days). It is stored in Terra API's database but not pushed until it enters the window, and only when a subsequent write or delete for that user triggers a refresh. There is no background sync.
 
 ```json
 { "path": "planned_date",

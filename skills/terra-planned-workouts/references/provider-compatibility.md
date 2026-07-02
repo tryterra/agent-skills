@@ -16,11 +16,11 @@ Which providers support create, update, retrieve, and delete of planned workouts
 | Delete | yes | yes | yes | yes | yes | no | yes | no | yes |
 
 - \* COROS has no in-place update. Updates delete the old workout and create a new one (the `provider_workout_id` changes).
-- † Huawei cannot update workout content on the device. An update changes only the planned date in Terra's database; the device workout is unchanged.
+- † Huawei cannot update workout content on the device. An update changes only the planned date in Terra API's database; the device workout is unchanged.
 - ‡ Garmin only returns workouts created by your application's API credentials. Workouts from other apps or created on the device do not appear.
 - § Zepp uses a 7-day sync window. Updates replace all workouts within the current window on the device.
 
-**When an operation is not supported the API still returns success.** For deletes, the workout is removed from Terra's database but remains on the device. For retrieves, only workouts stored in Terra's database are returned, not workouts from the provider.
+**When an operation is not supported the API still returns success.** For deletes, the workout is removed from Terra API's database but remains on the device. For retrieves, only workouts stored in Terra API's database are returned, not workouts from the provider.
 
 ## Feature Matrix
 
@@ -127,7 +127,7 @@ Training platform integration.
 Running workouts only. Create only. No update, retrieve, or delete on the device.
 
 - **Strengths:** heart rate targets (absolute BPM, max %, threshold %, zones); pace and speed targets (converted to milliseconds per kilometer); cadence targets (as "steps rate"); calorie-based completion; block repeats via ActionCombine.
-- **Limitations:** running only (other sports get a warning and appear as a run); no power targets; single target per step (first prioritized target used); no strength or swimming; no retrieve (no fetch endpoint); no delete (delete removes the Terra record but the device workout remains); no update (only changes the planned date in Terra's DB); no planned-date support (the workout is available immediately regardless of `planned_date`, and a coercion warning is always returned).
+- **Limitations:** running only (other sports get a warning and appear as a run); no power targets; single target per step (first prioritized target used); no strength or swimming; no retrieve (no fetch endpoint); no delete (delete removes the Terra API record but the device workout remains); no update (only changes the planned date in Terra API's DB); no planned-date support (the workout is available immediately regardless of `planned_date`, and a coercion warning is always returned).
 - **Special behaviors:** pace stored as milliseconds per kilometer internally; HR zones converted to absolute BPM via max HR; cooldown and recovery both map to Huawei's "Relax" action with a warning; single values expanded ±5%; step-level reps converted to separate repeating ActionCombine blocks; unique workout names enforced per user (duplicates return 400); Huawei may return a 500 "createWorkout error" but still create the workout, in which case `provider_workout_id` is empty and a coercion warning is returned.
 
 ### Zepp
@@ -135,7 +135,7 @@ Running workouts only. Create only. No update, retrieve, or delete on the device
 Endurance sports with a sync-window constraint. Supports create, update, and delete. No retrieve.
 
 - **Strengths:** running, cycling, swimming; full HR and power target coverage including zones and percentages; cadence as a secondary target; block repeats; pace targets auto-converted from sec/km to m/s.
-- **Limitations:** no strength; no swim stroke types (ignored with warning); no equipment weight targets (ignored with warning); no controls; no retrieve (no fetch endpoint); **7-day sync window** – workouts only appear when scheduled within today to today + 6 days. Out-of-window workouts are stored in Terra's database but not pushed until a later write or delete for that user triggers a window refresh. There is no automatic background sync.
+- **Limitations:** no strength; no swim stroke types (ignored with warning); no equipment weight targets (ignored with warning); no controls; no retrieve (no fetch endpoint); **7-day sync window** – workouts only appear when scheduled within today to today + 6 days. Out-of-window workouts are stored in Terra API's database but not pushed until a later write or delete for that user triggers a window refresh. There is no automatic background sync.
 - **Special behaviors:** full window replacement (every write or delete re-syncs the entire 7-day window); out-of-window workouts return a warning but are still stored; unsupported sports default to RUNNING with a warning; missing completion conditions default to 60 seconds; cadence only as a secondary target (a warning is returned if it is the only target); step-level reps wrapped in repeat blocks; single values expanded ±5%.
 
 ### Hevy
@@ -143,7 +143,7 @@ Endurance sports with a sync-window constraint. Supports create, update, and del
 Strength training routines only. Supports create and retrieve. No update or delete on the provider.
 
 - **Strengths:** full exercise name resolution (Garmin UPPER_CASE names, Hevy display names, and short aliases all resolve to built-in Hevy template IDs); exercise metadata enrichment (custom exercises get muscle group, equipment category, and type inferred from the shared metadata registry); weight unit conversion (lbs to kg); duration-based and distance-based sets alongside weight/reps.
-- **Limitations:** strength only (other sports produce a warning but exercises are still pushed as a routine); no HR, power, pace, speed, or cadence targets; no RPE (silently dropped with a warning); no block repeats (each block maps to one exercise, each step to one set); no planned-date support (the routine appears in the library immediately); no delete (removes the Terra record but the routine stays in the Hevy account); no update (routines are not tied to a date, so "update planned date" has no provider-side effect).
+- **Limitations:** strength only (other sports produce a warning but exercises are still pushed as a routine); no HR, power, pace, speed, or cadence targets; no RPE (silently dropped with a warning); no block repeats (each block maps to one exercise, each step to one set); no planned-date support (the routine appears in the library immediately); no delete (removes the Terra API record but the routine stays in the Hevy account); no update (routines are not tied to a date, so "update planned date" has no provider-side effect).
 - **Special behaviors:** if the user's Hevy account hits the custom exercise limit, a 403 is returned per exercise with a warning and the routine is still created with the remaining exercises; muscle group for custom exercises is inferred from the name via the Garmin exercise→category mapping.
 
 ### Apple

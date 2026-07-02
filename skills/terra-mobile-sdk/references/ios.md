@@ -191,7 +191,7 @@ func postActivityData(terra: TerraManager) {
 
 ## Planned workout sync (iOS 17+)
 
-Planned workouts are created via Terra's REST API on your backend; the iOS SDK syncs them to Apple Watch through WorkoutKit. Requires iOS 17+.
+Planned workouts are created via Terra API's REST API on your backend; the iOS SDK syncs them to Apple Watch through WorkoutKit. Requires iOS 17+.
 
 - `enablePlannedWorkoutBackendSync(enabled:)` – turn automatic syncing on/off (call after connecting Apple Health).
 - `syncPlannedWorkoutsFromBackend(type:)` – manually trigger a sync of pending actions.

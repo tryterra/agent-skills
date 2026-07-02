@@ -30,7 +30,7 @@ Base URL `https://access.tryterra.co/api/v2`. Every request needs two headers: `
 
 **Phase 1 – Create a template (once).** `POST /workouts` with the workout structure returns a reusable `workout_id`. The template is generic: it holds structure and, where you want personalization, percentage-based targets.
 
-**Phase 2 – Schedule to a user (per athlete).** `POST /workouts/{workout_id}/plan?user_id=X` applies that athlete's parameters (max HR, FTP, etc.) at scheduling time, converts percentage targets to absolute values, and pushes to the connected device. Returns a `planned_workout_id` (Terra's ID) and a `provider_workout_id` (the device's ID).
+**Phase 2 – Schedule to a user (per athlete).** `POST /workouts/{workout_id}/plan?user_id=X` applies that athlete's parameters (max HR, FTP, etc.) at scheduling time, converts percentage targets to absolute values, and pushes to the connected device. Returns a `planned_workout_id` (Terra API's ID) and a `provider_workout_id` (the device's ID).
 
 ```bash
 # Phase 1: create a reusable template
@@ -138,11 +138,11 @@ Coercion is a success path, not an error. How you handle warnings is your choice
 - **Provider operations differ wildly.** Some providers do not support update, retrieve, or delete. An unsupported operation still returns a success response, so success does not always mean the device changed. Read `references/provider-compatibility.md` before targeting a specific provider.
 - **COROS update = delete + recreate.** COROS has no in-place update, so an "update" deletes the old workout and creates a new one; the `provider_workout_id` changes.
 - **Huawei is create-only, running-only, no scheduling.** No update, retrieve, or delete on the device. It ignores `planned_date` – the workout is available immediately and **always** returns a coercion warning noting this. Duplicate workout names per user are rejected with a 400. Non-running sports appear as a run.
-- **Zepp has a 7-day sync window** (today to today + 6 days). Workouts scheduled outside the window are stored in Terra's database but not pushed to the device until a later write or delete for that user triggers a window refresh. There is no background auto-sync.
+- **Zepp has a 7-day sync window** (today to today + 6 days). Workouts scheduled outside the window are stored in Terra API's database but not pushed to the device until a later write or delete for that user triggers a window refresh. There is no background auto-sync.
 - **Hevy is strength-only.** RPE targets are silently dropped with a warning, there are no block repeats (one block maps to one exercise, one step to one set), and it has no scheduling, update, or delete on the provider.
 - **Apple syncs via the Terra iOS SDK.** The server queues the action; the SDK pushes to WorkoutKit and reports back via `POST /v2/plannedWorkouts/{id}/synced`. Until then `provider_workout_id` is `null`.
 - **Garmin retrieve only returns workouts created by your own credentials.** Workouts made by other apps or on the device itself are invisible to your GET calls.
-- **Deletes remove from Terra's database but may leave the workout on the device** for providers without a delete endpoint (e.g. Huawei, Hevy).
+- **Deletes remove from Terra API's database but may leave the workout on the device** for providers without a delete endpoint (e.g. Huawei, Hevy).
 
 ## References
 
