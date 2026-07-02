@@ -6,7 +6,7 @@ Live docs: https://docs.tryterra.co/planned-workouts-api/overview/exercise-refer
 
 ## Overview
 
-For strength workouts on Garmin, exercise names are matched against Garmin's catalog of 1,600+ exercises (1,624 across 49 categories), which drives categorization and display on the device. For other providers that accept custom names, the name is title-cased and underscores are converted to spaces.
+For strength workouts on Garmin, exercise names are matched against Garmin's catalog of 1,600+ exercises (1,624 across 49 categories), which drives categorization and display on the device. The lookup matches full exercise names only; there is no fallback to category-level names like `BENCH_PRESS`. Providers that accept custom names (e.g. Hevy custom exercises) receive your input name verbatim.
 
 ## Name Normalization
 
@@ -16,7 +16,7 @@ Garmin lookup is flexible. The normalization process is:
 2. Convert to UPPERCASE.
 3. Look up in the exercise catalog.
 
-So all of these resolve to the same `BARBELL_BENCH_PRESS`:
+Examples of how inputs resolve:
 
 | Input | Normalized | Garmin | Hevy |
 | ----- | ---------- | ------ | ---- |
@@ -25,16 +25,17 @@ So all of these resolve to the same `BARBELL_BENCH_PRESS`:
 | `Barbell Bench Press` | `BARBELL_BENCH_PRESS` | Found | Bench Press (Barbell) |
 | `barbell bench press` | `BARBELL_BENCH_PRESS` | Found | Bench Press (Barbell) |
 | `Bench Press (Barbell)` | `BENCH_PRESS_(BARBELL)` | Not found | Bench Press (Barbell) |
-| `Bench Press` | `BENCH_PRESS` | Found (category) | Bench Press (Barbell) via alias |
+| `Bench Press` | `BENCH_PRESS` | Not found (category names are not looked up) | Bench Press (Barbell) via alias |
+| `Dumbbell Bench Press` | `DUMBBELL_BENCH_PRESS` | Found | Built-in Hevy template |
 | `My Custom Exercise` | `MY_CUSTOM_EXERCISE` | Not found | Custom exercise created |
 
 ## Hevy Lookup Path
 
 Garmin names work for Hevy too. Hevy tries, in order:
 
-1. Exact Hevy display name (e.g. `Squat (Barbell)`).
-2. Short name alias (e.g. `Bench Press` maps to `Bench Press (Barbell)`).
-3. Garmin-style normalized name via the shared metadata registry.
+1. Garmin-style normalized name via the shared metadata registry (spaces to underscores, uppercased) – covers Garmin catalog names with built-in Hevy template IDs.
+2. Hevy built-in lookup, which resolves exact display names (e.g. `Squat (Barbell)`) and short aliases (e.g. `Bench Press` maps to `Bench Press (Barbell)`) in one pass.
+3. No match: a custom exercise is created.
 
 ## When a Name Is Not Found
 
@@ -47,11 +48,11 @@ Garmin names work for Hevy too. Hevy tries, in order:
 
 **Hevy:**
 
-- A custom exercise template is created automatically on the user's Hevy account.
-- Muscle group and equipment are inferred from the name where possible (via the Garmin exercise→category mapping, e.g. "Bench Press" → BENCH_PRESS → chest).
+- A custom exercise template is created automatically on the user's Hevy account, titled with your raw input name.
+- Muscle group and equipment are inferred from the shared metadata registry when the Garmin-normalized name is found there (e.g. a Garmin catalog name without a built-in Hevy template); otherwise they default to "other".
 - A coercion warning is returned only if the user's custom exercise limit is reached (a 403 per exercise; the routine is still created with the remaining exercises).
 
-**Other providers:** the name is displayed as Title Case With Spaces Instead Of Underscores, regardless of input format.
+**Other providers:** the name you send is used as-is. (Title-casing with spaces instead of underscores happens only on the read path, when importing workouts FROM Garmin and formatting its UPPER_CASE names for display.)
 
 ## Tips
 

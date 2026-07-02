@@ -6,12 +6,12 @@ Live docs: https://docs.tryterra.co/planned-workouts-api/overview/coercion-warni
 
 ## Response Format
 
-Each warning is an object with a `path` (the field that changed) and a `message` (what happened and why).
+Each warning is an object with a `path` (the field that changed) and a `message` (what happened and why). Note that all Terra API IDs (`planned_workout_id`, `workout_id`) are serialized as JSON strings.
 
 ```json
 {
   "status": "success",
-  "planned_workout_id": 12345,
+  "planned_workout_id": "12345",
   "provider_workout_id": "garmin_abc123",
   "coercion_warnings": [
     { "path": "workout.sport", "message": "Unsupported sport type: yoga. Defaulting to OTHER." },
@@ -84,7 +84,7 @@ A strength exercise name does not match Garmin's catalog. The name and category 
   "message": "Exercise 'CUSTOM_EXERCISE' not found in Garmin catalog. Exercise name and category will be omitted." }
 ```
 
-Fix: use a recognized name (see references/garmin-exercises.md). Note Hevy behaves differently: it creates a custom exercise automatically and only warns if the account's custom exercise limit is reached.
+Fix: use a recognized name (see references/exercise-reference.md). Note Hevy behaves differently: it creates a custom exercise automatically and only warns if the account's custom exercise limit is reached.
 
 ### Block completion coercion
 
@@ -95,13 +95,13 @@ The provider does not support the block's completion type; the block runs once.
   "message": "Time-based block completion not supported. Block will execute once." }
 ```
 
-### Intensity type coercion
+### Target reinterpretation (Garmin threshold HR)
 
-The provider does not support the intensity type; it is mapped to a supported one.
+The provider keeps your values but interprets the target differently. Garmin only supports heart rate as a percentage of max HR, so threshold-percentage targets are re-labeled.
 
 ```json
-{ "path": "workout.step_blocks[0].steps[0].intensity_type",
-  "message": "RECOVERY intensity coerced to ACTIVE." }
+{ "path": "workout.step_blocks[0].steps[0].intensity_targets[0]",
+  "message": "Garmin uses heart rate percentage of max HR, not threshold HR. The percentage values will be interpreted as % of max HR." }
 ```
 
 ### Sync window (Zepp)
@@ -115,9 +115,11 @@ The workout is scheduled outside Zepp's 7-day window (today to today + 6 days). 
 
 ### Unsupported sport (Zepp)
 
+Several sports map silently before this warning fires: trail running maps to TRAILRUN, mountain biking to CYCLING, and hiking/walking to RUNNING. Only sports with no mapping at all (e.g. strength) trigger the warning.
+
 ```json
 { "path": "workout.sport",
-  "message": "sport 'strength' not supported by Zepp, defaulting to 'RUNNING'. Supported sports: RUNNING, CYCLING, SWIMMING" }
+  "message": "sport 'strength' not supported by Zepp, defaulting to 'RUNNING'. Supported sports: RUNNING, CYCLING, LAP_SWIMMING" }
 ```
 
 ### Cadence as primary target (Zepp)

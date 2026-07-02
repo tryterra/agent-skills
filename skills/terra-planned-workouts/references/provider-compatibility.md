@@ -11,7 +11,7 @@ Which providers support create, update, retrieve, and delete of planned workouts
 | Operation | Garmin | COROS | Wahoo | Suunto | TrainingPeaks | Huawei | Zepp | Hevy | Apple |
 | --------- | ------ | ----- | ----- | ------ | ------------- | ------ | ---- | ---- | ----- |
 | Create | yes | yes | yes | yes | yes | yes | yes | yes | yes |
-| Update | yes | yes* | yes | yes | yes | no† | yes§ | no | yes |
+| Update | yes | yes* | yes | yes | yes | no† | yes§ | yes | yes |
 | Retrieve | yes‡ | no | yes | yes | yes | no | no | yes | no |
 | Delete | yes | yes | yes | yes | yes | no | yes | no | yes |
 
@@ -35,8 +35,10 @@ Which providers support create, update, retrieve, and delete of planned workouts
 | Swimming | yes | yes | no | yes | yes | no | yes | no | yes |
 | Strength | yes | yes | no | yes | yes | no | no | yes | yes |
 | Trail Running | yes | yes | yes | yes | no | no | yes | no | no |
-| Mountain Biking | yes | no | yes | yes | yes | no | no | no | no |
-| Backcountry Skiing | yes | no | no | yes | no | no | no | no | no |
+| Mountain Biking | yes | yes‖ | yes | yes | yes | no | no‖ | no | no |
+| Backcountry Skiing | yes | no‖ | no | yes | no | no | no | no | no |
+
+- ‖ Silent fallback with **no** coercion warning: COROS pushes Mountain Biking as its generic bike sport and Backcountry Skiing as a run; Zepp pushes Mountain Biking as CYCLING.
 
 ### Targets
 
@@ -69,7 +71,7 @@ Which providers support create, update, retrieve, and delete of planned workouts
 
 | Feature | Garmin | COROS | Wahoo | Suunto | TrainingPeaks | Huawei | Zepp | Hevy | Apple |
 | ------- | ------ | ----- | ----- | ------ | ------------- | ------ | ---- | ---- | ----- |
-| Multiple targets/step | yes (2, cycling/swimming) | no | yes | no | no | no | yes (1 + cadence) | no | no |
+| Multiple targets/step | yes (2, cycling/swimming) | no | yes | yes | no | no | yes (1 + cadence) | no | no |
 | Block repeats | yes | yes | yes | yes | yes | yes | yes | no | yes |
 | Exercise names | yes | yes | no | yes | yes | no | no | yes | no |
 | Swim strokes | yes | yes | no | yes | no | no | no | no | no |
@@ -111,14 +113,14 @@ Focused on cycling and running.
 Solid multi-sport support.
 
 - **Strengths:** wide sport type support; swimming with stroke metadata; strength with exercise text; percentage targets converted to absolute values using athlete parameters.
-- **Limitations:** single target per step; no controls support; step names truncated to 13 characters; descriptions truncated to 23 characters.
-- **Special behaviors:** cadence converted from RPM to Hz (÷60); manual lap trigger for open/reps completion; percentage targets (HR %, power %, speed %) resolved to absolute values using provided athlete parameters or defaults.
+- **Limitations:** no controls support; workout names truncated to 60 characters; step names truncated to 13 characters; descriptions truncated to 256 characters (the short description shown on the watch, derived from the workout **name**, is truncated to 23 characters).
+- **Special behaviors:** all intensity targets on a step are emitted (multiple targets per step supported); cadence converted from RPM to Hz (÷60); manual lap trigger for open/reps completion; percentage targets (HR %, power %, speed %) resolved to absolute values using provided athlete parameters or defaults.
 
 ### TrainingPeaks
 
 Training platform integration.
 
-- **Strengths:** RPE support; all sports including triathlon; integrates with athlete profile for conversions.
+- **Strengths:** RPE support; wide sport coverage (unlisted sports map to "other" with a coercion warning); integrates with athlete profile for conversions.
 - **Limitations:** single target per step; no stroke type support.
 - **Special behaviors:** absolute HR converted to % using the athlete's max HR from request, then the TrainingPeaks profile, then defaults; absolute power converted to % using FTP from request, then profile, then defaults; reps estimated as 4 sec/rep (minimum 30 sec); missing profile data falls back to defaults with a coercion warning.
 
@@ -140,19 +142,19 @@ Endurance sports with a sync-window constraint. Supports create, update, and del
 
 ### Hevy
 
-Strength training routines only. Supports create and retrieve. No update or delete on the provider.
+Strength training routines only. Supports create, update, and retrieve. No delete on the provider.
 
 - **Strengths:** full exercise name resolution (Garmin UPPER_CASE names, Hevy display names, and short aliases all resolve to built-in Hevy template IDs); exercise metadata enrichment (custom exercises get muscle group, equipment category, and type inferred from the shared metadata registry); weight unit conversion (lbs to kg); duration-based and distance-based sets alongside weight/reps.
-- **Limitations:** strength only (other sports produce a warning but exercises are still pushed as a routine); no HR, power, pace, speed, or cadence targets; no RPE (silently dropped with a warning); no block repeats (each block maps to one exercise, each step to one set); no planned-date support (the routine appears in the library immediately); no delete (removes the Terra API record but the routine stays in the Hevy account); no update (routines are not tied to a date, so "update planned date" has no provider-side effect).
-- **Special behaviors:** if the user's Hevy account hits the custom exercise limit, a 403 is returned per exercise with a warning and the routine is still created with the remaining exercises; muscle group for custom exercises is inferred from the name via the Garmin exercise→category mapping.
+- **Limitations:** strength only (other sports produce a warning but exercises are still pushed as a routine); no HR, power, pace, speed, or cadence targets; no RPE (silently dropped with a warning); no block repeats (each block maps to one exercise, each step to one set); no planned-date support (the routine appears in the library immediately, and routines are not tied to a date so "update planned date" has no provider-side effect); no delete (removes the Terra API record but the routine stays in the Hevy account).
+- **Special behaviors:** updates are supported – when a `provider_workout_id` exists, the existing Hevy routine is updated in place (title, notes, exercises); if the user's Hevy account hits the custom exercise limit, a 403 is returned per exercise with a warning and the routine is still created with the remaining exercises; muscle group and equipment for custom exercises are inferred from the shared exercise metadata registry when the Garmin-normalized name is found there, otherwise they default to "other".
 
 ### Apple
 
-Workouts sync via the Terra iOS SDK: the server queues actions in Redis, the SDK polls, pushes to WorkoutKit, and reports back.
+Workouts sync via the Terra iOS SDK: the server queues the sync action, the SDK polls, pushes to WorkoutKit, and reports back.
 
 - **Strengths:** heart rate targets (absolute BPM, % max, % threshold, zones); power targets (absolute watts, % FTP, zones); pace and speed targets; cadence targets; calorie-based completion; block repeats via IntervalBlock iterations.
 - **Limitations:** single target per step (extras dropped with a warning); single warmup and single cooldown per workout (WorkoutKit supports one of each; extras dropped with a warning); no exercise names (WorkoutKit steps are goals and alerts, so strength is limited to timed interval blocks, not sets/reps); no swim stroke types; no RPE; no multiple targets per step; no retrieve (no server-side WorkoutKit read API).
-- **Special behaviors:** the SDK reports the WorkoutKit UUID via `POST /v2/plannedWorkouts/{id}/synced`, stored as `provider_workout_id`; until the SDK syncs, `provider_workout_id` is `null`; unsupported sports (pilates, cardio, trail running, mountain biking, backcountry skiing) map to the closest Apple activity with a warning.
+- **Special behaviors:** the SDK reports the WorkoutKit UUID via `POST /v2/plannedWorkouts/{id}/synced`, stored as `provider_workout_id`; until the SDK syncs, `provider_workout_id` is `null`; unsupported sports (pilates, cardio, trail running, mountain biking, backcountry skiing) map to the generic "other" activity with a warning.
 
 ## Best Practices
 

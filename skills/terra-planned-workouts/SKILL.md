@@ -50,8 +50,10 @@ curl -X POST "https://access.tryterra.co/api/v2/workouts/123/plan?user_id=USER_I
   -H "Content-Type: application/json" \
   -H "dev-id: YOUR_DEV_ID" -H "x-api-key: YOUR_API_KEY" \
   -d '{ "planned_date": "2026-02-10", "ftp": 280 }'
-# → { "status": "success", "planned_workout_id": 67890, "provider_workout_id": "abc123" }
+# → 201 { "status": "success", "planned_workout_id": "67890", "provider_workout_id": "abc123" }
 ```
+
+All Terra API IDs (`workout_id`, `planned_workout_id`) are serialized as JSON **strings**, because JavaScript clients lose precision on numbers past 2^53. The `plan` call returns HTTP 201 on success.
 
 ## Endpoints
 
@@ -63,7 +65,7 @@ curl -X POST "https://access.tryterra.co/api/v2/workouts/123/plan?user_id=USER_I
 | DELETE | `/workouts/{id}` | Delete a template. **Cascades** – see gotchas |
 | POST | `/workouts/{id}/plan?user_id=X` | Schedule a template to a user, applying athlete params |
 | GET | `/plannedWorkouts/{id}` | Get one planned workout |
-| GET | `/plannedWorkouts?user_id=X` | List a user's scheduled workouts (optional `start_date`, `end_date`) |
+| GET | `/plannedWorkouts?user_id=X` | List a user's scheduled workouts (optional `start_date` and `end_date` filters – **both required together**; one alone is ignored) |
 | PATCH | `/plannedWorkouts/{id}?user_id=X` | Update the scheduled date. **Only `planned_date`, never athlete params** |
 | DELETE | `/plannedWorkouts/{id}?user_id=X` | Unschedule a workout for one user |
 
@@ -94,12 +96,13 @@ Completion condition types: `time` (seconds), `distance` (meters), `reps`, `calo
 
 Target value rules:
 
-- Provide a range with `value_low` and `value_high`, or a single `value`. A single `value` auto-expands to a ±5% range on most providers, **except `rpe`, which stays a point value**.
-- You cannot use both `value` and `value_low`/`value_high` on the same target.
+- **Absolute targets** accept either a single `value` or a `value_low`/`value_high` range. A single `value` auto-expands to a ±5% range on most providers, **except `rpe`, which stays a point value**.
+- **Percentage targets** (`power_percentage`, `heart_rate_max_percentage`, `heart_rate_threshold_percentage`, `speed_percentage`) **reject a single `value` with a 400 at template creation**. Supply `value_low` and/or `value_high`; a lone bound is expanded to a ±5% range.
+- Never send both `value` and `value_low`/`value_high` on the same target.
 - For ranges, `value_low` must be **strictly less than** `value_high`.
 - `pool_length_meters` is swimming-only; setting it elsewhere is invalid.
 - Athlete metrics (`ftp`, `max_heart_rate`, `threshold_heart_rate`, `threshold_speed`, `pool_length_meters`) must be positive.
-- Sanity ranges (mostly warnings, not hard rejections): heart rate 30-250 BPM, power 1-2000 W, speed 0-15 m/s, pace 1-7200 sec/km, cadence 1-300, RPE 1-10, percentage targets 0-200%.
+- Sanity ranges are **hard 400 rejections** at `POST /workouts`, not warnings: heart rate 30-250 BPM, power 1-2000 W, speed 0-15 m/s, pace 1-7200 sec/km, cadence 1-300, RPE 1-10, percentage targets 0-200%.
 
 ## Athlete Parameters
 
@@ -122,7 +125,7 @@ Providers differ in what they can represent. When a provider cannot express a fe
 ```json
 {
   "status": "success",
-  "planned_workout_id": 12345,
+  "planned_workout_id": "12345",
   "provider_workout_id": "garmin_abc123",
   "coercion_warnings": [
     { "path": "workout.sport", "message": "Unsupported sport type: yoga. Defaulting to OTHER." }
@@ -140,7 +143,7 @@ Coercion is a success path, not an error. How you handle warnings is your choice
 - **COROS update = delete + recreate.** COROS has no in-place update, so an "update" deletes the old workout and creates a new one; the `provider_workout_id` changes.
 - **Huawei is create-only, running-only, no scheduling.** No update, retrieve, or delete on the device. It ignores `planned_date` – the workout is available immediately and **always** returns a coercion warning noting this. Duplicate workout names per user are rejected with a 400. Non-running sports appear as a run.
 - **Zepp has a 7-day sync window** (today to today + 6 days). Workouts scheduled outside the window are stored in Terra API's database but not pushed to the device until a later write or delete for that user triggers a window refresh. There is no background auto-sync.
-- **Hevy is strength-only.** RPE targets are silently dropped with a warning, there are no block repeats (one block maps to one exercise, one step to one set), and it has no scheduling, update, or delete on the provider.
+- **Hevy is strength-only.** RPE targets are silently dropped with a warning, there are no block repeats (one block maps to one exercise, one step to one set), and it has no scheduling and no provider-side delete. Updates are supported: when a `provider_workout_id` exists, the existing Hevy routine is updated in place.
 - **Apple syncs via the Terra iOS SDK.** The server queues the action; the SDK pushes to WorkoutKit and reports back via `POST /v2/plannedWorkouts/{id}/synced`. Until then `provider_workout_id` is `null`.
 - **Garmin retrieve only returns workouts created by your own credentials.** Workouts made by other apps or on the device itself are invisible to your GET calls.
 - **Deletes remove from Terra API's database but may leave the workout on the device** for providers without a delete endpoint (e.g. Huawei, Hevy).
