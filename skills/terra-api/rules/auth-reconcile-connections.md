@@ -34,7 +34,10 @@ async function syncTerraConnections(appUserId: string) {
   const seen = new Set<string>();
   for (const u of info.users ?? []) {
     seen.add(u.user_id);
-    await upsertConnection(u.user_id, { status: u.active ? "active" : "revoked", provider: u.provider });
+    await upsertConnection(u.user_id, {
+      status: u.active ? "active" : "revoked",
+      provider: u.provider,
+    });
   }
   await revokeConnectionsNotIn(appUserId, seen); // stale rows Terra API no longer knows
 }

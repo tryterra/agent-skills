@@ -16,9 +16,12 @@ Provider-agnostic does not mean unconditionally present: scores are computed onl
 
 ```typescript
 // Separate code paths and scales per provider
-const stress = provider === "GARMIN" ? garminStress(row)
-             : provider === "WHOOP" ? whoopStrainToStress(row)
-             : null; // unsupported provider, no score
+const stress =
+  provider === "GARMIN"
+    ? garminStress(row)
+    : provider === "WHOOP"
+      ? whoopStrainToStress(row)
+      : null; // unsupported provider, no score
 ```
 
 **Correct (one enrichment path regardless of provider):**

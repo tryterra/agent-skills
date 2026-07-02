@@ -18,16 +18,16 @@ Garmin lookup is flexible. The normalization process is:
 
 Examples of how inputs resolve:
 
-| Input | Normalized | Garmin | Hevy |
-| ----- | ---------- | ------ | ---- |
-| `BARBELL_BENCH_PRESS` | `BARBELL_BENCH_PRESS` | Found | Bench Press (Barbell) |
-| `barbell_bench_press` | `BARBELL_BENCH_PRESS` | Found | Bench Press (Barbell) |
-| `Barbell Bench Press` | `BARBELL_BENCH_PRESS` | Found | Bench Press (Barbell) |
-| `barbell bench press` | `BARBELL_BENCH_PRESS` | Found | Bench Press (Barbell) |
-| `Bench Press (Barbell)` | `BENCH_PRESS_(BARBELL)` | Not found | Bench Press (Barbell) |
-| `Bench Press` | `BENCH_PRESS` | Not found (category names are not looked up) | Bench Press (Barbell) via alias |
-| `Dumbbell Bench Press` | `DUMBBELL_BENCH_PRESS` | Found | Built-in Hevy template |
-| `My Custom Exercise` | `MY_CUSTOM_EXERCISE` | Not found | Custom exercise created |
+| Input                   | Normalized              | Garmin                                       | Hevy                            |
+| ----------------------- | ----------------------- | -------------------------------------------- | ------------------------------- |
+| `BARBELL_BENCH_PRESS`   | `BARBELL_BENCH_PRESS`   | Found                                        | Bench Press (Barbell)           |
+| `barbell_bench_press`   | `BARBELL_BENCH_PRESS`   | Found                                        | Bench Press (Barbell)           |
+| `Barbell Bench Press`   | `BARBELL_BENCH_PRESS`   | Found                                        | Bench Press (Barbell)           |
+| `barbell bench press`   | `BARBELL_BENCH_PRESS`   | Found                                        | Bench Press (Barbell)           |
+| `Bench Press (Barbell)` | `BENCH_PRESS_(BARBELL)` | Not found                                    | Bench Press (Barbell)           |
+| `Bench Press`           | `BENCH_PRESS`           | Not found (category names are not looked up) | Bench Press (Barbell) via alias |
+| `Dumbbell Bench Press`  | `DUMBBELL_BENCH_PRESS`  | Found                                        | Built-in Hevy template          |
+| `My Custom Exercise`    | `MY_CUSTOM_EXERCISE`    | Not found                                    | Custom exercise created         |
 
 ## Hevy Lookup Path
 

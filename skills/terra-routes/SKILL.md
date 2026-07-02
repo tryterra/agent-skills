@@ -68,24 +68,24 @@ curl -X POST "https://access.tryterra.co/api/v2/routes/295581149349019648/push?u
 
 **RouteTemplate**
 
-| Field                     | Required | Notes                                          |
-| ------------------------- | -------- | ---------------------------------------------- |
-| `name`                    | Yes      | Route name shown on device, non-empty          |
-| `sport`                   | Yes      | One of the sport types below                   |
-| `waypoints`               | Yes      | Array of GPS points, minimum 2                 |
-| `description`             | No       | Garmin only                                    |
-| `elevation_gain_meters`   | No       | Total gain in meters                           |
-| `elevation_loss_meters`   | No       | Total loss in meters                           |
-| `speed_meters_per_second` | No       | Average course speed target, Garmin only       |
+| Field                     | Required | Notes                                    |
+| ------------------------- | -------- | ---------------------------------------- |
+| `name`                    | Yes      | Route name shown on device, non-empty    |
+| `sport`                   | Yes      | One of the sport types below             |
+| `waypoints`               | Yes      | Array of GPS points, minimum 2           |
+| `description`             | No       | Garmin only                              |
+| `elevation_gain_meters`   | No       | Total gain in meters                     |
+| `elevation_loss_meters`   | No       | Total loss in meters                     |
+| `speed_meters_per_second` | No       | Average course speed target, Garmin only |
 
 **Waypoint**
 
-| Field              | Required | Notes                                          |
-| ------------------ | -------- | ---------------------------------------------- |
-| `latitude`         | Yes      | Decimal degrees, -90 to 90                     |
-| `longitude`        | Yes      | Decimal degrees, -180 to 180                   |
-| `elevation_meters` | No       | Metres above sea level                         |
-| `course_point`     | No       | POI marker at this waypoint, Garmin only       |
+| Field              | Required | Notes                                    |
+| ------------------ | -------- | ---------------------------------------- |
+| `latitude`         | Yes      | Decimal degrees, -90 to 90               |
+| `longitude`        | Yes      | Decimal degrees, -180 to 180             |
+| `elevation_meters` | No       | Metres above sea level                   |
+| `course_point`     | No       | POI marker at this waypoint, Garmin only |
 
 **course_point** is `{ "type": ..., "name": ... }`. The API schema contains 15 types: `generic`, `summit`, `valley`, `water`, `food`, `danger`, `first_aid`, `sprint`, `segment_start`, `segment_end`, `left`, `right`, `straight`, `left_fork`, `right_fork`. Garmin support is documented for the first 10 (the POI types) only; do not rely on the five turn-direction types unless verified against current provider behavior (see Gotchas).
 
@@ -95,15 +95,15 @@ curl -X POST "https://access.tryterra.co/api/v2/routes/295581149349019648/push?u
 
 ## Provider Matrix
 
-| Capability             | Garmin | COROS       | Wahoo      |
-| ---------------------- | ------ | ----------- | ---------- |
-| Wire format            | JSON   | GPX         | base64 FIT |
-| Push                   | Yes    | Yes         | Yes        |
-| Re-sync                | Yes    | Yes (re-POST new GPX) | Yes |
-| Delete                 | Yes    | No          | Yes        |
-| Course points (POIs)   | Yes    | No          | No         |
-| Speed target           | Yes    | No          | No         |
-| Description            | Yes    | No          | No         |
+| Capability           | Garmin | COROS                 | Wahoo      |
+| -------------------- | ------ | --------------------- | ---------- |
+| Wire format          | JSON   | GPX                   | base64 FIT |
+| Push                 | Yes    | Yes                   | Yes        |
+| Re-sync              | Yes    | Yes (re-POST new GPX) | Yes        |
+| Delete               | Yes    | No                    | Yes        |
+| Course points (POIs) | Yes    | No                    | No         |
+| Speed target         | Yes    | No                    | No         |
+| Description          | Yes    | No                    | No         |
 
 All three support re-sync. COROS has no in-place update, so a re-sync re-POSTs a fresh GPX file while the `provider_route_id` stays stable. Delete works on Garmin and Wahoo only.
 

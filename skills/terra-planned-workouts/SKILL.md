@@ -57,17 +57,17 @@ All Terra API IDs (`workout_id`, `planned_workout_id`) are serialized as JSON **
 
 ## Endpoints
 
-| Method | Endpoint | Description |
-| ------ | -------- | ----------- |
-| POST | `/workouts` | Create a workout template, returns `workout_id` |
-| GET | `/workouts` | List all templates |
-| GET | `/workouts/{id}` | Get template details |
-| DELETE | `/workouts/{id}` | Delete a template. **Cascades** – see gotchas |
-| POST | `/workouts/{id}/plan?user_id=X` | Schedule a template to a user, applying athlete params |
-| GET | `/plannedWorkouts/{id}` | Get one planned workout |
-| GET | `/plannedWorkouts?user_id=X` | List a user's scheduled workouts (optional `start_date` and `end_date` filters – **both required together**; one alone is ignored) |
-| PATCH | `/plannedWorkouts/{id}?user_id=X` | Update the scheduled date. **Only `planned_date`, never athlete params** |
-| DELETE | `/plannedWorkouts/{id}?user_id=X` | Unschedule a workout for one user |
+| Method | Endpoint                          | Description                                                                                                                        |
+| ------ | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| POST   | `/workouts`                       | Create a workout template, returns `workout_id`                                                                                    |
+| GET    | `/workouts`                       | List all templates                                                                                                                 |
+| GET    | `/workouts/{id}`                  | Get template details                                                                                                               |
+| DELETE | `/workouts/{id}`                  | Delete a template. **Cascades** – see gotchas                                                                                      |
+| POST   | `/workouts/{id}/plan?user_id=X`   | Schedule a template to a user, applying athlete params                                                                             |
+| GET    | `/plannedWorkouts/{id}`           | Get one planned workout                                                                                                            |
+| GET    | `/plannedWorkouts?user_id=X`      | List a user's scheduled workouts (optional `start_date` and `end_date` filters – **both required together**; one alone is ignored) |
+| PATCH  | `/plannedWorkouts/{id}?user_id=X` | Update the scheduled date. **Only `planned_date`, never athlete params**                                                           |
+| DELETE | `/plannedWorkouts/{id}?user_id=X` | Unschedule a workout for one user                                                                                                  |
 
 ## Data Model
 
@@ -77,12 +77,12 @@ A template is a hierarchy: `WorkoutTemplate → step_blocks[] → steps[] → in
 
 **step_blocks[]** – a group of steps executed together. The block's `completion_condition` controls repetition:
 
-| Block condition | Behavior |
-| --------------- | -------- |
-| `{"type":"reps","value":4}` | Repeat all steps 4 times |
-| `{"type":"time","value":1200}` | Repeat until 20 minutes total |
-| `{"type":"distance","value":5000}` | Repeat until 5 km total |
-| `{"type":"open"}` or omitted | Execute once (no repeat) |
+| Block condition                    | Behavior                      |
+| ---------------------------------- | ----------------------------- |
+| `{"type":"reps","value":4}`        | Repeat all steps 4 times      |
+| `{"type":"time","value":1200}`     | Repeat until 20 minutes total |
+| `{"type":"distance","value":5000}` | Repeat until 5 km total       |
+| `{"type":"open"}` or omitted       | Execute once (no repeat)      |
 
 **steps[]** – each step needs a `completion_condition` (defaults to `open` if omitted) and an `intensity_type` (required: `warmup`, `active`, `rest`, `recovery`, `cooldown`). Optional: `intensity_targets[]`, `notes`, `strength` (exercise details), `swimming` (stroke and equipment).
 
@@ -108,13 +108,13 @@ Target value rules:
 
 Templates are generic; personalization happens at scheduling time. Supply these in the `plan` request body:
 
-| Parameter | Unit | Used by |
-| --------- | ---- | ------- |
-| `max_heart_rate` | BPM | `heart_rate_max_percentage` targets |
-| `threshold_heart_rate` | BPM | `heart_rate_threshold_percentage` targets |
-| `ftp` | watts | `power_percentage` targets |
-| `threshold_speed` | m/s | `speed_percentage` targets |
-| `pool_length_meters` | meters | swimming (overrides the template value) |
+| Parameter              | Unit   | Used by                                   |
+| ---------------------- | ------ | ----------------------------------------- |
+| `max_heart_rate`       | BPM    | `heart_rate_max_percentage` targets       |
+| `threshold_heart_rate` | BPM    | `heart_rate_threshold_percentage` targets |
+| `ftp`                  | watts  | `power_percentage` targets                |
+| `threshold_speed`      | m/s    | `speed_percentage` targets                |
+| `pool_length_meters`   | meters | swimming (overrides the template value)   |
 
 Conversion is linear: `Absolute = Percentage × param / 100`. A `power_percentage` of 95-100 with `ftp: 280` becomes 266-280 W on the device; the same template scheduled with `ftp: 200` becomes 190-200 W. If a percentage target's required parameter is missing, the Terra API emits a coercion warning and falls back to a provider default rather than failing.
 
@@ -128,7 +128,10 @@ Providers differ in what they can represent. When a provider cannot express a fe
   "planned_workout_id": "12345",
   "provider_workout_id": "garmin_abc123",
   "coercion_warnings": [
-    { "path": "workout.sport", "message": "Unsupported sport type: yoga. Defaulting to OTHER." }
+    {
+      "path": "workout.sport",
+      "message": "Unsupported sport type: yoga. Defaulting to OTHER."
+    }
   ]
 }
 ```

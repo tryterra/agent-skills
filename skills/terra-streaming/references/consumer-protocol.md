@@ -14,10 +14,10 @@ The producer connection (your app to the broker) uses the same endpoint and hand
 
 3. **IDENTIFY within 15 seconds** of connecting, or the server closes with **4000**. Send `Op 3` with a fresh token and the connection `type`:
 
-   | Type | Name | Connection | Token endpoint |
-   |------|------|------------|----------------|
-   | 0 | USER | producer (mobile SDKs sending data) | `POST https://ws.tryterra.co/auth/user?id=<terra_user_id>` |
-   | 1 | DEVELOPER | consumer (your backend receiving data) | `POST https://ws.tryterra.co/auth/developer` |
+   | Type | Name      | Connection                             | Token endpoint                                             |
+   | ---- | --------- | -------------------------------------- | ---------------------------------------------------------- |
+   | 0    | USER      | producer (mobile SDKs sending data)    | `POST https://ws.tryterra.co/auth/user?id=<terra_user_id>` |
+   | 1    | DEVELOPER | consumer (your backend receiving data) | `POST https://ws.tryterra.co/auth/developer`               |
 
    Both token endpoints are served over HTTPS by the websocket host (`ws.tryterra.co`) – they do **not** exist on `api.tryterra.co`. Mint tokens server-side with your Dev ID and API key; see the [REST endpoints reference](https://docs.tryterra.co/reference/streaming-api/api-endpoints.md) for the exact request/response schemas.
 

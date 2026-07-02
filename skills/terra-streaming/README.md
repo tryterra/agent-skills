@@ -28,14 +28,14 @@ cp -r skills/terra-streaming ~/.claude/skills/
 
 ## Contents
 
-| File | What it covers |
-|------|----------------|
-| `SKILL.md` | Architecture, tokens, opcodes, protocol gotchas, developer-choice facts |
-| `references/consumer-protocol.md` | Full handshake, heartbeats, DISPATCH payload, REPLAY, close codes |
-| `references/ios.md` | Native iOS producer (Apple Developer Program required), Apple Watch |
-| `references/android.md` | Native Android producer, ANT+, device-scan variants |
-| `references/react-native.md` | React Native producer, iOS `BLWidget` vs Android scan |
-| `references/flutter.md` | Flutter producer, `startRealtimeToApp` vs `startRealtimeToServer` |
-| `references/wear-os.md` | Wear OS watch paired to an Android phone, exercise streams |
+| File                              | What it covers                                                          |
+| --------------------------------- | ----------------------------------------------------------------------- |
+| `SKILL.md`                        | Architecture, tokens, opcodes, protocol gotchas, developer-choice facts |
+| `references/consumer-protocol.md` | Full handshake, heartbeats, DISPATCH payload, REPLAY, close codes       |
+| `references/ios.md`               | Native iOS producer (Apple Developer Program required), Apple Watch     |
+| `references/android.md`           | Native Android producer, ANT+, device-scan variants                     |
+| `references/react-native.md`      | React Native producer, iOS `BLWidget` vs Android scan                   |
+| `references/flutter.md`           | Flutter producer, `startRealtimeToApp` vs `startRealtimeToServer`       |
+| `references/wear-os.md`           | Wear OS watch paired to an Android phone, exercise streams              |
 
 Full documentation: [docs.tryterra.co/streaming-api](https://docs.tryterra.co/streaming-api).

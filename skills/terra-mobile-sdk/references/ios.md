@@ -11,12 +11,12 @@ Native Swift integration for **Apple Health**. Source: [docs.tryterra.co/health-
    - Background Modes > Background fetch
 3. Add to `info.plist`:
 
-| Key | Value |
-| --- | --- |
-| Privacy - Health Share Usage Description | Description of how Health data is used (min 3 words) |
+| Key                                        | Value                                                |
+| ------------------------------------------ | ---------------------------------------------------- |
+| Privacy - Health Share Usage Description   | Description of how Health data is used (min 3 words) |
 | Privacy - Health Records Usage Description | Description of how Health data is used (min 3 words) |
-| Privacy - Health Update Usage Description | Description of how Health data is used (min 3 words) |
-| Permitted background task scheduler | `co.tryterra.data.post.request` |
+| Privacy - Health Update Usage Description  | Description of how Health data is used (min 3 words) |
+| Permitted background task scheduler        | `co.tryterra.data.post.request`                      |
 
 ## 2. Initialize (once on app start, ideally on every foreground)
 

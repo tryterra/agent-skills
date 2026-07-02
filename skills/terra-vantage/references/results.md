@@ -6,10 +6,10 @@ How to fetch normalized test results and satisfy the mandatory acknowledgment st
 
 Both endpoints use HTTP Basic auth and both require the `test_taker_id` query parameter.
 
-| Method | Path                                              | Description                                        |
-| ------ | ------------------------------------------------- | -------------------------------------------------- |
-| GET    | `/api/v1/results/{order_item_id}`                 | Get a presigned URL to download results in FHIR format |
-| POST   | `/api/v1/results/{order_item_id}/acknowledge`     | Acknowledge that results were retrieved and processed |
+| Method | Path                                          | Description                                            |
+| ------ | --------------------------------------------- | ------------------------------------------------------ |
+| GET    | `/api/v1/results/{order_item_id}`             | Get a presigned URL to download results in FHIR format |
+| POST   | `/api/v1/results/{order_item_id}/acknowledge` | Acknowledge that results were retrieved and processed  |
 
 `order_item_id` is an integer (min 1); `test_taker_id` is an integer (min 1), passed as a query parameter on both calls.
 

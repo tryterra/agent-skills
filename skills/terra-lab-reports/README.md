@@ -18,25 +18,25 @@ cp -r skills/terra-lab-reports ~/.claude/skills/
 
 ## Contents
 
-| Path                             | What it covers                                                        |
-| -------------------------------- | --------------------------------------------------------------------- |
-| `SKILL.md`                       | Product overview, async lifecycle, endpoints, data model, gotchas, rule index |
-| `rules/`                         | Seven best-practice rules with incorrect/correct examples             |
-| `references/api-reference.md`    | Goal-to-endpoint routing with live spec links and key semantics        |
-| `references/webhook-payload.md`  | The event envelope (`type`, `event_id`, `occurred_at`, `upload_id`, `data`), idempotency keys, and the failure event |
-| `references/biomarkers.md`       | Standardization, UCUM mappings, LOINC coverage, common-biomarker tables |
+| Path                            | What it covers                                                                                                       |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `SKILL.md`                      | Product overview, async lifecycle, endpoints, data model, gotchas, rule index                                        |
+| `rules/`                        | Seven best-practice rules with incorrect/correct examples                                                            |
+| `references/api-reference.md`   | Goal-to-endpoint routing with live spec links and key semantics                                                      |
+| `references/webhook-payload.md` | The event envelope (`type`, `event_id`, `occurred_at`, `upload_id`, `data`), idempotency keys, and the failure event |
+| `references/biomarkers.md`      | Standardization, UCUM mappings, LOINC coverage, common-biomarker tables                                              |
 
 ### Rules
 
-| Rule                                  | Impact | Summary                                                        |
-| ------------------------------------- | ------ | -------------------------------------------------------------- |
-| `webhooks-dedupe-event-id`            | HIGH   | Dedupe on `event_id`; a reprocess mints a new one with the same `session_id` |
-| `data-keep-unmatched-biomarkers`      | HIGH   | Never discard a null `biomarker.key`; fall back to `source.name` |
-| `data-filter-ranges-by-demographics`  | HIGH   | Use `applied_range` first, then filter ranges by sex/age/context |
-| `data-store-ids-as-strings`           | MEDIUM | Snowflake session IDs lose precision as JS numbers            |
-| `data-parse-utf8`                     | MEDIUM | Data contains `µ`, `×`, `±`, superscripts – parse as UTF-8    |
-| `api-poll-at-most-every-5s`           | MEDIUM | Webhooks for production; poll no faster than every 5 seconds  |
-| `api-space-bulk-uploads`              | MEDIUM | One file per request, 20 MB cap; space bulk uploads           |
+| Rule                                 | Impact | Summary                                                                      |
+| ------------------------------------ | ------ | ---------------------------------------------------------------------------- |
+| `webhooks-dedupe-event-id`           | HIGH   | Dedupe on `event_id`; a reprocess mints a new one with the same `session_id` |
+| `data-keep-unmatched-biomarkers`     | HIGH   | Never discard a null `biomarker.key`; fall back to `source.name`             |
+| `data-filter-ranges-by-demographics` | HIGH   | Use `applied_range` first, then filter ranges by sex/age/context             |
+| `data-store-ids-as-strings`          | MEDIUM | Snowflake session IDs lose precision as JS numbers                           |
+| `data-parse-utf8`                    | MEDIUM | Data contains `µ`, `×`, `±`, superscripts – parse as UTF-8                   |
+| `api-poll-at-most-every-5s`          | MEDIUM | Webhooks for production; poll no faster than every 5 seconds                 |
+| `api-space-bulk-uploads`             | MEDIUM | One file per request, 20 MB cap; space bulk uploads                          |
 
 ## Highlights
 

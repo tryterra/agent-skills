@@ -33,15 +33,15 @@ cp -r skills/terra-api ~/.claude/skills/
 
 ## Skills
 
-| Skill | Description | Status |
-|---|---|---|
-| [`terra-api`](skills/terra-api) | Best-practice rules: webhooks & signature verification, data idempotency, connection lifecycle, multi-device data, testing | ✅ Ready |
-| [`terra-mobile-sdk`](skills/terra-mobile-sdk) | Mobile SDK: Apple Health, Samsung Health, Health Connect (iOS, Android, React Native, Flutter) | ✅ Ready |
-| [`terra-streaming`](skills/terra-streaming) | Realtime streaming: websockets, Real-Time SDK, live sensor data (iOS, Android, React Native, Flutter, Wear OS) | ✅ Ready |
-| [`terra-planned-workouts`](skills/terra-planned-workouts) | Planned Workouts API: push structured workouts with intervals and targets to wearables | 🧪 Pre-release |
-| [`terra-routes`](skills/terra-routes) | Routes API: push GPS courses with waypoints to Garmin, COROS, Wahoo devices | 🧪 Pre-release |
-| [`terra-lab-reports`](skills/terra-lab-reports) | Lab Reports API: parse lab report PDFs/images into standardized biomarkers (LOINC, UCUM) | 🧪 Pre-release |
-| [`terra-vantage`](skills/terra-vantage) | Vantage API: order blood/DNA test kits, track fulfillment, deliver and acknowledge FHIR results | ✅ Ready |
+| Skill                                                     | Description                                                                                                                | Status         |
+| --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | -------------- |
+| [`terra-api`](skills/terra-api)                           | Best-practice rules: webhooks & signature verification, data idempotency, connection lifecycle, multi-device data, testing | ✅ Ready       |
+| [`terra-mobile-sdk`](skills/terra-mobile-sdk)             | Mobile SDK: Apple Health, Samsung Health, Health Connect (iOS, Android, React Native, Flutter)                             | ✅ Ready       |
+| [`terra-streaming`](skills/terra-streaming)               | Realtime streaming: websockets, Real-Time SDK, live sensor data (iOS, Android, React Native, Flutter, Wear OS)             | ✅ Ready       |
+| [`terra-planned-workouts`](skills/terra-planned-workouts) | Planned Workouts API: push structured workouts with intervals and targets to wearables                                     | 🧪 Pre-release |
+| [`terra-routes`](skills/terra-routes)                     | Routes API: push GPS courses with waypoints to Garmin, COROS, Wahoo devices                                                | 🧪 Pre-release |
+| [`terra-lab-reports`](skills/terra-lab-reports)           | Lab Reports API: parse lab report PDFs/images into standardized biomarkers (LOINC, UCUM)                                   | 🧪 Pre-release |
+| [`terra-vantage`](skills/terra-vantage)                   | Vantage API: order blood/DNA test kits, track fulfillment, deliver and acknowledge FHIR results                            | ✅ Ready       |
 
 ## Terra API docs MCP server
 

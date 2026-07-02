@@ -20,7 +20,7 @@ One data event has a different shape: `athlete` payloads carry a single `athlete
 ```typescript
 async function processEvent(event: TerraWebhookEvent) {
   const rows = event.data.map(extractMetrics); // throws on large_request_processing:
-  await upsertRows(rows);                      // event.data is undefined
+  await upsertRows(rows); // event.data is undefined
 }
 ```
 
@@ -28,12 +28,26 @@ async function processEvent(event: TerraWebhookEvent) {
 
 ```typescript
 const DATA_EVENTS = [
-  "activity", "athlete", "body", "daily", "hormone", "menstruation",
-  "nutrition", "sleep", "planned_workout", "lab_report", "route",
+  "activity",
+  "athlete",
+  "body",
+  "daily",
+  "hormone",
+  "menstruation",
+  "nutrition",
+  "sleep",
+  "planned_workout",
+  "lab_report",
+  "route",
 ];
 const AUTH_EVENTS = [
-  "auth", "auth_cancelled", "deauth", "user_reauth",
-  "access_revoked", "permission_change", "connection_error",
+  "auth",
+  "auth_cancelled",
+  "deauth",
+  "user_reauth",
+  "access_revoked",
+  "permission_change",
+  "connection_error",
 ];
 
 async function processEvent(event: TerraWebhookEvent) {

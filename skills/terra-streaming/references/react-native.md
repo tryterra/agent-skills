@@ -16,20 +16,28 @@ npm install react-native-terra-rt-react
 Data arrives through native event emitters, so set the listeners up once (e.g. in a `useEffect`) before initializing. **Initialize every time the app is opened or foregrounded.**
 
 ```tsx
-import { NativeEventEmitter, NativeModules } from 'react-native';
-import { initTerra } from 'react-native-terra-rt-react';
-import type { Update, Device } from 'react-native-terra-rt-react';
+import { NativeEventEmitter, NativeModules } from "react-native";
+import { initTerra } from "react-native-terra-rt-react";
+import type { Update, Device } from "react-native-terra-rt-react";
 
 const updateEmitter = new NativeEventEmitter(NativeModules.UpdateHandler);
-updateEmitter.addListener('Update', (u: Update) => console.log(`${u.type}: ${u.val}`));
+updateEmitter.addListener("Update", (u: Update) =>
+  console.log(`${u.type}: ${u.val}`),
+);
 
 const deviceEmitter = new NativeEventEmitter(NativeModules.DeviceHandler);
-deviceEmitter.addListener('Device', (d: Device) => console.log(`Found: ${d.name}`));
+deviceEmitter.addListener("Device", (d: Device) =>
+  console.log(`Found: ${d.name}`),
+);
 
-const connectionEmitter = new NativeEventEmitter(NativeModules.ConnectionHandler);
-connectionEmitter.addListener('ConnectionUpdate', (c: boolean) => console.log('WS:', c));
+const connectionEmitter = new NativeEventEmitter(
+  NativeModules.ConnectionHandler,
+);
+connectionEmitter.addListener("ConnectionUpdate", (c: boolean) =>
+  console.log("WS:", c),
+);
 
-const result = await initTerra('YOUR_DEV_ID', 'YOUR_REFERENCE_ID');
+const result = await initTerra("YOUR_DEV_ID", "YOUR_REFERENCE_ID");
 ```
 
 ## Register the phone (initConnection)
@@ -46,7 +54,7 @@ const connResult = await initConnection(token);
 - **iOS:** `startDeviceScan` is **not supported**. Render the `BLWidget` native component (`requireNativeComponent('BLWidget')`) instead; it lists devices and handles connection.
 
 ```tsx
-if (Platform.OS === 'android') {
+if (Platform.OS === "android") {
   await startDeviceScan(Connections.BLE);
 } else {
   // render <BLWidget withCache={false} onSuccessfulConnection={...} /> in your tree
@@ -68,7 +76,11 @@ To the broker as well – fetch a **producer token** from your backend (`POST /a
 ```tsx
 const { userId } = await getUserId();
 const { token } = await fetchStreamingToken(userId); // your backend
-await startRealtime(Connections.BLE, [DataTypes.HEART_RATE, DataTypes.STEPS], token);
+await startRealtime(
+  Connections.BLE,
+  [DataTypes.HEART_RATE, DataTypes.STEPS],
+  token,
+);
 ```
 
 Watch websocket status via the `ConnectionUpdate` emitter. Stop and disconnect:

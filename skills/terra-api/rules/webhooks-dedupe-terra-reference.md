@@ -26,8 +26,8 @@ await db.execute(
 **Correct (unique insert on X-Terra-Trace-Id, terra-reference kept for correlation):**
 
 ```typescript
-const traceId = c.req.header("x-terra-trace-id");   // unique per delivery
-const reference = c.req.header("terra-reference");  // ties back to your request
+const traceId = c.req.header("x-terra-trace-id"); // unique per delivery
+const reference = c.req.header("terra-reference"); // ties back to your request
 const inserted = await db.execute(
   `INSERT INTO terra_webhook_event (trace_id, terra_reference, type, received_at)
    VALUES ($1, $2, $3, now())

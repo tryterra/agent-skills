@@ -26,12 +26,12 @@ cp -r skills/terra-planned-workouts ~/.claude/skills/
 
 ## Contents
 
-| File | Purpose |
-| ---- | ------- |
-| `SKILL.md` | Index, workflow, endpoints, data model, athlete params, coercion, gotchas |
-| `references/provider-compatibility.md` | Operations matrix and per-provider feature support and behaviors |
-| `references/coercion-scenarios.md` | Coercion warning catalog, handling patterns, prevention checklist |
-| `references/exercise-reference.md` | Exercise name normalization and not-found behavior |
+| File                                   | Purpose                                                                   |
+| -------------------------------------- | ------------------------------------------------------------------------- |
+| `SKILL.md`                             | Index, workflow, endpoints, data model, athlete params, coercion, gotchas |
+| `references/provider-compatibility.md` | Operations matrix and per-provider feature support and behaviors          |
+| `references/coercion-scenarios.md`     | Coercion warning catalog, handling patterns, prevention checklist         |
+| `references/exercise-reference.md`     | Exercise name normalization and not-found behavior                        |
 
 The full Garmin exercise catalog and the sport-specific payload examples are not bundled; the skill directs agents to fetch the live `.md` doc pages, which stay current with the API.
 

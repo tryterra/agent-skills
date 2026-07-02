@@ -16,10 +16,10 @@ Terra API expects a 200 response within the webhook timeout: 8 seconds by defaul
 ```typescript
 app.post("/api/terra/webhook", async (c) => {
   const event = await verifyAndParse(c);
-  await archiveRawPayload(event);      // object storage write
-  await upsertHealthData(event);       // database writes for every record
+  await archiveRawPayload(event); // object storage write
+  await upsertHealthData(event); // database writes for every record
   await updateConnectionStatus(event); // more writes
-  return c.text("ok", 200);            // may arrive after the timeout (8s default)
+  return c.text("ok", 200); // may arrive after the timeout (8s default)
 });
 ```
 

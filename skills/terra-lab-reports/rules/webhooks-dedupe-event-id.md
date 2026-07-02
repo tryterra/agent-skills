@@ -37,7 +37,7 @@ async function handleLabReport(envelope) {
       await recordFailure(envelope.data.session_id, envelope.data.error); // {code, message, retriable}
       break;
     default:
-      // open vocabulary: log and acknowledge unknown event types
+    // open vocabulary: log and acknowledge unknown event types
   }
   await markProcessed(envelope.event_id); // a reprocess has a new event_id -> accepted
 }

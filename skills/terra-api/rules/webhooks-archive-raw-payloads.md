@@ -23,7 +23,11 @@ async function processEvent(event: TerraWebhookEvent) {
 **Correct (archive first, link each row):**
 
 ```typescript
-async function processEvent(eventId: string, event: TerraWebhookEvent, raw: string) {
+async function processEvent(
+  eventId: string,
+  event: TerraWebhookEvent,
+  raw: string,
+) {
   const payloadKey = `webhooks/${yyyy}/${mm}/${dd}/${eventId}.json`;
   await bucket.put(payloadKey, raw);
   await upsertDailyRows(event.data, payloadKey); // each row stores payload_key

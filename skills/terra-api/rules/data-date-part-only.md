@@ -14,14 +14,14 @@ Terra API's guidance for daily, body, nutrition, and menstruation data is to "on
 **Incorrect (parse, convert, then extract):**
 
 ```typescript
-const start = new Date(item.metadata.start_time);        // converts to UTC
-const date = start.toISOString().slice(0, 10);           // "2026-04-01" - wrong day
+const start = new Date(item.metadata.start_time); // converts to UTC
+const date = start.toISOString().slice(0, 10); // "2026-04-01" - wrong day
 ```
 
 **Correct (slice the string first):**
 
 ```typescript
-const date = item.metadata.start_time.slice(0, 10);      // "2026-04-02" - as delivered
+const date = item.metadata.start_time.slice(0, 10); // "2026-04-02" - as delivered
 ```
 
 ```sql

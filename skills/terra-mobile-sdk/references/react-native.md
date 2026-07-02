@@ -38,17 +38,17 @@ Same as native Android (see `references/android.md`): minSDK 28, and either the 
 `initTerra` is asynchronous and a prerequisite for all other SDK calls.
 
 ```tsx
-import { initTerra } from 'terra-react';
+import { initTerra } from "terra-react";
 
 const initializeTerra = async () => {
   try {
-    const successMessage = await initTerra('YOUR_DEV_ID', 'YOUR_REFERENCE_ID');
+    const successMessage = await initTerra("YOUR_DEV_ID", "YOUR_REFERENCE_ID");
     if (successMessage.error !== null) {
-      throw new Error('Terra manager failed to initialise');
+      throw new Error("Terra manager failed to initialise");
     }
     // ready for other terra-react methods
   } catch (error) {
-    console.error('Failed to initialize Terra:', error);
+    console.error("Failed to initialize Terra:", error);
   }
 };
 ```
@@ -58,22 +58,22 @@ const initializeTerra = async () => {
 Mint the single-use token from your backend first (`POST https://api.tryterra.co/v2/auth/generateAuthToken` with `dev-id` + `x-api-key`). The token expires in 3 minutes, so mint it just-in-time, not at app start.
 
 ```tsx
-import { Connections, initConnection } from 'terra-react';
+import { Connections, initConnection } from "terra-react";
 
 const initializeConnection = async () => {
   try {
-    const token = 'example_token';           // from your backend
+    const token = "example_token"; // from your backend
     const successMessage = await initConnection(
-      Connections.APPLE_HEALTH,              // or SAMSUNG / HEALTH_CONNECT
+      Connections.APPLE_HEALTH, // or SAMSUNG / HEALTH_CONNECT
       token,
-      true,                                  // schedulerOn
-      [],                                    // customPermissions – empty = all
+      true, // schedulerOn
+      [], // customPermissions – empty = all
     );
     if (successMessage.error !== null) {
-      throw new Error('Error initialising a connection');
+      throw new Error("Error initialising a connection");
     }
   } catch (error) {
-    console.error('Connection failed:', error);
+    console.error("Connection failed:", error);
   }
 };
 ```
@@ -87,7 +87,7 @@ Popup behavior: Apple Health and Health Connect show the popup once (re-triggers
 ## 4. Validate with getUserId on every re-init
 
 ```tsx
-import { getUserId, Connections } from 'terra-react';
+import { getUserId, Connections } from "terra-react";
 // returns the user_id or null; on null, call initConnection again
 ```
 
@@ -118,22 +118,27 @@ Delivery constraints and per-category `customPermissions` requirements are in SK
 `setIgnoredSources` skips named HealthKit source apps (to avoid duplicates when a cloud Terra API connection and that provider's companion app both sync into Apple Health). Call it after every `initTerra`; **not persisted across restarts**. No-op on Android.
 
 ```tsx
-import { setIgnoredSources } from 'terra-react';
-setIgnoredSources(['com.whoop.app', 'com.garmin.connect.mobile']);
+import { setIgnoredSources } from "terra-react";
+setIgnoredSources(["com.whoop.app", "com.garmin.connect.mobile"]);
 ```
 
 ## Historical data and disconnect
 
 ```tsx
-import { Connections, getDaily } from 'terra-react';
+import { Connections, getDaily } from "terra-react";
 
 const requestData = async () => {
   const endDate = new Date();
   const startDate = new Date(endDate);
   startDate.setDate(startDate.getDate() - 1);
-  const dataMessage = await getDaily(Connections.APPLE_HEALTH, startDate, endDate, false);
-  if (dataMessage.error !== null) throw new Error('Failed to get data');
-  if (dataMessage.success) console.log('Daily data:', dataMessage.data);
+  const dataMessage = await getDaily(
+    Connections.APPLE_HEALTH,
+    startDate,
+    endDate,
+    false,
+  );
+  if (dataMessage.error !== null) throw new Error("Failed to get data");
+  if (dataMessage.success) console.log("Daily data:", dataMessage.data);
 };
 ```
 
@@ -144,11 +149,16 @@ Set the final `toWebhook` argument to `false` to receive the payload in the resp
 `postActivity` writes into Apple Health (Health Connect writes are not yet supported). **`device_data` is required** – the write fails without it.
 
 ```tsx
-import { Activity, postActivity, Connections } from 'terra-react';
+import { Activity, postActivity, Connections } from "terra-react";
 
 const activityPayload: Activity = {
-  metadata: { name: 'Morning Run', start_time: '...', end_time: '...', type: 8 /* RUNNING */ },
-  device_data: { name: 'Terra' },   // required
+  metadata: {
+    name: "Morning Run",
+    start_time: "...",
+    end_time: "...",
+    type: 8 /* RUNNING */,
+  },
+  device_data: { name: "Terra" }, // required
 };
 const resp = await postActivity(Connections.APPLE_HEALTH, activityPayload);
 ```

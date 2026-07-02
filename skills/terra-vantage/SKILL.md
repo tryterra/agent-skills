@@ -54,10 +54,10 @@ Placing an order returns an `order_id`, a `recipient_id`, and one `order_item_id
 
 Each order sets a `collection_type` that determines how the sample is taken and which address field applies:
 
-| `collection_type` | Meaning                                    | Address field           |
-| ------------------ | ------------------------------------------ | ----------------------- |
-| `AT_HOME`          | Kit shipped to the recipient; they self-collect and follow the kit instructions | `shipping_address`      |
-| `GO_TO_LAB`        | Mobile phlebotomy; a registered nurse collects the sample at a lab | `requested_lab_address` |
+| `collection_type` | Meaning                                                                         | Address field           |
+| ----------------- | ------------------------------------------------------------------------------- | ----------------------- |
+| `AT_HOME`         | Kit shipped to the recipient; they self-collect and follow the kit instructions | `shipping_address`      |
+| `GO_TO_LAB`       | Mobile phlebotomy; a registered nurse collects the sample at a lab              | `requested_lab_address` |
 
 For `GO_TO_LAB`, the requested lab address is used as a proxy to route the order to the closest available lab; the resolved lab comes back as `confirmed_lab_address`. A variant advertises which methods it supports in `availableCollectionTypes`, so confirm support before offering a method to a user; note this field is an array of integer enum codes (int32), not the `AT_HOME`/`GO_TO_LAB` strings used in the order request, so do not compare it against those strings.
 

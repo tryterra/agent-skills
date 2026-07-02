@@ -30,8 +30,8 @@ Realtime streaming has four parts and you build three connections between them. 
 The three connections you build:
 
 - **Wearable to app**: the user pairs their wearable to your app over Bluetooth/ANT+ using an RT SDK.
-- **App to broker**: your app opens a *producer* connection and forwards the wearable's data.
-- **Broker to backend**: your backend opens a *consumer* connection and receives the data live.
+- **App to broker**: your app opens a _producer_ connection and forwards the wearable's data.
+- **Broker to backend**: your backend opens a _consumer_ connection and receives the data live.
 
 You identify a user by your own `reference_id`. The Terra API mints a Terra user ID for that user (no auth widget needed); that ID is what the token endpoints take and what arrives as the `uid` field on every payload.
 
@@ -39,11 +39,11 @@ You identify a user by your own `reference_id`. The Terra API mints a Terra user
 
 Every websocket connection authenticates with a short-lived token minted by your backend from your Dev ID and API key. **All three tokens are single-use** – the server deletes each one after a successful IDENTIFY, so every reconnect needs a freshly minted token. Never ship your API key into the app; mint tokens server-side and hand them off.
 
-| Token | Endpoint | Used by | IDENTIFY type |
-|-------|----------|---------|---------------|
-| Phone-registration | `POST https://api.tryterra.co/v2/auth/generateAuthToken` | RT SDK `initConnection` (registers the phone as a producer) | n/a (SDK-managed) |
-| Producer | `POST https://ws.tryterra.co/auth/user?id=<terra_user_id>` | producer connection sending data | 0 (USER) |
-| Consumer / developer | `POST https://ws.tryterra.co/auth/developer` | your backend consumer | 1 (DEVELOPER) |
+| Token                | Endpoint                                                   | Used by                                                     | IDENTIFY type     |
+| -------------------- | ---------------------------------------------------------- | ----------------------------------------------------------- | ----------------- |
+| Phone-registration   | `POST https://api.tryterra.co/v2/auth/generateAuthToken`   | RT SDK `initConnection` (registers the phone as a producer) | n/a (SDK-managed) |
+| Producer             | `POST https://ws.tryterra.co/auth/user?id=<terra_user_id>` | producer connection sending data                            | 0 (USER)          |
+| Consumer / developer | `POST https://ws.tryterra.co/auth/developer`               | your backend consumer                                       | 1 (DEVELOPER)     |
 
 Note the hosts: only `generateAuthToken` lives on the main API (`api.tryterra.co`). The producer and consumer token endpoints are served over HTTPS by the websocket host (`ws.tryterra.co`) and do **not** exist on `api.tryterra.co`. For the exact request/response schemas, fetch [the REST endpoints reference](https://docs.tryterra.co/reference/streaming-api/api-endpoints.md) when building the request.
 

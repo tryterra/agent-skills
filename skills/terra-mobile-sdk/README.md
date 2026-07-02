@@ -20,13 +20,13 @@ cp -r skills/terra-mobile-sdk ~/.claude/skills/
 
 ## Contents
 
-| File | What it covers |
-| --- | --- |
-| `SKILL.md` | When the SDK is the right tool, the six-step workflow, permission-popup behavior, background delivery, cross-platform gotchas, decisions left to you |
-| `references/ios.md` | TerraiOS (Swift): capabilities, info.plist, `Terra.instance`, deferred prompting, `setUpBackgroundDelivery`, `setIgnoredSources`, writing data, WorkoutKit planned-workout sync |
-| `references/android.md` | TerraAndroid (Kotlin): Gradle coordinates, minSDK 28, Samsung vs Health Connect setup, ProGuard, manifest intent-filters, deprecated `startIntent` |
-| `references/react-native.md` | terra-react: install, iOS + Android native setup, `initTerra`/`initConnection`, AppDelegate background delivery, `postActivity` (Apple Health only) |
-| `references/flutter.md` | terra_flutter_bridge: `flutter pub`, native setup, `TerraFlutter` API, AppDelegate background delivery, getters |
+| File                         | What it covers                                                                                                                                                                  |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SKILL.md`                   | When the SDK is the right tool, the six-step workflow, permission-popup behavior, background delivery, cross-platform gotchas, decisions left to you                            |
+| `references/ios.md`          | TerraiOS (Swift): capabilities, info.plist, `Terra.instance`, deferred prompting, `setUpBackgroundDelivery`, `setIgnoredSources`, writing data, WorkoutKit planned-workout sync |
+| `references/android.md`      | TerraAndroid (Kotlin): Gradle coordinates, minSDK 28, Samsung vs Health Connect setup, ProGuard, manifest intent-filters, deprecated `startIntent`                              |
+| `references/react-native.md` | terra-react: install, iOS + Android native setup, `initTerra`/`initConnection`, AppDelegate background delivery, `postActivity` (Apple Health only)                             |
+| `references/flutter.md`      | terra_flutter_bridge: `flutter pub`, native setup, `TerraFlutter` API, AppDelegate background delivery, getters                                                                 |
 
 ## Highlights
 

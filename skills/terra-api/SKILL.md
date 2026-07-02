@@ -24,13 +24,13 @@ Reference these guidelines when:
 
 ## Rule Categories by Priority
 
-| Priority | Category | Impact | Prefix |
-|----------|----------|--------|--------|
-| 1 | Webhook Handling | CRITICAL | `webhooks-` |
-| 2 | Data Handling & Idempotency | CRITICAL | `data-` |
-| 3 | Auth & Connection Lifecycle | HIGH | `auth-` |
-| 4 | Multi-Device Data | MEDIUM | `devices-` |
-| 5 | Testing | LOW-MEDIUM | `testing-` |
+| Priority | Category                    | Impact     | Prefix      |
+| -------- | --------------------------- | ---------- | ----------- |
+| 1        | Webhook Handling            | CRITICAL   | `webhooks-` |
+| 2        | Data Handling & Idempotency | CRITICAL   | `data-`     |
+| 3        | Auth & Connection Lifecycle | HIGH       | `auth-`     |
+| 4        | Multi-Device Data           | MEDIUM     | `devices-`  |
+| 5        | Testing                     | LOW-MEDIUM | `testing-`  |
 
 ## Quick Reference
 

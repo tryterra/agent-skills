@@ -20,12 +20,12 @@ cp -r skills/terra-vantage ~/.claude/skills/
 
 ## Contents
 
-| File                            | What it covers                                                                                       |
-| ------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `SKILL.md`                      | Product intro, availability and onboarding, Basic auth, the order-to-results workflow, collection methods, kit activation, the mandatory acknowledgment step, webhooks, sandbox, and gotchas |
-| `references/api-reference.md`   | Goal-to-endpoint routing table with live schema links, plus semantics the schema pages omit |
-| `references/webhooks.md`        | Every webhook event type and payload, the results-status lifecycle, and HMAC-SHA256 signature verification |
-| `references/results.md`         | Fetching FHIR results via presigned URL, the FHIR Bundle structure, and the mandatory acknowledgment requirement |
+| File                          | What it covers                                                                                                                                                                               |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SKILL.md`                    | Product intro, availability and onboarding, Basic auth, the order-to-results workflow, collection methods, kit activation, the mandatory acknowledgment step, webhooks, sandbox, and gotchas |
+| `references/api-reference.md` | Goal-to-endpoint routing table with live schema links, plus semantics the schema pages omit                                                                                                  |
+| `references/webhooks.md`      | Every webhook event type and payload, the results-status lifecycle, and HMAC-SHA256 signature verification                                                                                   |
+| `references/results.md`       | Fetching FHIR results via presigned URL, the FHIR Bundle structure, and the mandatory acknowledgment requirement                                                                             |
 
 ## Highlights
 

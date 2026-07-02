@@ -39,16 +39,16 @@ Other statuses: `retry_scheduled`, `retrying`, `cancelled`, `deleted`, and `fail
 
 Base URL `https://access.tryterra.co/api`. Every request needs both headers: `dev-id` and `x-api-key`.
 
-| Method | Endpoint                                     | Notes                                                             |
-| ------ | -------------------------------------------- | ----------------------------------------------------------------- |
-| POST   | `/v2/lab-reports`                            | Multipart upload; field MUST be `file` (singular), one file/request. `202` returns `upload_id` + `current_status: "processing"` – NO session_id (one upload can fan out to several sessions). |
-| GET    | `/v2/lab-reports`                            | List / filter (by `reference_id`, `upload_id`, `report_date_from`/`_to`, `uploaded_at_from`/`_to`). Capped at 500 – use filters. |
-| GET    | `/v2/lab-reports/{session_id}`               | Session: metadata, `upload_id`, status history, layered `results[]`, `panels[]`. Files, artifacts, and delivery state are NOT embedded – use the sub-resources. |
-| GET    | `/v2/lab-reports/{session_id}/files`         | Input files + thumbnail as presigned URLs, with a response-level `expires_at`. |
-| GET    | `/v2/lab-reports/{session_id}/deliveries`    | Per-destination delivery state (`destination_id`, `status`, `attempt_count`, `last_error`). |
-| GET    | `/v2/lab-reports/{session_id}/artifacts`     | Processing artifacts; privileged keys only – standard keys get `404`. |
-| POST   | `/v2/lab-reports/{session_id}/reprocess`     | Re-run extraction/standardization; async `202`. Emits a NEW event (new `event_id`) with the SAME `session_id`. |
-| DELETE | `/v2/lab-reports/{session_id}`               | Soft-delete; `204`.                                              |
+| Method | Endpoint                                  | Notes                                                                                                                                                                                         |
+| ------ | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| POST   | `/v2/lab-reports`                         | Multipart upload; field MUST be `file` (singular), one file/request. `202` returns `upload_id` + `current_status: "processing"` – NO session_id (one upload can fan out to several sessions). |
+| GET    | `/v2/lab-reports`                         | List / filter (by `reference_id`, `upload_id`, `report_date_from`/`_to`, `uploaded_at_from`/`_to`). Capped at 500 – use filters.                                                              |
+| GET    | `/v2/lab-reports/{session_id}`            | Session: metadata, `upload_id`, status history, layered `results[]`, `panels[]`. Files, artifacts, and delivery state are NOT embedded – use the sub-resources.                               |
+| GET    | `/v2/lab-reports/{session_id}/files`      | Input files + thumbnail as presigned URLs, with a response-level `expires_at`.                                                                                                                |
+| GET    | `/v2/lab-reports/{session_id}/deliveries` | Per-destination delivery state (`destination_id`, `status`, `attempt_count`, `last_error`).                                                                                                   |
+| GET    | `/v2/lab-reports/{session_id}/artifacts`  | Processing artifacts; privileged keys only – standard keys get `404`.                                                                                                                         |
+| POST   | `/v2/lab-reports/{session_id}/reprocess`  | Re-run extraction/standardization; async `202`. Emits a NEW event (new `event_id`) with the SAME `session_id`.                                                                                |
+| DELETE | `/v2/lab-reports/{session_id}`            | Soft-delete; `204`.                                                                                                                                                                           |
 
 [references/api-reference.md](references/api-reference.md) routes each goal to its endpoint and notes the semantics the spec page treats lightly; read it before implementing any endpoint call. For full request/response/error specs (RFC 7807 shapes, status codes), fetch the live page when building the call: [API Reference](https://docs.tryterra.co/lab-reports/api-reference) (append `.md` for markdown).
 

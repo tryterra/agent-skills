@@ -16,7 +16,7 @@ tags: api, upload, rate-limits
 ```javascript
 // field named "report" – rejected with 400
 form.append("report", fileStream);
-await Promise.all(files.map(f => uploadNow(f))); // bursts past rate limits
+await Promise.all(files.map((f) => uploadNow(f))); // bursts past rate limits
 ```
 
 **Correct (field "file", one per request, spaced, with reference_id):**

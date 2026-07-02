@@ -10,10 +10,10 @@ Which providers support create, update, retrieve, and delete of planned workouts
 
 | Operation | Garmin | COROS | Wahoo | Suunto | TrainingPeaks | Huawei | Zepp | Hevy | Apple |
 | --------- | ------ | ----- | ----- | ------ | ------------- | ------ | ---- | ---- | ----- |
-| Create | yes | yes | yes | yes | yes | yes | yes | yes | yes |
-| Update | yes | yes* | yes | yes | yes | no† | yes§ | yes | yes |
-| Retrieve | yes‡ | no | yes | yes | yes | no | no | yes | no |
-| Delete | yes | yes | yes | yes | yes | no | yes | no | yes |
+| Create    | yes    | yes   | yes   | yes    | yes           | yes    | yes  | yes  | yes   |
+| Update    | yes    | yes*  | yes   | yes    | yes           | no†    | yes§ | yes  | yes   |
+| Retrieve  | yes‡   | no    | yes   | yes    | yes           | no     | no   | yes  | no    |
+| Delete    | yes    | yes   | yes   | yes    | yes           | no     | yes  | no   | yes   |
 
 - \* COROS has no in-place update. Updates delete the old workout and create a new one (the `provider_workout_id` changes).
 - † Huawei cannot update workout content on the device. An update changes only the planned date in Terra API's database; the device workout is unchanged.
@@ -28,53 +28,53 @@ Which providers support create, update, retrieve, and delete of planned workouts
 
 ### Sports
 
-| Sport | Garmin | COROS | Wahoo | Suunto | TrainingPeaks | Huawei | Zepp | Hevy | Apple |
-| ----- | ------ | ----- | ----- | ------ | ------------- | ------ | ---- | ---- | ----- |
-| Running | yes | yes | yes | yes | yes | yes | yes | no | yes |
-| Cycling | yes | yes | yes | yes | yes | no | yes | no | yes |
-| Swimming | yes | yes | no | yes | yes | no | yes | no | yes |
-| Strength | yes | yes | no | yes | yes | no | no | yes | yes |
-| Trail Running | yes | yes | yes | yes | no | no | yes | no | no |
-| Mountain Biking | yes | yes‖ | yes | yes | yes | no | no‖ | no | no |
-| Backcountry Skiing | yes | no‖ | no | yes | no | no | no | no | no |
+| Sport              | Garmin | COROS | Wahoo | Suunto | TrainingPeaks | Huawei | Zepp | Hevy | Apple |
+| ------------------ | ------ | ----- | ----- | ------ | ------------- | ------ | ---- | ---- | ----- |
+| Running            | yes    | yes   | yes   | yes    | yes           | yes    | yes  | no   | yes   |
+| Cycling            | yes    | yes   | yes   | yes    | yes           | no     | yes  | no   | yes   |
+| Swimming           | yes    | yes   | no    | yes    | yes           | no     | yes  | no   | yes   |
+| Strength           | yes    | yes   | no    | yes    | yes           | no     | no   | yes  | yes   |
+| Trail Running      | yes    | yes   | yes   | yes    | no            | no     | yes  | no   | no    |
+| Mountain Biking    | yes    | yes‖  | yes   | yes    | yes           | no     | no‖  | no   | no    |
+| Backcountry Skiing | yes    | no‖   | no    | yes    | no            | no     | no   | no   | no    |
 
 - ‖ Silent fallback with **no** coercion warning: COROS pushes Mountain Biking as its generic bike sport and Backcountry Skiing as a run; Zepp pushes Mountain Biking as CYCLING.
 
 ### Targets
 
-| Target | Garmin | COROS | Wahoo | Suunto | TrainingPeaks | Huawei | Zepp | Hevy | Apple |
-| ------ | ------ | ----- | ----- | ------ | ------------- | ------ | ---- | ---- | ----- |
-| Heart Rate (BPM) | yes | yes | yes | yes | yes* | yes | yes | no | yes |
-| HR % of Max | yes | yes | yes | yes* | yes | yes* | yes* | no | yes |
-| HR % of Threshold | yes | yes | yes | yes* | yes | yes* | yes* | no | yes |
-| HR Zones | yes | yes† | yes† | yes† | yes† | yes† | yes† | no | yes |
-| Power (Watts) | yes | yes | yes | yes | yes* | no | yes | no | yes |
-| Power % FTP | yes | yes | yes | yes* | yes | no | yes* | no | yes |
-| Power Zones | yes | yes† | yes† | yes† | yes† | no | yes† | no | yes |
-| Pace | yes | yes | yes | yes | yes* | yes | yes | no | yes |
-| Speed | yes | yes | yes | yes | yes* | yes | yes | no | yes |
-| Cadence | yes | yes | yes | yes | yes | yes | yes¶ | no | yes |
-| RPE | no | no | yes | no | yes | no | no | no | no |
+| Target            | Garmin | COROS | Wahoo | Suunto | TrainingPeaks | Huawei | Zepp | Hevy | Apple |
+| ----------------- | ------ | ----- | ----- | ------ | ------------- | ------ | ---- | ---- | ----- |
+| Heart Rate (BPM)  | yes    | yes   | yes   | yes    | yes*          | yes    | yes  | no   | yes   |
+| HR % of Max       | yes    | yes   | yes   | yes*   | yes           | yes*   | yes* | no   | yes   |
+| HR % of Threshold | yes    | yes   | yes   | yes*   | yes           | yes*   | yes* | no   | yes   |
+| HR Zones          | yes    | yes†  | yes†  | yes†   | yes†          | yes†   | yes† | no   | yes   |
+| Power (Watts)     | yes    | yes   | yes   | yes    | yes*          | no     | yes  | no   | yes   |
+| Power % FTP       | yes    | yes   | yes   | yes*   | yes           | no     | yes* | no   | yes   |
+| Power Zones       | yes    | yes†  | yes†  | yes†   | yes†          | no     | yes† | no   | yes   |
+| Pace              | yes    | yes   | yes   | yes    | yes*          | yes    | yes  | no   | yes   |
+| Speed             | yes    | yes   | yes   | yes    | yes*          | yes    | yes  | no   | yes   |
+| Cadence           | yes    | yes   | yes   | yes    | yes           | yes    | yes¶ | no   | yes   |
+| RPE               | no     | no    | yes   | no     | yes           | no     | no   | no   | no    |
 
 ### Completion Conditions
 
-| Condition | Garmin | COROS | Wahoo | Suunto | TrainingPeaks | Huawei | Zepp | Hevy | Apple |
-| --------- | ------ | ----- | ----- | ------ | ------------- | ------ | ---- | ---- | ----- |
-| Time | yes | yes | yes | yes | yes | yes | yes | yes | yes |
-| Distance | yes | yes | yes | yes | yes | yes | yes | yes | yes |
-| Reps | yes | yes | no | no | yes | yes | yes | yes | no |
-| Calories | yes | no | no | no | no | yes | no | no | yes |
-| HR Trigger | yes | no | no | no | no | no | no | no | no |
-| Power Trigger | yes | no | no | no | no | no | no | no | no |
+| Condition     | Garmin | COROS | Wahoo | Suunto | TrainingPeaks | Huawei | Zepp | Hevy | Apple |
+| ------------- | ------ | ----- | ----- | ------ | ------------- | ------ | ---- | ---- | ----- |
+| Time          | yes    | yes   | yes   | yes    | yes           | yes    | yes  | yes  | yes   |
+| Distance      | yes    | yes   | yes   | yes    | yes           | yes    | yes  | yes  | yes   |
+| Reps          | yes    | yes   | no    | no     | yes           | yes    | yes  | yes  | no    |
+| Calories      | yes    | no    | no    | no     | no            | yes    | no   | no   | yes   |
+| HR Trigger    | yes    | no    | no    | no     | no            | no     | no   | no   | no    |
+| Power Trigger | yes    | no    | no    | no     | no            | no     | no   | no   | no    |
 
 ### Structure
 
-| Feature | Garmin | COROS | Wahoo | Suunto | TrainingPeaks | Huawei | Zepp | Hevy | Apple |
-| ------- | ------ | ----- | ----- | ------ | ------------- | ------ | ---- | ---- | ----- |
-| Multiple targets/step | yes (2, cycling/swimming) | no | yes | yes | no | no | yes (1 + cadence) | no | no |
-| Block repeats | yes | yes | yes | yes | yes | yes | yes | no | yes |
-| Exercise names | yes | yes | no | yes | yes | no | no | yes | no |
-| Swim strokes | yes | yes | no | yes | no | no | no | no | no |
+| Feature               | Garmin                    | COROS | Wahoo | Suunto | TrainingPeaks | Huawei | Zepp              | Hevy | Apple |
+| --------------------- | ------------------------- | ----- | ----- | ------ | ------------- | ------ | ----------------- | ---- | ----- |
+| Multiple targets/step | yes (2, cycling/swimming) | no    | yes   | yes    | no            | no     | yes (1 + cadence) | no   | no    |
+| Block repeats         | yes                       | yes   | yes   | yes    | yes           | yes    | yes               | no   | yes   |
+| Exercise names        | yes                       | yes   | no    | yes    | yes           | no     | no                | yes  | no    |
+| Swim strokes          | yes                       | yes   | no    | yes    | no            | no     | no                | no   | no    |
 
 **Table notes:**
 

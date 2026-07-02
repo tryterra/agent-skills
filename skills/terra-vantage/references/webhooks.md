@@ -20,7 +20,10 @@ The initial payment-processing state is never delivered as a webhook; it appears
 ```json
 {
   "event_type": "order.status_changed",
-  "data": { "order_id": 249956252111773696, "status": "fulfillment.payment_complete" }
+  "data": {
+    "order_id": 249956252111773696,
+    "status": "fulfillment.payment_complete"
+  }
 }
 ```
 
@@ -41,13 +44,13 @@ The initial payment-processing state is never delivered as a webhook; it appears
 
 These carry `order_id`, `order_item_id`, `results_status`, `variant_id`, and a `test_taker` object (`test_taker_id`, `first_name`, `last_name`, `email`, `phone_number`, `country_code`), plus `event_id` and `timestamp`. In the payload examples, `test_taker_id` is a string while `country_code` and `phone_number` are integers.
 
-| `results_status`                     | When it fires                                          | Extra fields |
-| ------------------------------------ | ------------------------------------------------------ | ------------ |
-| `results.kit_activated`              | End user activates the kit (two-step activation suppliers only) | – |
-| `results.sample_processing_in_lab`   | Lab confirms receipt of the sample                     | – |
-| `results.results_ready`              | Lab confirms results are available                     | – |
-| `results.sample_rejected`            | Lab rejects the sample                                 | `failure_cause` (e.g. `"blood contaminated"`) |
-| `results.escalation_raised`          | An escalation is raised on a result set                | `escalation_level` (e.g. `"medium"`; maximum `escalation_level.very_high`) |
+| `results_status`                   | When it fires                                                   | Extra fields                                                               |
+| ---------------------------------- | --------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `results.kit_activated`            | End user activates the kit (two-step activation suppliers only) | –                                                                          |
+| `results.sample_processing_in_lab` | Lab confirms receipt of the sample                              | –                                                                          |
+| `results.results_ready`            | Lab confirms results are available                              | –                                                                          |
+| `results.sample_rejected`          | Lab rejects the sample                                          | `failure_cause` (e.g. `"blood contaminated"`)                              |
+| `results.escalation_raised`        | An escalation is raised on a result set                         | `escalation_level` (e.g. `"medium"`; maximum `escalation_level.very_high`) |
 
 Result-status lifecycle for an item:
 

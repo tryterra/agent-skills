@@ -14,7 +14,15 @@
       "description": "Skills for integrating Terra API – authentication, webhooks, data models, and historical health & fitness data",
       "source": "./",
       "strict": false,
-      "skills": ["./skills/terra-api", "./skills/terra-mobile-sdk", "./skills/terra-streaming", "./skills/terra-planned-workouts", "./skills/terra-routes", "./skills/terra-lab-reports", "./skills/terra-vantage"]
+      "skills": [
+        "./skills/terra-api",
+        "./skills/terra-mobile-sdk",
+        "./skills/terra-streaming",
+        "./skills/terra-planned-workouts",
+        "./skills/terra-routes",
+        "./skills/terra-lab-reports",
+        "./skills/terra-vantage"
+      ]
     }
   ]
 }

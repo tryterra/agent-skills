@@ -16,7 +16,12 @@ Every webhook is an envelope: event metadata wraps the resource under `data`:
   "event_id": "evt_9f1c2d7a8b3e4f56",
   "occurred_at": "2026-03-28T14:23:45Z",
   "upload_id": "upl_4a2b8c1d",
-  "data": { "session_id": "297405620317847552", "results_count": 42, "panels": [], "results": [] }
+  "data": {
+    "session_id": "297405620317847552",
+    "results_count": 42,
+    "panels": [],
+    "results": []
+  }
 }
 ```
 

@@ -4,18 +4,18 @@ Which endpoint does what, and where to fetch the current request/response schema
 
 For exact field lists, validation limits, and full request/response examples, fetch the live `.md` page in the table below (append nothing; the URLs are already markdown). Do not rely on remembered field names: the product is evolving and the live page is authoritative.
 
-| Goal | Endpoint | Current schema (fetch when building the call) |
-| ---- | -------- | --------------------------------------------- |
-| List diagnostic categories | `GET /api/v1/products` | https://docs.tryterra.co/vantage-api-reference/core-resources/products.md |
-| List products in a category | `GET /api/v1/products/{product_type_id}` | same page |
-| List orderable variants | `GET /api/v1/products/{product_id}/variants` | same page |
-| Place an order | `POST /api/v1/orders` | https://docs.tryterra.co/vantage-api-reference/core-resources/orders.md |
-| Get order details | `GET /api/v1/orders/{order_id}` | same page |
-| End-user kit activation (HTML form) | `GET /activate?kit_id=...` | https://docs.tryterra.co/vantage-api-reference/core-resources/activation.md |
-| Submit activation details | `POST /activate/kit` | same page |
-| Update/clear webhook URL | `PATCH /api/v1/clients/webhook-url` | https://docs.tryterra.co/vantage-api-reference/core-resources/clients.md |
-| Fetch results (presigned URL) | `GET /api/v1/results/{order_item_id}` | https://docs.tryterra.co/vantage-api-reference/core-resources/results.md |
-| Acknowledge results | `POST /api/v1/results/{order_item_id}/acknowledge` | same page |
+| Goal                                | Endpoint                                           | Current schema (fetch when building the call)                               |
+| ----------------------------------- | -------------------------------------------------- | --------------------------------------------------------------------------- |
+| List diagnostic categories          | `GET /api/v1/products`                             | https://docs.tryterra.co/vantage-api-reference/core-resources/products.md   |
+| List products in a category         | `GET /api/v1/products/{product_type_id}`           | same page                                                                   |
+| List orderable variants             | `GET /api/v1/products/{product_id}/variants`       | same page                                                                   |
+| Place an order                      | `POST /api/v1/orders`                              | https://docs.tryterra.co/vantage-api-reference/core-resources/orders.md     |
+| Get order details                   | `GET /api/v1/orders/{order_id}`                    | same page                                                                   |
+| End-user kit activation (HTML form) | `GET /activate?kit_id=...`                         | https://docs.tryterra.co/vantage-api-reference/core-resources/activation.md |
+| Submit activation details           | `POST /activate/kit`                               | same page                                                                   |
+| Update/clear webhook URL            | `PATCH /api/v1/clients/webhook-url`                | https://docs.tryterra.co/vantage-api-reference/core-resources/clients.md    |
+| Fetch results (presigned URL)       | `GET /api/v1/results/{order_item_id}`              | https://docs.tryterra.co/vantage-api-reference/core-resources/results.md    |
+| Acknowledge results                 | `POST /api/v1/results/{order_item_id}/acknowledge` | same page                                                                   |
 
 A worked end-to-end ordering example lives at https://docs.tryterra.co/vantage-api-docs/getting-started/ordering-your-first-test.md
 

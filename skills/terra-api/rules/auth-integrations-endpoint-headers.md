@@ -16,17 +16,21 @@ The detailed integrations endpoint (`GET /integrations/detailed`, `detailedfetch
 ```typescript
 // Public endpoint, so this "works" – but returns EVERY provider
 // Terra API supports, not the ones enabled for your account.
-const catalogue = await fetch("https://api.tryterra.co/v2/integrations/detailed")
-  .then((r) => r.json());
+const catalogue = await fetch(
+  "https://api.tryterra.co/v2/integrations/detailed",
+).then((r) => r.json());
 renderConnectScreen(catalogue.providers); // offers providers users can't connect
 ```
 
 **Correct (dev-id header scopes the catalogue to your account):**
 
 ```typescript
-const catalogue = await fetch("https://api.tryterra.co/v2/integrations/detailed", {
-  headers: { "dev-id": env.TERRA_DEV_ID },
-}).then((r) => r.json()); // only providers enabled for your dev account
+const catalogue = await fetch(
+  "https://api.tryterra.co/v2/integrations/detailed",
+  {
+    headers: { "dev-id": env.TERRA_DEV_ID },
+  },
+).then((r) => r.json()); // only providers enabled for your dev account
 ```
 
 Reference: fetch the docs index at [docs.tryterra.co/llms.txt](https://docs.tryterra.co/llms.txt) to locate the current integrations endpoint reference when building the request or parsing the response.

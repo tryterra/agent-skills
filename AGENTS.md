@@ -31,7 +31,7 @@ metadata:
 Rules:
 
 - `name`: 1–64 chars; lowercase letters, digits, and hyphens only; no leading/trailing/consecutive hyphens; **must match the directory name**.
-- `description`: 1–1024 chars. State both *what* the skill does and *when* an agent should use it. Include the keywords a user's request would actually contain – product names, provider names, header names, error strings.
+- `description`: 1–1024 chars. State both _what_ the skill does and _when_ an agent should use it. Include the keywords a user's request would actually contain – product names, provider names, header names, error strings.
   - Good: `Integrate Terra API – the unified health & fitness data API for 500+ wearables. Use when building with Terra API, tryterra.co, or handling terra-signature webhooks.`
   - Bad: `Helps with health data.`
 - In all prose, write "Terra API" – never bare "Terra".
@@ -40,7 +40,7 @@ Rules:
 
 ## Writing the body
 
-- **Skills are not doc copies.** Terra API docs are LLM-friendly (append `.md` to any docs.tryterra.co URL; index at docs.tryterra.co/llms.txt; also exposed as an MCP server at https://docs.tryterra.co/~gitbook/mcp), so an agent can always fetch the current spec. A skill's value is what the agent lacks: distilled workflows, gotchas, incorrect/correct patterns, decision tables, defaults, and cross-product boundaries. The content test: *would the agent get this wrong without this instruction?* If not, cut it.
+- **Skills are not doc copies.** Terra API docs are LLM-friendly (append `.md` to any docs.tryterra.co URL; index at docs.tryterra.co/llms.txt; also exposed as an MCP server at https://docs.tryterra.co/~gitbook/mcp), so an agent can always fetch the current spec. A skill's value is what the agent lacks: distilled workflows, gotchas, incorrect/correct patterns, decision tables, defaults, and cross-product boundaries. The content test: _would the agent get this wrong without this instruction?_ If not, cut it.
 - **Bundle the stable, point to the volatile.** Keep bundled: gotchas (inline in SKILL.md), decision aids (which endpoint/provider for which job, routing tables mapping goal to doc URL), workflows and defaults, deterministic scripts. Point to the live `.md` doc page for: exact request/response shapes, field lists, enum values, and payload examples – bundled copies of those drift the moment the API changes. Make fetch instructions conditional and precise ("fetch <url>.md when building the request body"), and declare the dependency with the `compatibility` frontmatter field (e.g. `Requires network access to docs.tryterra.co for full API schemas`).
 - **Keep SKILL.md under 500 lines** (~5k tokens). Agents load the whole body when the skill activates; every token competes for attention.
 - **Gotchas belong in the body**, not in references – surprising, environment-specific facts (e.g. "HMAC verification must use the raw unaltered request body") are the highest-value content and the agent may not know to load a reference file for them.

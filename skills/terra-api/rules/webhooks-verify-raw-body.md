@@ -17,7 +17,9 @@ Every Terra API webhook carries a signature header in the form `t=<timestamp>,v1
 app.post("/api/terra/webhook", async (req, res) => {
   // body-parser already consumed the stream and parsed JSON
   const body = JSON.stringify(req.body); // NOT the bytes Terra API signed
-  if (!verifyTerraWebhookSignature(req.headers["x-terra-signature"], body, secret)) {
+  if (
+    !verifyTerraWebhookSignature(req.headers["x-terra-signature"], body, secret)
+  ) {
     return res.status(401).end();
   }
   await handleEvent(req.body);
@@ -31,7 +33,10 @@ app.post("/api/terra/webhook", async (req, res) => {
 app.post("/api/terra/webhook", async (c) => {
   const rawBody = await c.req.text(); // raw, unaltered bytes
   const signature = c.req.header("x-terra-signature"); // header lookups are case-insensitive
-  if (!signature || !verifyTerraWebhookSignature(signature, rawBody, env.TERRA_SIGNING_SECRET)) {
+  if (
+    !signature ||
+    !verifyTerraWebhookSignature(signature, rawBody, env.TERRA_SIGNING_SECRET)
+  ) {
     return c.text("invalid signature", 401);
   }
   const event = JSON.parse(rawBody); // parse only after the signature checks out
