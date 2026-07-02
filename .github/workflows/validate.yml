@@ -3,9 +3,9 @@ name: Validate skills
 on:
   push:
     branches: [main]
-    paths: ["skills/**"]
+    paths: ["skills/**", ".github/workflows/validate.yml"]
   pull_request:
-    paths: ["skills/**"]
+    paths: ["skills/**", ".github/workflows/validate.yml"]
 
 jobs:
   validate:
@@ -21,7 +21,10 @@ jobs:
         run: pip install skills-ref
 
       - name: Validate all skills
-        run: agentskills validate skills/*
+        run: |
+          for skill in skills/*/; do
+            agentskills validate "$skill"
+          done
 
       - name: Check SKILL.md line counts
         run: |
