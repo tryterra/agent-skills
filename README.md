@@ -35,7 +35,7 @@ cp -r skills/terra-api ~/.claude/skills/
 
 | Skill | Description | Status |
 |---|---|---|
-| [`terra-api`](skills/terra-api) | 25 best-practice rules: webhooks & signature verification, data idempotency, connection lifecycle, multi-device merging, SDK types, testing | ✅ Ready |
+| [`terra-api`](skills/terra-api) | 21 best-practice rules: webhooks & signature verification, data idempotency, connection lifecycle, multi-device data, testing | ✅ Ready |
 | `terra-mobile` | Mobile SDK: Apple Health, Samsung Health, Health Connect (iOS, Android, React Native, Flutter) | Planned |
 | `terra-streaming` | Realtime streaming: websockets, Real-Time SDK, live sensor data | Planned |
 

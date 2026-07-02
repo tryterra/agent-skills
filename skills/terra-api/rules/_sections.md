@@ -20,10 +20,10 @@ The section ID (in parentheses) is the filename prefix used to group rules.
 **Impact:** HIGH
 **Description:** Connections change state through six event types and can drift when webhooks are missed. Correct lifecycle handling and reconciliation keep your database matching Terra API's actual state.
 
-## 4. Multi-Device Merging (devices)
+## 4. Multi-Device Data (devices)
 
 **Impact:** MEDIUM
-**Description:** Users connect multiple sources. Priority rankings, per-metric fill-in, and overlap dedup produce one coherent view with the best sensor winning per category.
+**Description:** Users connect multiple sources, and the same day or session arrives once per device. Know the data reality; the selection/merge policy itself is your product's decision.
 
 ## 5. Testing (testing)
 

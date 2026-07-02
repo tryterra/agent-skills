@@ -9,7 +9,7 @@ metadata:
 
 # Terra API Best Practices
 
-Production-tested guidelines for building with Terra API. Contains 24 rules across 5 categories, prioritized by impact, distilled from a real multi-device integration.
+Production-tested guidelines for building with Terra API. Contains 21 rules across 5 categories, prioritized by impact, distilled from a real multi-device integration.
 
 ## When to Apply
 
@@ -18,7 +18,7 @@ Reference these guidelines when:
 - Implementing or reviewing a Terra API webhook endpoint
 - Designing storage for wearable health data (activity, sleep, daily, body, nutrition, menstruation, hormone, athlete)
 - Building device connection flows (auth, deauth, reauth, scopes)
-- Merging data from multiple connected devices
+- Handling data from users with multiple connected devices
 - Writing tests for a Terra API integration
 
 ## Rule Categories by Priority
@@ -28,7 +28,7 @@ Reference these guidelines when:
 | 1 | Webhook Handling | CRITICAL | `webhooks-` |
 | 2 | Data Handling & Idempotency | CRITICAL | `data-` |
 | 3 | Auth & Connection Lifecycle | HIGH | `auth-` |
-| 4 | Multi-Device Merging | MEDIUM | `devices-` |
+| 4 | Multi-Device Data | MEDIUM | `devices-` |
 | 5 | Testing | LOW-MEDIUM | `testing-` |
 
 ## Quick Reference
@@ -59,13 +59,10 @@ Reference these guidelines when:
 - `auth-reconcile-connections` - Reconcile against Terra API state on page mount, auth redirect, and a schedule
 - `auth-integrations-endpoint-headers` - Fetch the integrations catalogue with dev-id only, both headers return empty
 
-### 4. Multi-Device Merging (MEDIUM)
+### 4. Multi-Device Data (MEDIUM)
 
-- `devices-provider-priority` - Rank providers per data category with a default fallback list
-- `devices-priority-fill-in` - Take the first non-null value per metric walking down the priority list
-- `devices-dedupe-overlap` - Same type + >80% time overlap is the same session, keep the higher priority record
+- `devices-expect-cross-device-duplicates` - The same session arrives once per device with different summary_ids; your app owns the merge policy
 - `devices-enrichment-provider-agnostic` - Enrichment scores are computed by Terra API for all providers and are comparable
-- `devices-source-attribution` - Carry a provider field on every merged value, label sources when 2+ connections
 
 ### 5. Testing (LOW-MEDIUM)
 

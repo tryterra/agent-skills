@@ -2,7 +2,7 @@
 
 Best practices for integrating [Terra API](https://tryterra.co) – the unified health & fitness data API for 500+ wearables and health data sources.
 
-24 rules across 5 categories, distilled from a production multi-device integration. Each rule is a standalone file with incorrect/correct code examples, prioritized by impact so agents (and humans) fix the critical things first.
+21 rules across 5 categories, distilled from a production multi-device integration. Each rule is a standalone file with incorrect/correct code examples, prioritized by impact so agents (and humans) fix the critical things first.
 
 ## Installation
 
@@ -23,7 +23,7 @@ cp -r skills/terra-api ~/.claude/skills/
 | 1 | Webhook Handling | CRITICAL | 5 |
 | 2 | Data Handling & Idempotency | CRITICAL | 6 |
 | 3 | Auth & Connection Lifecycle | HIGH | 6 |
-| 4 | Multi-Device Merging | MEDIUM | 5 |
+| 4 | Multi-Device Data | MEDIUM | 2 |
 | 5 | Testing | LOW-MEDIUM | 2 |
 
 ## Highlights
