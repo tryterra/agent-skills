@@ -15,7 +15,7 @@ npx skills add tryterra/agent-skills
 Or a single skill:
 
 ```bash
-npx skills add tryterra/agent-skills --skill terra-api
+npx skills add tryterra/agent-skills --skill terra-unified-api
 ```
 
 **Claude Code plugin** (alternative):
@@ -28,14 +28,14 @@ npx skills add tryterra/agent-skills --skill terra-api
 **Manual** (Claude Code):
 
 ```bash
-cp -r skills/terra-api ~/.claude/skills/
+cp -r skills/terra-unified-api ~/.claude/skills/
 ```
 
 ## Skills
 
 | Skill                                                     | Description                                                                                                                | Status         |
 | --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | -------------- |
-| [`terra-api`](skills/terra-api)                           | Best-practice rules: webhooks & signature verification, data idempotency, connection lifecycle, multi-device data, testing | ✅ Ready       |
+| [`terra-unified-api`](skills/terra-unified-api)           | Best-practice rules: webhooks & signature verification, data idempotency, connection lifecycle, multi-device data, testing | ✅ Ready       |
 | [`terra-mobile-sdk`](skills/terra-mobile-sdk)             | Mobile SDK: Apple Health, Samsung Health, Health Connect (iOS, Android, React Native, Flutter)                             | ✅ Ready       |
 | [`terra-streaming`](skills/terra-streaming)               | Realtime streaming: websockets, Real-Time SDK, live sensor data (iOS, Android, React Native, Flutter, Wear OS)             | ✅ Ready       |
 | [`terra-planned-workouts`](skills/terra-planned-workouts) | Planned Workouts API: push structured workouts with intervals and targets to wearables                                     | 🧪 Pre-release |

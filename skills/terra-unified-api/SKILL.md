@@ -1,5 +1,5 @@
 ---
-name: terra-api
+name: terra-unified-api
 description: Best practices for integrating Terra API – the unified health & fitness data API for 500+ wearables (Garmin, Fitbit, Oura, Whoop, Apple Health, Strava, Dexcom). Use when building with Terra API or tryterra.co, handling terra-signature (X-Terra-Signature) webhooks, storing wearable health data (activity, sleep, daily, body, nutrition, menstruation, hormone), managing device connections, or merging data across multiple devices.
 license: MIT
 compatibility: Requires network access to docs.tryterra.co for full API schemas

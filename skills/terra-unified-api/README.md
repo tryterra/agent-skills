@@ -1,4 +1,4 @@
-# terra-api
+# terra-unified-api
 
 Best practices for integrating [Terra API](https://tryterra.co) – the unified health & fitness data API for 500+ wearables and health data sources.
 
@@ -7,13 +7,13 @@ Rules across 5 categories, distilled from a production multi-device integration.
 ## Installation
 
 ```bash
-npx skills add tryterra/agent-skills --skill terra-api
+npx skills add tryterra/agent-skills --skill terra-unified-api
 ```
 
 Or manually for Claude Code:
 
 ```bash
-cp -r skills/terra-api ~/.claude/skills/
+cp -r skills/terra-unified-api ~/.claude/skills/
 ```
 
 ## Categories
@@ -38,7 +38,7 @@ cp -r skills/terra-api ~/.claude/skills/
 ## Structure
 
 ```
-terra-api/
+terra-unified-api/
 ├── SKILL.md        # index: categories, priorities, quick reference
 └── rules/
     ├── _sections.md

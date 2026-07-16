@@ -15,7 +15,7 @@
       "source": "./",
       "strict": false,
       "skills": [
-        "./skills/terra-api",
+        "./skills/terra-unified-api",
         "./skills/terra-mobile-sdk",
         "./skills/terra-streaming",
         "./skills/terra-planned-workouts",

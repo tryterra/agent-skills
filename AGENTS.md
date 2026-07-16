@@ -50,7 +50,7 @@ Rules:
   - Good: `Read references/webhooks.md when implementing the webhook endpoint or debugging signature failures.`
   - Bad: `See references/ for more details.`
 - Keep references one level deep from SKILL.md – no chains of files referencing files.
-- Rules-based skills (like `terra-api`) use `rules/` instead of `references/`: SKILL.md is an index with a category priority table and a one-liner per rule; each rule lives in `rules/<prefix>-<name>.md` with frontmatter (title, impact, tags) and incorrect/correct code examples. `rules/_sections.md` defines the categories; copy `rules/_template.md` for new rules.
+- Rules-based skills (like `terra-unified-api`) use `rules/` instead of `references/`: SKILL.md is an index with a category priority table and a one-liner per rule; each rule lives in `rules/<prefix>-<name>.md` with frontmatter (title, impact, tags) and incorrect/correct code examples. `rules/_sections.md` defines the categories; copy `rules/_template.md` for new rules.
 - Scripts in `scripts/` should be self-contained, print status to stderr and machine-readable output to stdout, and fail with helpful error messages.
 - Source content from the live docs: append `.md` to any `docs.tryterra.co` URL for markdown, or start from the index at `docs.tryterra.co/llms.txt`. Cite the source URL at the top of each reference file so it can be refreshed later.
 
