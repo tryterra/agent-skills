@@ -42,6 +42,7 @@ cp -r skills/terra-unified-api ~/.claude/skills/
 | [`terra-routes`](skills/terra-routes)                     | Routes API: push GPS courses with waypoints to Garmin, COROS, Wahoo devices                                                | 🧪 Pre-release |
 | [`terra-lab-reports`](skills/terra-lab-reports)           | Lab Reports API: parse lab report PDFs/images into standardized biomarkers (LOINC, UCUM)                                   | 🧪 Pre-release |
 | [`terra-vantage`](skills/terra-vantage)                   | Vantage API: order blood/DNA test kits, track fulfillment, deliver and acknowledge FHIR results                            | ✅ Ready       |
+| [`terra-models`](skills/terra-models)                     | Models: run health models (Sleep Window, Health Terrain) over a connected user's data for ready-to-use wellness insights   | ✅ Ready       |
 
 ## Terra API docs MCP server
 
