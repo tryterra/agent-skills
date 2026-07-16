@@ -27,4 +27,4 @@ cp -r skills/terra-models ~/.claude/skills/
 | ---------- | -------------------------------------------------------------------------- |
 | `SKILL.md` | The models, the run workflow, result-handling gotchas, pricing, boundaries |
 
-Full API documentation: [docs.tryterra.co/models](https://docs.tryterra.co/models) (append `.md` to any docs URL for markdown).
+Full API documentation: [docs.tryterra.co/models/models](https://docs.tryterra.co/models/models) (append `.md` to any docs URL for markdown).
