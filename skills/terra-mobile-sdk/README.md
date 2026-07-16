@@ -2,7 +2,7 @@
 
 Integration guidance for the [Terra API](https://tryterra.co) mobile SDK – the on-device path for health sources that have **no web API**: Apple Health (HealthKit), Samsung Health, and Health Connect.
 
-Every other provider (Garmin, Fitbit, Oura, Whoop, Strava, Dexcom, and 500+ more) connects through the [Health & Fitness API](https://docs.tryterra.co/unified-api), covered by the `terra-unified-api` skill. This skill is for the three sources you can only reach on-device.
+Every other provider (Garmin, Fitbit, Oura, Whoop, Strava, Dexcom, and 500+ more) connects through the [Unified API](https://docs.tryterra.co/unified-api), covered by the `terra-unified-api` skill. This skill is for the three sources you can only reach on-device.
 
 `SKILL.md` carries the six-step workflow and every cross-platform gotcha inline; the `references/` files carry per-platform setup detail and code.
 

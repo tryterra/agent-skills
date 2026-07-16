@@ -14,7 +14,7 @@ Guidelines for building on the Terra API Streaming (Real-Time) API, which delive
 
 ## Streaming vs Health & Fitness
 
-The Streaming API is for realtime, sub-second-to-per-second signals only: heart rate, steps, distance covered, acceleration, ECG, HRV, calories, location, and gyroscope. Anything with a longer span – workouts, sleep, daily totals, body, nutrition – belongs to the [Health & Fitness API](https://docs.tryterra.co/unified-api/getting-started), not here. If you need a completed workout summary rather than a live feed, you are on the wrong API.
+The Streaming API is for realtime, sub-second-to-per-second signals only: heart rate, steps, distance covered, acceleration, ECG, HRV, calories, location, and gyroscope. Anything with a longer span – workouts, sleep, daily totals, body, nutrition – belongs to the [Unified API](https://docs.tryterra.co/unified-api/getting-started), not here. If you need a completed workout summary rather than a live feed, you are on the wrong API.
 
 Devices only appear on the stream when they actually broadcast over BLE, ANT+, or a supported custom Bluetooth protocol (heart-rate straps like the Polar H10 or Wahoo TICKR, and some watches). No broadcast means no stream.
 

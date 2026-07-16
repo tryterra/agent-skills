@@ -20,7 +20,7 @@ The mobile SDK exists for one reason: to reach health sources that have **no web
 - **Samsung Health** (Android)
 - **Health Connect** (Android)
 
-Every other provider (Garmin, Fitbit, Oura, Whoop, Strava, Dexcom, and 500+ more) connects through the [Health & Fitness API](https://docs.tryterra.co/unified-api), not the SDK. Google Fit can be read through the SDK via Health Connect, but the web API is the preferred, more reliable route for it. If a provider you need has a web API, use the web API.
+Every other provider (Garmin, Fitbit, Oura, Whoop, Strava, Dexcom, and 500+ more) connects through the [Unified API](https://docs.tryterra.co/unified-api), not the SDK. Google Fit can be read through the SDK via Health Connect, but the web API is the preferred, more reliable route for it. If a provider you need has a web API, use the web API.
 
 Data captured by the SDK flows to the same Data Destination (webhook) as web API data, and connections are managed with the same auth model. If you are building the receiving webhook or storing the health data, that is the `terra-unified-api` skill's territory; this skill covers the on-device connection.
 

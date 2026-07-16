@@ -76,4 +76,4 @@ Read the individual rule file in `rules/` when working on that area, e.g. read `
 
 ## Related Terra API Surfaces
 
-This skill covers the core Health & Fitness API integration. Terra API also offers mobile SDKs for on-device sources (Apple Health, Samsung Health, Health Connect), a realtime Streaming API over websockets, an MCP server exposing health-data query tools to AI agents, planned workouts and routes (write-to-device products), and lab reports. See [docs.tryterra.co](https://docs.tryterra.co) for those surfaces.
+This skill covers the core Unified API integration. Terra API also offers mobile SDKs for on-device sources (Apple Health, Samsung Health, Health Connect), a realtime Streaming API over websockets, an MCP server exposing health-data query tools to AI agents, planned workouts and routes (write-to-device products), and lab reports. See [docs.tryterra.co](https://docs.tryterra.co) for those surfaces.
