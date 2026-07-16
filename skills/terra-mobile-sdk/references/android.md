@@ -1,6 +1,6 @@
 # Android (Kotlin) – TerraAndroid
 
-Native Kotlin integration for **Samsung Health** and **Health Connect**. Source: [docs.tryterra.co/health-and-fitness-api/mobile-only-sources/android-kotlin](https://docs.tryterra.co/health-and-fitness-api/mobile-only-sources/android-kotlin).
+Native Kotlin integration for **Samsung Health** and **Health Connect**. Source: [docs.tryterra.co/unified-api/mobile-only-sources/android-kotlin](https://docs.tryterra.co/unified-api/mobile-only-sources/android-kotlin).
 
 ## 1. Install
 
@@ -106,7 +106,7 @@ fun initialiseUserConnection() {
 - `connection`: `Connections.SAMSUNG` (Samsung Health) or `Connections.HEALTH_CONNECT`.
 - `schedulerOn = true`: lets Terra API make scheduled requests while the app is in the foreground.
 - `startIntent`: **deprecated, always pass `null`**.
-- `customPermissions`: maps to Health Connect / Samsung data types – see [Permissions mapping](https://docs.tryterra.co/health-and-fitness-api/mobile-only-sources).
+- `customPermissions`: maps to Health Connect / Samsung data types – see [Permissions mapping](https://docs.tryterra.co/unified-api/mobile-only-sources).
 
 **Popup fires once.** Health Connect forbids the permission popup from appearing more than once per permission, so a second `initConnection` does nothing. It re-appears only if you expand `customPermissions`, the app is reinstalled, or you request a permission Google has not approved for release.
 
@@ -146,4 +146,4 @@ fun requestData() {
 }
 ```
 
-Disconnect via the same backend endpoint as web integrations (`DELETE /auth/deauthenticateUser`). There is no iOS-style background-delivery setup on Android – foreground scheduled requests are controlled by `schedulerOn`. See the SDK reference on [docs.tryterra.co](https://docs.tryterra.co/health-and-fitness-api/mobile-only-sources/android-kotlin) for the full function list.
+Disconnect via the same backend endpoint as web integrations (`DELETE /auth/deauthenticateUser`). There is no iOS-style background-delivery setup on Android – foreground scheduled requests are controlled by `schedulerOn`. See the SDK reference on [docs.tryterra.co](https://docs.tryterra.co/unified-api/mobile-only-sources/android-kotlin) for the full function list.

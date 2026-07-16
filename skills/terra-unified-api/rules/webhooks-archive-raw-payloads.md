@@ -34,4 +34,4 @@ async function processEvent(
 }
 ```
 
-Reference: [Webhooks](https://docs.tryterra.co/health-and-fitness-api/integration-setup/setting-up-data-destinations/webhooks)
+Reference: [Webhooks](https://docs.tryterra.co/unified-api/integration-setup/setting-up-data-destinations/webhooks)

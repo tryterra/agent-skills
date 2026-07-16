@@ -20,7 +20,7 @@ The mobile SDK exists for one reason: to reach health sources that have **no web
 - **Samsung Health** (Android)
 - **Health Connect** (Android)
 
-Every other provider (Garmin, Fitbit, Oura, Whoop, Strava, Dexcom, and 500+ more) connects through the [Health & Fitness API](https://docs.tryterra.co/health-and-fitness-api), not the SDK. Google Fit can be read through the SDK via Health Connect, but the web API is the preferred, more reliable route for it. If a provider you need has a web API, use the web API.
+Every other provider (Garmin, Fitbit, Oura, Whoop, Strava, Dexcom, and 500+ more) connects through the [Health & Fitness API](https://docs.tryterra.co/unified-api), not the SDK. Google Fit can be read through the SDK via Health Connect, but the web API is the preferred, more reliable route for it. If a provider you need has a web API, use the web API.
 
 Data captured by the SDK flows to the same Data Destination (webhook) as web API data, and connections are managed with the same auth model. If you are building the receiving webhook or storing the health data, that is the `terra-unified-api` skill's territory; this skill covers the on-device connection.
 
@@ -35,7 +35,7 @@ The shape is identical on every platform. Platform differences are in the `refer
 5. **Validate with `getUserId` on every re-initialization.** `getUserId` is synchronous and returns the `user_id` if the connection is live or `nil`/`null` if not. Call it right after every init; on `nil`, call `initConnection` again to reconnect. Re-connecting an already-connected user triggers no popup and does not interrupt the user.
 6. **iOS only: enable background delivery.** Call `Terra.setUpBackgroundDelivery()` in your `AppDelegate`'s `didFinishLaunchingWithOptions`. Without it, Apple Health data is not pushed automatically.
 
-**Deauthenticating** a user uses the same endpoint as web integrations: `DELETE /auth/deauthenticateUser`, called from your backend. See [the web API auth reference](https://docs.tryterra.co/health-and-fitness-api).
+**Deauthenticating** a user uses the same endpoint as web integrations: `DELETE /auth/deauthenticateUser`, called from your backend. See [the web API auth reference](https://docs.tryterra.co/unified-api).
 
 ## Permission popup behavior (read before shipping)
 
@@ -83,4 +83,4 @@ Read the file for the platform you are building on:
 - **`references/react-native.md`** – read when integrating **terra-react**: install, iOS + Android native setup, `initTerra`/`initConnection`, the AppDelegate background-delivery edit, `postActivity` (Apple Health only).
 - **`references/flutter.md`** – read when integrating **terra_flutter_bridge**: `flutter pub`, native setup, `TerraFlutter` API, AppDelegate background delivery, getters.
 
-Full docs: [docs.tryterra.co](https://docs.tryterra.co) (append `.md` to any docs URL for a markdown version). Where a signature or enum is not shown here, see the SDK reference linked from [docs.tryterra.co](https://docs.tryterra.co/health-and-fitness-api/mobile-only-sources). If the terra-docs MCP server (`https://docs.tryterra.co/~gitbook/mcp`) is connected, use its tools to search and fetch the docs instead.
+Full docs: [docs.tryterra.co](https://docs.tryterra.co) (append `.md` to any docs URL for a markdown version). Where a signature or enum is not shown here, see the SDK reference linked from [docs.tryterra.co](https://docs.tryterra.co/unified-api/mobile-only-sources). If the terra-docs MCP server (`https://docs.tryterra.co/~gitbook/mcp`) is connected, use its tools to search and fetch the docs instead.

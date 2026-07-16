@@ -33,4 +33,4 @@ const res = await client.authentication.authenticateuser({
 // every webhook for this connection now carries reference_id = appUser.id
 ```
 
-Reference: [Getting started](https://docs.tryterra.co/health-and-fitness-api/getting-started)
+Reference: [Getting started](https://docs.tryterra.co/unified-api/getting-started)
