@@ -21,7 +21,8 @@
         "./skills/terra-planned-workouts",
         "./skills/terra-routes",
         "./skills/terra-lab-reports",
-        "./skills/terra-vantage"
+        "./skills/terra-vantage",
+        "./skills/terra-models"
       ]
     }
   ]
