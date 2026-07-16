@@ -18,7 +18,7 @@ cp -r skills/terra-streaming ~/.claude/skills/
 
 ## Highlights
 
-- Streaming carries per-second signals only (heart rate, steps, distance, acceleration, ECG, HRV, calories, location, gyroscope); workouts, sleep, and daily totals belong to the Health & Fitness API
+- Streaming carries per-second signals only (heart rate, steps, distance, acceleration, ECG, HRV, calories, location, gyroscope); workouts, sleep, and daily totals belong to the Unified API
 - One websocket endpoint for both roles; the IDENTIFY `type` (0 producer, 1 consumer) sets the role
 - **Every token is single-use** – the server deletes it after IDENTIFY, so each reconnect needs a fresh one
 - `seq` is monotonic but **sparse** – gaps are normal, not lost data

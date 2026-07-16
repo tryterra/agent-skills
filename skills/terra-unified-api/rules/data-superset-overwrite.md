@@ -31,4 +31,4 @@ ON CONFLICT (terra_connection_id, date) DO UPDATE SET
 WHERE excluded.ordering_ts >= terra_daily.ordering_ts; -- reordered retries never regress data
 ```
 
-Reference: [Receiving data updates](https://docs.tryterra.co/health-and-fitness-api/managing-user-health-data/receiving-data-updates)
+Reference: [Receiving data updates](https://docs.tryterra.co/unified-api/managing-user-health-data/receiving-data-updates)

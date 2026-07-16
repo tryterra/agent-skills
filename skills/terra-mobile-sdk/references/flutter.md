@@ -1,6 +1,6 @@
 # Flutter – terra_flutter_bridge
 
-Cross-platform integration for **Apple Health** (iOS), **Samsung Health**, and **Health Connect** (Android). Source: [docs.tryterra.co/health-and-fitness-api/mobile-only-sources/flutter](https://docs.tryterra.co/health-and-fitness-api/mobile-only-sources/flutter).
+Cross-platform integration for **Apple Health** (iOS), **Samsung Health**, and **Health Connect** (Android). Source: [docs.tryterra.co/unified-api/mobile-only-sources/flutter](https://docs.tryterra.co/unified-api/mobile-only-sources/flutter).
 
 ## 1. Install and native setup
 
@@ -78,7 +78,7 @@ Future<void> _initialiseConnection() async {
 
 - `type`: `Connection.appleHealth`, `Connection.samsung`, or `Connection.healthConnect`.
 - `schedulerOn`: **no effect on iOS** (background delivery is via `setUpBackgroundDelivery`); on Android, `true` enables foreground scheduled requests.
-- `customPermissions`: see [Permissions mapping](https://docs.tryterra.co/health-and-fitness-api/mobile-only-sources).
+- `customPermissions`: see [Permissions mapping](https://docs.tryterra.co/unified-api/mobile-only-sources).
 
 Popup behavior: Apple Health and Health Connect show the popup once (re-triggers only on expanded `customPermissions`, reinstall, or – Health Connect – a permission Google has not approved). The HealthKit popup is a WebView; WebView-based apps must interrupt their WebView, call `initConnection`, then reopen.
 
@@ -134,4 +134,4 @@ Future<void> getData() async {
 }
 ```
 
-Set `toWebhook: false` to receive the payload in the response instead of pushing to your destination. Disconnect via the same backend endpoint as web integrations (`DELETE /auth/deauthenticateUser`). See the SDK reference on [docs.tryterra.co](https://docs.tryterra.co/health-and-fitness-api/mobile-only-sources/flutter) for the full function list.
+Set `toWebhook: false` to receive the payload in the response instead of pushing to your destination. Disconnect via the same backend endpoint as web integrations (`DELETE /auth/deauthenticateUser`). See the SDK reference on [docs.tryterra.co](https://docs.tryterra.co/unified-api/mobile-only-sources/flutter) for the full function list.

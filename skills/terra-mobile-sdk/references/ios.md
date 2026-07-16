@@ -1,6 +1,6 @@
 # iOS (Swift) – TerraiOS
 
-Native Swift integration for **Apple Health**. Source: [docs.tryterra.co/health-and-fitness-api/mobile-only-sources/ios-swift](https://docs.tryterra.co/health-and-fitness-api/mobile-only-sources/ios-swift). `TerraiOS` supports Apple Health only.
+Native Swift integration for **Apple Health**. Source: [docs.tryterra.co/unified-api/mobile-only-sources/ios-swift](https://docs.tryterra.co/unified-api/mobile-only-sources/ios-swift). `TerraiOS` supports Apple Health only.
 
 ## 1. Install and add capabilities
 
@@ -59,7 +59,7 @@ terra.initConnection(
 }
 ```
 
-`schedulerOn` has no effect on iOS; background delivery is controlled by `setUpBackgroundDelivery()`. `customReadTypes` maps to HealthKit types – see [Permissions mapping](https://docs.tryterra.co/health-and-fitness-api/mobile-only-sources). The popup fires once (re-triggers only on expanded `customPermissions` or reinstall), and it is a WebView (WebView-based apps must interrupt their WebView, call `initConnection`, then reopen).
+`schedulerOn` has no effect on iOS; background delivery is controlled by `setUpBackgroundDelivery()`. `customReadTypes` maps to HealthKit types – see [Permissions mapping](https://docs.tryterra.co/unified-api/mobile-only-sources). The popup fires once (re-triggers only on expanded `customPermissions` or reinstall), and it is a WebView (WebView-based apps must interrupt their WebView, call `initConnection`, then reopen).
 
 ## 4. Validate with getUserId on every re-init
 
@@ -178,7 +178,7 @@ let activityData = TerraActivityData(
 terra.postActivity(type: .APPLE_HEALTH, payload: activityData) { success, error in /* ... */ }
 ```
 
-`postBody` and `postNutrition` follow the same shape with `TerraBodyData` / `TerraNutritionData` payloads. Fetch [docs.tryterra.co/health-and-fitness-api/mobile-only-sources/ios-swift.md](https://docs.tryterra.co/health-and-fitness-api/mobile-only-sources/ios-swift.md) for the full payload field lists when building the request body.
+`postBody` and `postNutrition` follow the same shape with `TerraBodyData` / `TerraNutritionData` payloads. Fetch [docs.tryterra.co/unified-api/mobile-only-sources/ios-swift.md](https://docs.tryterra.co/unified-api/mobile-only-sources/ios-swift.md) for the full payload field lists when building the request body.
 
 ## Planned workout sync (iOS 17+)
 
@@ -188,4 +188,4 @@ Planned workouts are created via Terra API's REST API on your backend; the iOS S
 - `syncPlannedWorkoutsFromBackend(type:)` – manually trigger a sync of pending actions.
 - `isPlannedWorkoutBackendSyncEnabled` – current state.
 
-Observe `.terraPlannedWorkoutSynced` and `.terraPlannedWorkoutSyncCompleted` via `NotificationCenter` for per-workout and completion events. See the SDK reference linked from [the iOS docs](https://docs.tryterra.co/health-and-fitness-api/mobile-only-sources/ios-swift) for the event object shapes.
+Observe `.terraPlannedWorkoutSynced` and `.terraPlannedWorkoutSyncCompleted` via `NotificationCenter` for per-workout and completion events. See the SDK reference linked from [the iOS docs](https://docs.tryterra.co/unified-api/mobile-only-sources/ios-swift) for the event object shapes.

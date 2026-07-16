@@ -42,4 +42,4 @@ c.executionCtx.waitUntil(processEvent(inserted.rows[0].id, event));
 return c.text("ok", 200);
 ```
 
-Reference: [Receiving data updates](https://docs.tryterra.co/health-and-fitness-api/managing-user-health-data/receiving-data-updates)
+Reference: [Receiving data updates](https://docs.tryterra.co/unified-api/managing-user-health-data/receiving-data-updates)

@@ -1,6 +1,6 @@
 # React Native – terra-react
 
-Cross-platform integration for **Apple Health** (iOS), **Samsung Health**, and **Health Connect** (Android). Source: [docs.tryterra.co/health-and-fitness-api/mobile-only-sources/react-native](https://docs.tryterra.co/health-and-fitness-api/mobile-only-sources/react-native).
+Cross-platform integration for **Apple Health** (iOS), **Samsung Health**, and **Health Connect** (Android). Source: [docs.tryterra.co/unified-api/mobile-only-sources/react-native](https://docs.tryterra.co/unified-api/mobile-only-sources/react-native).
 
 ## 1. Install and native setup
 
@@ -80,7 +80,7 @@ const initializeConnection = async () => {
 
 - `type`: `Connections.APPLE_HEALTH`, `Connections.SAMSUNG`, or `Connections.HEALTH_CONNECT`.
 - `schedulerOn`: **no effect on iOS** (background delivery is via `setUpBackgroundDelivery`); on Android, `true` enables foreground scheduled requests.
-- `customPermissions`: see [Permissions mapping](https://docs.tryterra.co/health-and-fitness-api/mobile-only-sources).
+- `customPermissions`: see [Permissions mapping](https://docs.tryterra.co/unified-api/mobile-only-sources).
 
 Popup behavior: Apple Health and Health Connect show the popup once (re-triggers only on expanded `customPermissions`, reinstall, or – Health Connect – a permission Google has not approved). The HealthKit popup is a WebView; WebView-based apps must interrupt their WebView, call `initConnection`, then reopen.
 
@@ -163,4 +163,4 @@ const activityPayload: Activity = {
 const resp = await postActivity(Connections.APPLE_HEALTH, activityPayload);
 ```
 
-Fetch [docs.tryterra.co/health-and-fitness-api/mobile-only-sources/react-native.md](https://docs.tryterra.co/health-and-fitness-api/mobile-only-sources/react-native.md) for the full payload fields, function list, and `ActivityType` enum when building the request body.
+Fetch [docs.tryterra.co/unified-api/mobile-only-sources/react-native.md](https://docs.tryterra.co/unified-api/mobile-only-sources/react-native.md) for the full payload fields, function list, and `ActivityType` enum when building the request body.

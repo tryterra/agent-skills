@@ -37,4 +37,4 @@ app.post("/api/terra/webhook", async (c) => {
 
 Mark the recorded event `processed` or `failed` when the background work finishes so failures are visible and replayable.
 
-Reference: [Webhooks](https://docs.tryterra.co/health-and-fitness-api/integration-setup/setting-up-data-destinations/webhooks)
+Reference: [Webhooks](https://docs.tryterra.co/unified-api/integration-setup/setting-up-data-destinations/webhooks)

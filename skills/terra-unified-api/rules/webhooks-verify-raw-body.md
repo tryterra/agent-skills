@@ -47,4 +47,4 @@ app.post("/api/terra/webhook", async (c) => {
 
 The `terra-api` SDK ships `verifyTerraWebhookSignature()`; prefer it over hand-rolled HMAC code.
 
-Reference: [Webhooks](https://docs.tryterra.co/health-and-fitness-api/integration-setup/setting-up-data-destinations/webhooks)
+Reference: [Webhooks](https://docs.tryterra.co/unified-api/integration-setup/setting-up-data-destinations/webhooks)

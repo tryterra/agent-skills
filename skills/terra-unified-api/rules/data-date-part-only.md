@@ -33,4 +33,4 @@ CREATE TABLE terra_daily (
 );
 ```
 
-Reference: [Receiving data updates](https://docs.tryterra.co/health-and-fitness-api/managing-user-health-data/receiving-data-updates)
+Reference: [Receiving data updates](https://docs.tryterra.co/unified-api/managing-user-health-data/receiving-data-updates)

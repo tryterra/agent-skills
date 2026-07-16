@@ -47,4 +47,4 @@ INSERT INTO terra_activity (summary_id, ...) VALUES (...)
 ON CONFLICT (summary_id) DO UPDATE SET ...;
 ```
 
-Reference: [Receiving data updates](https://docs.tryterra.co/health-and-fitness-api/managing-user-health-data/receiving-data-updates)
+Reference: [Receiving data updates](https://docs.tryterra.co/unified-api/managing-user-health-data/receiving-data-updates)

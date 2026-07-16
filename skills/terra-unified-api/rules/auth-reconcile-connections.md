@@ -43,4 +43,4 @@ async function syncTerraConnections(appUserId: string) {
 }
 ```
 
-Reference: [Getting started](https://docs.tryterra.co/health-and-fitness-api/getting-started)
+Reference: [Getting started](https://docs.tryterra.co/unified-api/getting-started)
