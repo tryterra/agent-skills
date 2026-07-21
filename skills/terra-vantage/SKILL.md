@@ -44,7 +44,7 @@ An integration walks a test from catalog to acknowledged result. Products are a 
 7  POST /api/v1/results/{order_item_id}/acknowledge?test_taker_id= -> MANDATORY, user-triggered
 ```
 
-Placing an order returns `201` with an `order_id`, a `recipient_id`, and one `order_item_id` per item. New orders start at `order_status: "order.payment_processing"` and each item at `results_status: "results.awaiting_sample"`. Track everything downstream by `order_item_id`, since results, activation, and acknowledgment are all per-item.
+Placing an order returns `201` with an `order_id`, a `recipient_id`, and one `order_item_id` per item. New orders start at `order_status: "order.payment_processing"` (`order.processing` is a later state, reached only after payment completes) and each item at `results_status: "results.awaiting_sample"`. Track everything downstream by `order_item_id`, since results, activation, and acknowledgment are all per-item.
 
 [references/api-reference.md](references/api-reference.md) maps each goal to its endpoint (including the order/results indexes, lab lookup, catalog curation, and the monitoring endpoints) and to the live doc page carrying the current request/response schema; read it before implementing any endpoint call, and fetch the linked `.md` page when building a request body.
 
