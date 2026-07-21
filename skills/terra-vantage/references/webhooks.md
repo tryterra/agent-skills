@@ -9,7 +9,7 @@ There are two `event_type` families:
 - **`order.status_changed`** – order-level fulfillment progress.
 - **`order_item.results_status_change`** – per-item results progress.
 
-Every payload carries `event_id` (number) and `timestamp` (Unix seconds) in addition to the fields below. Delivery is at-least-once: **deduplicate on `event_id`** – but note `event_id` is a JSON number above JavaScript's safe-integer range, which `JSON.parse` silently rounds. The simplest safe dedupe key is the `X-Terra-Trace-Id` header, which carries the same value as a string; alternatively extract `event_id` from the raw body or use a BigInt-aware parser. `order_id`, `order_item_id`, `variant_id`, and `test_taker_id` are JSON **strings**.
+Every payload carries `event_id` (string) and `timestamp` (Unix seconds) in addition to the fields below. Delivery is at-least-once: **deduplicate on `event_id`**, which equals the `X-Terra-Trace-Id` header. All payload IDs – `event_id`, `order_id`, `order_item_id`, `variant_id`, `test_taker_id` – are JSON **strings**.
 
 ### Fulfillment events (`event_type: "order.status_changed"`)
 
@@ -20,7 +20,7 @@ REST reads of the same order render these states as `order.*` – and payment fa
 ```json
 {
   "event_type": "order.status_changed",
-  "event_id": 249956485092777984,
+  "event_id": "249956485092777984",
   "timestamp": 1763661470,
   "data": {
     "order_id": "249956252111773696",
@@ -77,4 +77,4 @@ Verification steps:
 - Failures (network error, timeout, 408, 429, any 5xx) get up to 5 HTTP attempts with exponential backoff and jitter (~1s, 2s, 4s, 8s) on the first delivery; after that the event is redelivered as single attempts with growing delays (5s doubling, capped at 10 minutes), up to 10 deliveries in total (~14 calls over ~30 minutes) before dead-lettering. Handlers must be idempotent. **Other 4xx responses are recorded as rejected and NOT retried** – a verifier bug that returns 401 permanently drops events.
 - Dead-lettered events can be replayed by Terra – not silently lost.
 - Ordering is not guaranteed; treat each event as the item's current state.
-- Debug with `GET /api/v1/webhook-deliveries?outcome=failed` (outcomes: `delivered`, `rejected`, `invalid` = undeliverable (no URL registered or payload build failure), `dead_lettered`, `replayed`; `attempts` and `final_status_code` included). Note its `event_type` field uses internal enum names (`EVENT_TYPE_...`), not the payload strings. Cross-check authoritative state via `GET /api/v1/orders/{order_id}` `status_history`. See the [monitoring doc](https://docs.tryterra.co/vantage-api-docs/documentation/monitoring.md).
+- Debug with `GET /api/v1/webhook-deliveries?outcome=failed` (outcomes: `delivered`, `rejected`, `invalid` = no URL registered, `dead_lettered`, `replayed`; `attempts` and `final_status_code` included). Note its `event_type` field uses internal enum names (`EVENT_TYPE_...`), not the payload strings. Cross-check authoritative state via `GET /api/v1/orders/{order_id}` `status_history`. See the [monitoring doc](https://docs.tryterra.co/vantage-api-docs/documentation/monitoring.md).
