@@ -26,7 +26,7 @@ const SKIP = [
 // entry once its space goes live so drift is caught again.
 const KNOWN_UNPUBLISHED = [
   "https://docs.tryterra.co/routes-api-pre-release/", // Routes API (pre-release)
-  // Vantage pages added by tryterra/gitbook-vantage-docs#1 — remove these
+  // Vantage pages added by tryterra/gitbook-vantage-docs#1 - remove these
   // entries once that PR merges and the pages publish.
   "https://docs.tryterra.co/vantage-api-docs/core-concepts",
   "https://docs.tryterra.co/vantage-api-docs/getting-started/working-with-sandbox",

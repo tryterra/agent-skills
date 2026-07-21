@@ -33,7 +33,7 @@ A worked end-to-end ordering example lives at https://docs.tryterra.co/vantage-a
 - **IDs are strings** in order responses and webhooks (64-bit snowflakes). Catalog reads return numeric ids, but the order request's `variant_id` is a string.
 - **`currency` is an ISO 4217 numeric code** (`840` USD, `978` EUR, `826` GBP), prices are integer cents. `phone_number`/`country_code` accept quoted strings on input (preserves leading zeros; `phone_number` also accepts `+`-prefixed E.164) but return as integers. `gender_at_birth` is `male`|`female`.
 - **`client_order_reference_id` is your reconciliation key, NOT an idempotency key** – creation is not deduplicated server-side; a retried create makes a second order.
-- **New orders start at** `order_status: "order.processing"` (REST vocabulary) with each item at `results_status: "results.awaiting_sample"`; progress arrives via webhooks (see references/webhooks.md).
+- **New orders start at** `order_status: "order.payment_processing"` (REST vocabulary) with each item at `results_status: "results.awaiting_sample"`; progress arrives via webhooks (see references/webhooks.md).
 - **Keyset pagination** on the index endpoints: pass the response's `next_cursor` as `?cursor=`; absence of `next_cursor` means last page. `limit` is 1-100 (default 25).
 - **`GET /api/v1/orders/{order_id}` is the recovery path**: `status_history` (newest first, escalation entries carry `escalation_level` + `acknowledgment_due_by`), `items[].supplier_item_id`, and `items[].test_taker_ids` let you recover anything a missed webhook carried. Orders you don't own return 404.
 - **Webhook URLs must be HTTPS**; PATCH with an empty string clears the URL. Sandbox and production hold separate URLs.
