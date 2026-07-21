@@ -74,7 +74,7 @@ Verification steps:
 ## Delivery, Retries, Debugging
 
 - Respond with any **2xx quickly** (deliveries time out after ~10 seconds); process asynchronously.
-- Failures (network error, timeout, 408, 429, any 5xx) get up to 5 delivery attempts in total, with exponential backoff and jitter between them (~1s, 2s, 4s, 8s). **Other 4xx responses are recorded as rejected and NOT retried** – a verifier bug that returns 401 permanently drops events.
-- After in-process retries exhaust, events are dead-lettered and can be replayed by Terra – not silently lost.
+- Failures (network error, timeout, 408, 429, any 5xx) get up to 5 HTTP attempts with exponential backoff and jitter (~1s, 2s, 4s, 8s); when all 5 fail the event is re-queued, for up to 10 rounds before dead-lettering – a persistently failing endpoint can see up to ~50 calls for one event, so handlers must be idempotent. **Other 4xx responses are recorded as rejected and NOT retried** – a verifier bug that returns 401 permanently drops events.
+- Dead-lettered events can be replayed by Terra – not silently lost.
 - Ordering is not guaranteed; treat each event as the item's current state.
 - Debug with `GET /api/v1/webhook-deliveries?outcome=failed` (outcomes: `delivered`, `rejected`, `invalid` = undeliverable (no URL registered or payload build failure), `dead_lettered`, `replayed`; `attempts` and `final_status_code` included). Note its `event_type` field uses internal enum names (`EVENT_TYPE_...`), not the payload strings. Cross-check authoritative state via `GET /api/v1/orders/{order_id}` `status_history`. See the [monitoring doc](https://docs.tryterra.co/vantage-api-docs/documentation/monitoring.md).
