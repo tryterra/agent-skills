@@ -1,6 +1,6 @@
 # Vantage API Webhooks
 
-Terra API pushes order and result progress to the webhook URL you configure at onboarding (updatable via `PATCH /api/v1/clients/webhook-url`). Sandbox and production deliver the same webhooks; sandbox payloads additionally carry a `supplier_item_id` field. Source: [webhooks](https://docs.tryterra.co/vantage-api-docs/documentation/webhooks).
+Terra API pushes order and result progress to the HTTPS webhook URL registered per environment (`PATCH /api/v1/clients/webhook-url`). Sandbox and production deliver the same webhooks; sandbox `order.status_changed` payloads additionally carry a `supplier_item_id` field. Source: [webhooks](https://docs.tryterra.co/vantage-api-docs/documentation/webhooks).
 
 ## Event Types
 
@@ -9,31 +9,21 @@ There are two `event_type` families:
 - **`order.status_changed`** – order-level fulfillment progress.
 - **`order_item.results_status_change`** – per-item results progress.
 
-Every payload carries `event_id` and `timestamp` in addition to the fields below. Deduplicate on `event_id`.
+Every payload carries `event_id` (number) and `timestamp` (Unix seconds) in addition to the fields below. Delivery is at-least-once: **deduplicate on `event_id`** – but note `event_id` is a JSON number above JavaScript's safe-integer range, which `JSON.parse` silently rounds. The simplest safe dedupe key is the `X-Terra-Trace-Id` header, which carries the same value as a string; alternatively extract `event_id` from the raw body or use a BigInt-aware parser. `order_id`, `order_item_id`, `variant_id`, and `test_taker_id` are JSON **strings**.
 
 ### Fulfillment events (`event_type: "order.status_changed"`)
 
-The initial payment-processing state is never delivered as a webhook; it appears only in the order-placement response, as `order_status: "order.payment_processing"`. Note that the docs' event-type table spells some event names with British "fulfilment" while the payload examples use American "fulfillment"; match on the payload spelling (`fulfillment.*`).
+`data`: `order_id` (string), `status`, plus `tracking_number` and (sandbox only) `supplier_item_id` when available. `status` values: `fulfillment.payment_processing`, `fulfillment.payment_complete`, `fulfillment.payment_failed`, `fulfillment.processing`, `fulfillment.delayed`, `fulfillment.delivery_fulfilled`, `fulfillment.completed`, `fulfillment.cancelled`.
 
-**`fulfillment.payment_complete`** – payment confirmed.
-
-```json
-{
-  "event_type": "order.status_changed",
-  "data": {
-    "order_id": 249956252111773696,
-    "status": "fulfillment.payment_complete"
-  }
-}
-```
-
-**`fulfillment.delivery_fulfilled`** – delivery details / tracking available. Adds `tracking_number`.
+REST reads of the same order render these states as `order.*` – and payment failure specifically as `order.failed`, not `order.payment_failed`. Match on the vocabulary of the surface you are reading.
 
 ```json
 {
   "event_type": "order.status_changed",
+  "event_id": 249956485092777984,
+  "timestamp": 1763661470,
   "data": {
-    "order_id": 249956252111773696,
+    "order_id": "249956252111773696",
     "status": "fulfillment.delivery_fulfilled",
     "tracking_number": "KnD3d5PMZyq5ulNcWkrq"
   }
@@ -42,39 +32,49 @@ The initial payment-processing state is never delivered as a webhook; it appears
 
 ### Results events (`event_type: "order_item.results_status_change"`)
 
-These carry `order_id`, `order_item_id`, `results_status`, `variant_id`, and a `test_taker` object (`test_taker_id`, `first_name`, `last_name`, `email`, `phone_number`, `country_code`), plus `event_id` and `timestamp`. In the payload examples, `test_taker_id` is a string while `country_code` and `phone_number` are integers.
+`data`: `order_id`, `order_item_id`, `variant_id` (strings), `results_status`, and a `test_taker` object (`test_taker_id` string, `first_name`, `last_name`, `email`, `country_code` int, `phone_number` int). Status-dependent extras below.
 
-| `results_status`                   | When it fires                                                   | Extra fields                                                               |
-| ---------------------------------- | --------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| `results.kit_activated`            | End user activates the kit (two-step activation suppliers only) | –                                                                          |
-| `results.sample_processing_in_lab` | Lab confirms receipt of the sample                              | –                                                                          |
-| `results.results_ready`            | Lab confirms results are available                              | –                                                                          |
-| `results.sample_rejected`          | Lab rejects the sample                                          | `failure_cause` (e.g. `"blood contaminated"`)                              |
-| `results.escalation_raised`        | An escalation is raised on a result set                         | `escalation_level` (e.g. `"medium"`; maximum `escalation_level.very_high`) |
+| `results_status`                   | When it fires                                                                                            | Extra fields                                                    |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| `results.kit_activated`            | End user activates the kit (activation suppliers only) – first appearance of `test_taker_id`, capture it | –                                                               |
+| `results.sample_processing_in_lab` | Lab confirms receipt of the sample                                                                       | –                                                               |
+| `results.partial_results_ready`    | A subset of the panel has resulted                                                                       | –                                                               |
+| `results.results_ready`            | Results available – fetch and acknowledge                                                                | –                                                               |
+| `results.sample_rejected`          | Lab rejects the sample                                                                                   | `failure_cause` (e.g. `"blood contaminated"`)                   |
+| `results.lab_processing_error`     | Lab could not process the sample                                                                         | –                                                               |
+| `results.escalation_raised`        | Clinical escalation on the result set                                                                    | `escalation_level`, `acknowledgment_due_by` (ISO 8601 deadline) |
 
-Result-status lifecycle for an item:
+`escalation_level` enum, ascending: `not_escalated`, `very_low`, `low`, `medium`, `high`, `very_high`.
+
+Result-status lifecycle for an item (`results.awaiting_sample` is the initial state set at order creation, delivered in the order response rather than as a webhook):
 
 ```
-results.awaiting_sample -> results.kit_activated -> results.sample_processing_in_lab -> results.results_ready
-                                                                         \-> results.sample_rejected
-                                                                         \-> results.escalation_raised
+results.awaiting_sample -> results.kit_activated -> results.sample_processing_in_lab
+    -> results.partial_results_ready | results.results_ready
+       | results.lab_processing_error | results.escalation_raised | results.sample_rejected
+results.partial_results_ready -> results.results_ready | results.escalation_raised
+results.results_ready -> results.escalation_raised
 ```
-
-`results.awaiting_sample` is the initial per-item status set at order creation. `results.kit_activated` only appears for suppliers whose kits require end-user activation.
 
 ## Signature Verification
 
-Webhooks are signed with HMAC-SHA256. Verify every request before trusting the body.
+Webhooks are signed with HMAC-SHA256 using the account's Terra signing secret. Verify every request before trusting the body.
 
-- **Header:** `X-Terra-Signature`, formatted `t=<timestamp>,v1=<hex_signature>`, where `t` is a Unix timestamp in milliseconds and `v1` is the hex HMAC-SHA256 signature.
-- **Additional headers:** `X-Terra-Trace-Id` (unique request ID for debugging) and `Content-Type: application/json`.
+- **Header:** `X-Terra-Signature`, formatted `t=<timestamp>,v1=<hex_signature>`, where `t` is a Unix timestamp in **seconds** (not milliseconds – a millisecond comparison makes every verification fail) and `v1` is the hex HMAC-SHA256 signature.
+- **Additional headers:** `X-Terra-Trace-Id` (equals the `event_id`; quote it to Terra support) and `Content-Type: application/json`.
 
 Verification steps:
 
-1. Extract the `X-Terra-Signature` header and parse `t` (timestamp) and `v1` (signature).
-2. Reject if `t` is outside a 5-minute tolerance (300,000 milliseconds) of now.
-3. Construct the signed string as `"{timestamp}.{raw_body}"` using the raw request body.
-4. Compute the expected HMAC-SHA256 with your signing secret.
+1. Extract the `X-Terra-Signature` header and parse `t` and `v1`.
+2. Reject if `t` is outside a tolerance window of now (5 minutes / 300 seconds is the docs' default).
+3. Construct the signed string as `"{t}.{raw_body}"` using the **raw, unaltered request body** (re-serializing the JSON breaks the signature).
+4. Compute the expected HMAC-SHA256 with the signing secret.
 5. Compare `v1` to the expected signature using a constant-time comparison.
 
-The docs do not specify retry or redelivery behavior for failed deliveries.
+## Delivery, Retries, Debugging
+
+- Respond with any **2xx quickly** (deliveries time out after ~10 seconds); process asynchronously.
+- Failures (network error, timeout, 408, 429, any 5xx) get up to 5 HTTP attempts with exponential backoff and jitter (~1s, 2s, 4s, 8s) on the first delivery; after that the event is redelivered as single attempts with growing delays (5s doubling, capped at 10 minutes), up to 10 deliveries in total (~14 calls over ~30 minutes) before dead-lettering. Handlers must be idempotent. **Other 4xx responses are recorded as rejected and NOT retried** – a verifier bug that returns 401 permanently drops events.
+- Dead-lettered events can be replayed by Terra – not silently lost.
+- Ordering is not guaranteed; treat each event as the item's current state.
+- Debug with `GET /api/v1/webhook-deliveries?outcome=failed` (outcomes: `delivered`, `rejected`, `invalid` = undeliverable (no URL registered or payload build failure), `dead_lettered`, `replayed`; `attempts` and `final_status_code` included). Note its `event_type` field uses internal enum names (`EVENT_TYPE_...`), not the payload strings. Cross-check authoritative state via `GET /api/v1/orders/{order_id}` `status_history`. See the [monitoring doc](https://docs.tryterra.co/vantage-api-docs/documentation/monitoring.md).
