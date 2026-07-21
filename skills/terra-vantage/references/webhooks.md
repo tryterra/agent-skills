@@ -9,7 +9,7 @@ There are two `event_type` families:
 - **`order.status_changed`** – order-level fulfillment progress.
 - **`order_item.results_status_change`** – per-item results progress.
 
-Every payload carries `event_id` (number) and `timestamp` (Unix seconds) in addition to the fields below. Delivery is at-least-once: **deduplicate on `event_id`** – but note `event_id` is a JSON number above JavaScript's safe-integer range, which `JSON.parse` silently rounds. The simplest safe dedupe key is the `X-Terra-Trace-Id` header, which carries the same value as a string; alternatively extract `event_id` from the raw body or use a BigInt-aware parser. `order_id`, `order_item_id`, `variant_id`, and `test_taker_id` are JSON **strings**.
+Every payload carries `event_id` (string) and `timestamp` (Unix seconds) in addition to the fields below. Delivery is at-least-once: **deduplicate on `event_id`**, which equals the `X-Terra-Trace-Id` header. All payload IDs – `event_id`, `order_id`, `order_item_id`, `variant_id`, `test_taker_id` – are JSON **strings**.
 
 ### Fulfillment events (`event_type: "order.status_changed"`)
 
@@ -20,7 +20,7 @@ REST reads of the same order render these states as `order.*` – and payment fa
 ```json
 {
   "event_type": "order.status_changed",
-  "event_id": 249956485092777984,
+  "event_id": "249956485092777984",
   "timestamp": 1763661470,
   "data": {
     "order_id": "249956252111773696",
