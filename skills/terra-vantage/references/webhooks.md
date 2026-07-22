@@ -13,9 +13,9 @@ Every payload carries `event_id` (string) and `timestamp` (Unix seconds) in addi
 
 ### Fulfillment events (`event_type: "order.status_changed"`)
 
-`data`: `order_id` (string), `status`, plus `tracking_number` and (sandbox only) `supplier_item_id` when available. `status` values: `fulfillment.payment_processing`, `fulfillment.payment_complete`, `fulfillment.payment_failed`, `fulfillment.processing`, `fulfillment.delayed`, `fulfillment.delivery_fulfilled`, `fulfillment.completed`, `fulfillment.cancelled`.
+`data`: `order_id` (string), `status`, plus `tracking_number` and (sandbox only) `supplier_item_id` when available. `status` values: `order.payment_processing`, `order.payment_complete`, `order.payment_failed`, `order.processing`, `order.delayed`, `order.delivery_fulfilled`, `order.completed`, `order.cancelled` - the same vocabulary REST serves.
 
-REST reads of the same order render these states as `order.*` – and payment failure specifically as `order.failed`, not `order.payment_failed`. Match on the vocabulary of the surface you are reading.
+REST reads of the same order use the identical vocabulary - match webhook `status` verbatim against `order_status`/`status_history`. (The legacy `order.failed` string is still accepted as a status _filter_ on GET /orders but is never emitted.)
 
 ```json
 {
@@ -24,7 +24,7 @@ REST reads of the same order render these states as `order.*` – and payment fa
   "timestamp": 1763661470,
   "data": {
     "order_id": "249956252111773696",
-    "status": "fulfillment.delivery_fulfilled",
+    "status": "order.delivery_fulfilled",
     "tracking_number": "KnD3d5PMZyq5ulNcWkrq"
   }
 }
