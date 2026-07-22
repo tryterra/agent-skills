@@ -15,7 +15,7 @@ Every payload carries `event_id` (string) and `timestamp` (Unix seconds) in addi
 
 `data`: `order_id` (string), `status`, plus `tracking_number` and (sandbox only) `supplier_item_id` when available. `status` values: `order.payment_processing`, `order.payment_complete`, `order.payment_failed`, `order.processing`, `order.delayed`, `order.delivery_fulfilled`, `order.completed`, `order.cancelled` - the same vocabulary REST serves.
 
-REST reads of the same order use the identical vocabulary - match webhook `status` verbatim against `order_status`/`status_history`. (The legacy `order.failed` string is still accepted as a status *filter* on GET /orders but is never emitted.)
+REST reads of the same order use the identical vocabulary - match webhook `status` verbatim against `order_status`/`status_history`. (The legacy `order.failed` string is still accepted as a status _filter_ on GET /orders but is never emitted.)
 
 ```json
 {
