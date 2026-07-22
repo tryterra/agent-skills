@@ -57,7 +57,7 @@ Each order sets a `collection_type` that determines how the sample is taken and 
 | `AT_HOME`         | Kit shipped to the recipient; they self-collect and follow the kit instructions | `shipping_address`      |
 | `GO_TO_LAB`       | Sample drawn at a lab draw site (Patient Service Center)                        | `requested_lab_address` |
 
-For `GO_TO_LAB`, the requested lab address is used as a proxy to route the order to the closest available lab; the resolved lab comes back as `confirmed_lab_address`, and `GET /api/v1/labs?zip_code=` lists nearby draw sites (US) to offer the user beforehand. A variant advertises which methods it supports in `available_collection_types` (an array of the strings `"AT_HOME"`/`"GO_TO_LAB"`); confirm support before offering a method.
+For `GO_TO_LAB`, the requested lab address is used as a proxy to route the order to the closest available lab; the resolved lab comes back as `confirmed_lab_address`, and `GET /api/v1/labs?zip_code=` lists nearby draw sites (US) to offer the user beforehand. A variant advertises which methods it supports in `available_collection_types` (an array of the strings `"AT_HOME"`/`"GO_TO_LAB"`) and which countries it can be ordered in as `supported_ship_to_countries` (ISO-3166 alpha-2; the shipping destination for AT_HOME, the requested lab's country for GO_TO_LAB); gate both the method choice and the address form on them before ordering.
 
 ## Kit Activation
 
