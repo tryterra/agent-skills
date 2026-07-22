@@ -96,7 +96,7 @@ Two ways to drive a sandbox order through its lifecycle:
 ## Gotchas
 
 - **IDs are JSON strings.** `order_id`, `order_item_id`, `recipient_id`, `test_taker_id`, `variant_id`, and `event_id` in order responses and webhooks are 64-bit snowflakes serialized as strings – never parse them as numbers (JavaScript corrupts them). Catalog reads (`/products*`) still return numeric `id` fields; order requests take `variant_id` as a string.
-- **Two vocabularies for one fulfillment status.** REST reads render `order.*` (payment failure = `order.failed`); webhook payloads render `fulfillment.*` (payment failure = `fulfillment.payment_failed`). Results statuses (`results.*`) are identical on both. Match per surface.
+- **One vocabulary on both surfaces.** REST reads and webhook payloads use the same `order.*` fulfillment statuses (payment failure = `order.payment_failed`) and the same `results.*` statuses - webhook statuses match REST reads verbatim. (Historic: webhooks once said `fulfillment.*` and REST said `order.failed`; both retired.)
 - **Signature timestamp is Unix SECONDS.** `X-Terra-Signature: t=<unix_seconds>,v1=<hex>`; treating `t` as milliseconds makes every verification fail. Sign-check against the raw body.
 - **`test_taker_id` is required to read or acknowledge results.** Both endpoints take it as a query parameter; it first appears on the `results.kit_activated` webhook.
 - **Order creation is NOT idempotent.** `client_order_reference_id` is for reconciliation only – no server-side dedupe, so a blind retry creates a second order. On ambiguous failure, list recent orders and match your reference before retrying.
