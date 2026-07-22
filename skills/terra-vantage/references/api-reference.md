@@ -29,7 +29,7 @@ A worked end-to-end ordering example lives at https://docs.tryterra.co/vantage-a
 ## Semantics the schema pages do not spell out
 
 - **The catalog is three levels**: product types contain products, products contain variants. A variant is the exact item a recipient receives and the thing you order (`variant_id` + `quantity` per order item). `available_collection_types` on a variant is an array of the strings `"AT_HOME"`/`"GO_TO_LAB"`.
-- **Send the address field matching `collection_type`**: `shipping_address` for `AT_HOME`, `requested_lab_address` for `GO_TO_LAB`. The resolved lab comes back as `confirmed_lab_address`.
+- **Send the address field matching `collection_type`**: `shipping_address` for `AT_HOME`, `requested_lab_address` for `GO_TO_LAB`. The response's `confirmed_lab_address` field is reserved and currently always `null` - don't build UI on it; use `GET /api/v1/labs` for draw-site selection.
 - **IDs are strings** in order responses and webhooks (64-bit snowflakes). Catalog reads return numeric ids, but the order request's `variant_id` is a string.
 - **`currency` is an ISO 4217 numeric code** (`840` USD, `978` EUR, `826` GBP), prices are integer cents. `phone_number`/`country_code` accept quoted strings on input (preserves leading zeros; `phone_number` also accepts `+`-prefixed E.164) but return as integers. `gender_at_birth` is `male`|`female`.
 - **`client_order_reference_id` is your reconciliation key, NOT an idempotency key** – creation is not deduplicated server-side; a retried create makes a second order.
