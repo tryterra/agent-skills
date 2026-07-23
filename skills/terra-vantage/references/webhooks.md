@@ -32,7 +32,7 @@ REST reads of the same order use the identical vocabulary - match webhook `statu
 
 ### Results events (`event_type: "order_item.results_status_change"`)
 
-`data`: `order_id`, `order_item_id`, `variant_id` (strings), `results_status`, and a `test_taker` object (`test_taker_id` string, `first_name`, `last_name`, `email`, `country_code` int, `phone_number` int). Status-dependent extras below.
+`data`: `order_id`, `order_item_id`, `variant_id` (strings), `results_status`, and a `test_taker` object (`test_taker_id` string, `first_name`, `last_name`, `email`, `country_code` int, `phone_number` int — webhook payloads keep integers; REST reads return E.164 strings). Status-dependent extras below.
 
 | `results_status`                   | When it fires                                                                                            | Extra fields                                                    |
 | ---------------------------------- | -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
