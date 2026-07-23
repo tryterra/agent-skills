@@ -99,7 +99,7 @@ Two ways to drive a sandbox order through its lifecycle:
 - **One vocabulary on both surfaces.** REST reads and webhook payloads use the same `order.*` fulfillment statuses (payment failure = `order.payment_failed`) and the same `results.*` statuses - webhook statuses match REST reads verbatim. (Historic: webhooks once said `fulfillment.*` and REST said `order.failed`; both retired.)
 - **Signature timestamp is Unix SECONDS.** `X-Terra-Signature: t=<unix_seconds>,v1=<hex>`; treating `t` as milliseconds makes every verification fail. Sign-check against the raw body.
 - **`test_taker_id` is required to read or acknowledge results.** Both endpoints take it as a query parameter; it first appears on the `results.kit_activated` webhook.
-- **Order creation is NOT idempotent.** `client_order_reference_id` is for reconciliation only – no server-side dedupe, so a blind retry creates a second order. On ambiguous failure, list recent orders and match your reference before retrying.
+- **Send an `Idempotency-Key` header on order creation** (unique per attempt) – retries with the same key + body replay the original result instead of double-ordering; same key + different body → `409`. Without the header there is NO server-side dedupe (`client_order_reference_id` is reconciliation-only): on ambiguous failure, list recent orders and match your reference before retrying.
 - **Acknowledgment gates patient access and shifts liability.** Must be an explicit end-user action.
 - **Track by `order_item_id`, not `order_id`.** Results, activation, and acknowledgment are all per item.
 - **Presigned result URLs expire in 15 minutes.** Re-fetch to re-mint rather than caching the URL.
