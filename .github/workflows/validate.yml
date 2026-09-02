@@ -1,0 +1,54 @@
+name: Validate skills
+
+# This repository is published automatically from a private source repository.
+# This file is the one thing in it the publisher never touches: an app token
+# cannot create, change or delete a file under .github/workflows without the
+# `workflows` permission, which the publishing bot deliberately does not have.
+# So this directory belongs to this repository, and is edited here - unlike
+# everything else, which is rebuilt from source on every publish and where a
+# hand-made edit would be silently dropped.
+#
+# It runs the checks that are meaningful on the published tree. The source
+# repository additionally checks formatting, that skills/index.json is current,
+# and that every cited docs.tryterra.co link still resolves; those need tooling
+# that is not published, so they gate the merge there rather than running here.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install skills-ref
+        run: pip install skills-ref
+
+      - name: Validate every skill against the Agent Skills spec
+        run: |
+          for skill in skills/*/; do
+            agentskills validate "$skill"
+          done
+
+      - name: Check SKILL.md line counts
+        run: |
+          fail=0
+          for f in skills/*/SKILL.md; do
+            lines=$(wc -l < "$f")
+            if [ "$lines" -gt 500 ]; then
+              echo "::error file=$f::$f has $lines lines (max 500)"
+              fail=1
+            fi
+          done
+          exit $fail
