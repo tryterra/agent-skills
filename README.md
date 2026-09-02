@@ -1,5 +1,9 @@
 # Terra API Agent Skills
 
+[![Validate skills]](https://github.com/tryterra/agent-skills/actions/workflows/validate.yml)
+
+[Validate skills]: https://github.com/tryterra/agent-skills/actions/workflows/validate.yml/badge.svg?branch=main
+
 Agent skills for anyone building with [Terra API](https://tryterra.co) – the unified health & fitness data API for 500+ wearables and health data sources (Garmin, Fitbit, Oura, Whoop, Apple Health, Samsung Health, Strava, Dexcom, and more).
 
 These skills follow the [Agent Skills](https://agentskills.io) open standard, so they work with Claude Code, Cursor, GitHub Copilot, Gemini CLI, and any other agent that supports the format. Once installed, your agent automatically uses them when you work on a Terra API integration.
