@@ -1,0 +1,13 @@
+{
+  "version": "1.0.0",
+  "organization": "Terra API",
+  "date": "July 2026",
+  "abstract": "Push GPS routes to users' fitness devices with Terra API Routes (pre-release): the create-then-push workflow, the RouteTemplate and Waypoint data model, per-provider wire formats and feature gaps for Garmin, COROS, and Wahoo, cascade re-pushes, and route deletion.",
+  "references": [
+    "https://docs.tryterra.co/routes-api-pre-release/overview",
+    "https://docs.tryterra.co/routes-api-pre-release/introduction",
+    "https://docs.tryterra.co/routes-api-pre-release/core-concepts",
+    "https://docs.tryterra.co/routes-api-pre-release/sport-specific-examples",
+    "https://docs.tryterra.co/routes-api-pre-release/provider-compatibility"
+  ]
+}

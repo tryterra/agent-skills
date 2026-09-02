@@ -1,0 +1,113 @@
+{
+  "skills": [
+    {
+      "name": "terra-cli",
+      "description": ">- Inspect and change Terra API account configuration from the terminal with the terra CLI, instead of clicking in the Terra dashboard: environments (dev-ids), enabled providers, data scopes, webhook destinations, API keys, delivered events, users, team, and billing. Also reaches any admin or data API endpoint directly. Use when a task needs Terra API account state read or changed, when you would otherwise tell the user to open dashboard.tryterra.co, when debugging what a webhook actually delivered, or when the user mentions terra-cli, terra login, TERRA_ADMIN_TOKEN, or a dev-id.",
+      "files": ["SKILL.md"]
+    },
+    {
+      "name": "terra-lab-reports",
+      "description": "Best practices and API reference for Terra Lab Reports (pre-release) – convert clinical lab report PDFs and images into structured, standardized biomarker data. Use when parsing blood test results, extracting biomarkers, mapping to LOINC or UCUM unit codes, handling reference ranges, handling lab_report.completed / lab_report.failed webhooks, or working with PDF lab results and lab report OCR. Covers the async upload/standardize/deliver lifecycle, the event envelope (event_id, upload_id), the layered result model (source, biomarker, measurement, interpretation, reference ranges), unmatched-biomarker handling, snowflake IDs, and idempotent webhook processing.",
+      "files": [
+        "SKILL.md",
+        "references/api-reference.md",
+        "references/biomarkers.md",
+        "references/webhook-payload.md",
+        "rules/_sections.md",
+        "rules/_template.md",
+        "rules/api-poll-at-most-every-5s.md",
+        "rules/api-space-bulk-uploads.md",
+        "rules/data-filter-ranges-by-demographics.md",
+        "rules/data-keep-unmatched-biomarkers.md",
+        "rules/data-parse-utf8.md",
+        "rules/data-store-ids-as-strings.md",
+        "rules/webhooks-dedupe-event-id.md"
+      ]
+    },
+    {
+      "name": "terra-mobile-sdk",
+      "description": "Integrate the Terra API mobile SDK for on-device health sources that have no web API – Apple Health (HealthKit), Samsung Health, and Health Connect. Use when connecting Apple Health, Samsung Health, or Health Connect from a mobile app; when working with TerraiOS, TerraAndroid, terra-react, or terra_flutter_bridge; when minting a mobile SDK auth token via generateAuthToken; when configuring HealthKit background delivery, initConnection permission popups, getUserId validation, ProGuard rules for Samsung, or Health Connect manifest permissions; or when writing on-device data with postActivity/postBody/postNutrition.",
+      "files": [
+        "SKILL.md",
+        "references/android.md",
+        "references/flutter.md",
+        "references/ios.md",
+        "references/react-native.md"
+      ]
+    },
+    {
+      "name": "terra-models",
+      "description": "Run Terra API health models (Sleep Window, Health Terrain) over a connected user's data for a date range to return ready-to-use wellness insights. Use when building with Terra API Models, the /v2/models or /v2/models/run endpoints, model_run pricing, or turning a user's Terra API data into a sleep-schedule or whole-body health-shift insight.",
+      "files": ["SKILL.md"]
+    },
+    {
+      "name": "terra-planned-workouts",
+      "description": "Build with the Terra API Planned Workouts product (pre-release) – define a structured workout once and Terra API pushes it to users' devices. Use when pushing planned or structured workouts to Garmin, COROS, Wahoo, Suunto, TrainingPeaks, Huawei, Zepp, Hevy, or Apple watches, building training plans or workout templates, working with intervals, warmups, targets (HR, power, pace, cadence, RPE, zones), FTP or threshold-based personalization, athlete parameters, swimming or strength templates, or handling provider coercion warnings when a device cannot represent a feature.",
+      "files": [
+        "SKILL.md",
+        "references/coercion-scenarios.md",
+        "references/exercise-reference.md",
+        "references/provider-compatibility.md"
+      ]
+    },
+    {
+      "name": "terra-routes",
+      "description": "Push GPS routes to users' fitness devices with Terra API Routes (pre-release). Use when creating GPS courses or navigation routes, defining waypoints and course points, pushing a route to Garmin, COROS, or Wahoo devices, handling GPX or FIT route formats, or building turn-by-turn navigation onto wearables. Covers the create-then-push workflow, the RouteTemplate and Waypoint data model, per-provider wire formats and feature gaps, cascade re-pushes, and route deletion.",
+      "files": ["SKILL.md", "references/provider-details.md"]
+    },
+    {
+      "name": "terra-streaming",
+      "description": "Best practices for the Terra API Streaming (Real-Time) API – live, roughly per-second biometric data from wearables over websockets. Use when building realtime streaming with Terra API, TerraRT SDKs, or wss://ws.tryterra.co; streaming live heart rate, steps, distance, acceleration, ECG, HRV, RR intervals, calories, MET, power, cadence, speed, location, or gyroscope; pairing a wearable over BLE or ANT+; producing sensor data from a mobile app; consuming a live stream on a backend; or streaming from an Apple Watch or Wear OS watch. Covers the producer/broker/consumer architecture, the websocket handshake and opcodes, token minting, close codes, replay/backfill, and per-platform SDK setup (iOS, Android, React Native, Flutter, Wear OS).",
+      "files": [
+        "SKILL.md",
+        "references/android.md",
+        "references/consumer-protocol.md",
+        "references/data-types.md",
+        "references/flutter.md",
+        "references/ios.md",
+        "references/react-native.md",
+        "references/wear-os.md"
+      ]
+    },
+    {
+      "name": "terra-unified-api",
+      "description": "Best practices for integrating Terra API – the unified health & fitness data API for 500+ wearables (Garmin, Fitbit, Oura, Whoop, Apple Health, Strava, Dexcom). Use when building with Terra API or tryterra.co, handling terra-signature (X-Terra-Signature) webhooks, storing wearable health data (activity, sleep, daily, body, nutrition, menstruation, hormone), managing device connections, or merging data across multiple devices.",
+      "files": [
+        "SKILL.md",
+        "rules/_sections.md",
+        "rules/_template.md",
+        "rules/auth-handle-all-events.md",
+        "rules/auth-integrations-endpoint-headers.md",
+        "rules/auth-parse-scopes.md",
+        "rules/auth-reauth-id-swap.md",
+        "rules/auth-reconcile-connections.md",
+        "rules/auth-reference-id.md",
+        "rules/data-coalesce-enrichment-scores.md",
+        "rules/data-columns-over-blobs.md",
+        "rules/data-date-part-only.md",
+        "rules/data-natural-keys.md",
+        "rules/data-superset-overwrite.md",
+        "rules/data-timestamp-localization.md",
+        "rules/devices-enrichment-provider-agnostic.md",
+        "rules/devices-expect-cross-device-duplicates.md",
+        "rules/testing-cover-event-edge-cases.md",
+        "rules/testing-mock-boundaries.md",
+        "rules/webhooks-ack-within-timeout.md",
+        "rules/webhooks-archive-raw-payloads.md",
+        "rules/webhooks-dedupe-terra-reference.md",
+        "rules/webhooks-handle-informational-events.md",
+        "rules/webhooks-verify-raw-body.md"
+      ]
+    },
+    {
+      "name": "terra-vantage",
+      "description": "Order at-home and go-to-lab diagnostic tests and deliver results with the Terra Vantage API. Use when ordering blood tests or DNA tests, integrating at-home test kits, placing diagnostics orders, browsing test products and variants, handling kit activation, simulating order lifecycles in sandbox, tracking fulfillment and shipping, receiving results-status webhooks, fetching FHIR-format lab results, or acknowledging results (a mandatory compliance step before patients can view them). Covers the product-to-order-to-results workflow, authentication (Terra dev-id/API key via HTTP Basic or headers), the AT_HOME vs GO_TO_LAB collection methods, webhook events and HMAC signature verification, delivery debugging, the sandbox environment, and the manual partner onboarding required to get started.",
+      "files": [
+        "SKILL.md",
+        "references/api-reference.md",
+        "references/results.md",
+        "references/webhooks.md"
+      ]
+    }
+  ]
+}

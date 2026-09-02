@@ -1,0 +1,20 @@
+{
+  "$schema": "https://skills.sh/schemas/skills.sh.schema.json",
+  "groupings": [
+    {
+      "title": "Terra API",
+      "description": "Skills for integrating Terra API \u2013 the unified health & fitness data API.",
+      "skills": [
+        "terra-cli",
+        "terra-unified-api",
+        "terra-mobile-sdk",
+        "terra-streaming",
+        "terra-planned-workouts",
+        "terra-routes",
+        "terra-lab-reports",
+        "terra-vantage",
+        "terra-models"
+      ]
+    }
+  ]
+}

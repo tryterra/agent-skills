@@ -1,0 +1,10 @@
+{
+  "version": "1.0.0",
+  "organization": "Terra API",
+  "date": "September 2026",
+  "abstract": "Drive Terra API account configuration from the terminal with the terra CLI: the admin API surface the dashboard uses, the two-API split, and the commands that replace clicking.",
+  "references": [
+    "https://github.com/tryterra/terra-cli",
+    "https://docs.tryterra.co/llms.txt"
+  ]
+}
