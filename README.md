@@ -1,4 +1,4 @@
-# agent-skills
+# Terra API Agent Skills
 
 Agent skills for anyone building with [Terra API](https://tryterra.co) – the unified health & fitness data API for 500+ wearables and health data sources (Garmin, Fitbit, Oura, Whoop, Apple Health, Samsung Health, Strava, Dexcom, and more).
 
@@ -57,23 +57,11 @@ cp -r skills/terra-unified-api ~/.claude/skills/
 | [`terra-vantage`](skills/terra-vantage)                   | Vantage API: order blood/DNA test kits, track fulfillment, deliver and acknowledge FHIR results                                  | ✅ Ready       |
 | [`terra-models`](skills/terra-models)                     | Models: run health models (Sleep Window, Health Terrain) over a connected user's data for ready-to-use wellness insights         | ✅ Ready       |
 
-## Terra API docs MCP server
-
-The full documentation is also exposed as an MCP server at `https://docs.tryterra.co/~gitbook/mcp`, which gives agents search and retrieval over the live docs. Connect it alongside these skills:
-
-```bash
-# Claude Code
-claude mcp add terra-docs --scope user --transport http https://docs.tryterra.co/~gitbook/mcp
-
-# Codex
-codex mcp add terra-docs --url https://docs.tryterra.co/~gitbook/mcp
-```
-
-The skills point at live `.md` doc pages for volatile spec detail; with the MCP connected, agents can search and fetch those pages through it instead of raw URL fetches.
-
 ## Contributing
 
-See [AGENTS.md](AGENTS.md) for the authoring guide – repo layout, SKILL.md conventions, and how to validate. The Terra API docs are LLM-friendly: append `.md` to any [docs.tryterra.co](https://docs.tryterra.co) URL for markdown, or start from [docs.tryterra.co/llms.txt](https://docs.tryterra.co/llms.txt).
+These skills are written in a private source repository and published to [github.com/tryterra/agent-skills](https://github.com/tryterra/agent-skills) automatically. That published copy is read-only: a pull request opened against it cannot be merged, and an edit committed to it is overwritten by the next publish. Corrections, gaps and bug reports are very welcome as [issues](https://github.com/tryterra/agent-skills/issues).
+
+The Terra API docs are LLM-friendly: append `.md` to any [docs.tryterra.co](https://docs.tryterra.co) URL for markdown, or start from [docs.tryterra.co/llms.txt](https://docs.tryterra.co/llms.txt).
 
 ## License
 
