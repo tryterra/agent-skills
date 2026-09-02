@@ -16,9 +16,10 @@ cp -r skills/terra-models ~/.claude/skills/
 
 ## What It Covers
 
-- The two generally-available models: `sleep_window` (a recommended sleep schedule) and `health_terrain` (a weekly whole-body shift relative to the user's baseline)
+- The three generally-available models: `sleep_window` (a recommended sleep schedule), `cycle_phase_tracker` (per-day menstrual cycle phase with detected onsets and fertile windows) and `graph_impute` (Smart Fill: reconstructs the metrics a device did not record)
 - The `GET /v2/models` catalog and `GET /v2/models/run` endpoints, auth, and a working example
 - Reading empty or unsupported results (HTTP 200, not errors) and validating before you run to avoid wasted credits
+- The per-model traps: Smart Fill's required `table`, Sleep Window ignoring the date range, and the cycle tracker's `results` carrying a row for every day including ones with no data
 - Per-run pricing and the boundary with the Unified API
 
 ## Contents
