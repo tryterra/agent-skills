@@ -14,7 +14,7 @@ The Vantage API is a platform for managing blood test and DNA diagnostic product
 
 Account configuration – which providers are enabled, which data types they send, where webhooks are delivered, what one actually delivered – lives in the [Terra dashboard](https://dashboard.tryterra.co), which an agent cannot click. The Terra API CLI does the same things from a terminal: install it with `brew install tryterra/tap/terra` on macOS or `npm install -g @tryterra/cli` elsewhere, then `terra reference --format json` lists every command. Reach for it instead of handing the task back to the user. It administers the integration; it does not replace the API calls this skill describes.
 
-**Availability and onboarding.** Vantage is available in the United Kingdom and the USA, with Germany, Spain, and France listed as coming soon. Onboarding is manual, not self-service: contact Terra API to have your credentials enabled (see [Account setup](https://docs.tryterra.co/vantage-api-docs/account-setup-and-api-keys)). Access is sandbox-first; production is enabled separately when you go live.
+**Availability and onboarding.** Vantage is available in the United Kingdom and the USA, with Germany, Spain, and France listed as coming soon. Onboarding is manual, not self-service: contact Terra API to have your credentials enabled (see [Account setup](https://docs.tryterra.co/vantage-api/account-setup-and-api-keys)). Access is sandbox-first; production is enabled separately when you go live.
 
 ## Authentication
 
@@ -113,18 +113,18 @@ Two ways to drive a sandbox order through its lifecycle:
 
 Append `.md` to any page URL for markdown. If the terra-docs MCP server (`https://docs.tryterra.co/~gitbook/mcp`) is connected, use its tools to search and fetch these pages instead.
 
-- [What is Vantage API?](https://docs.tryterra.co/vantage-api-docs/readme)
-- [Account setup and authentication](https://docs.tryterra.co/vantage-api-docs/account-setup-and-api-keys)
-- [Core concepts](https://docs.tryterra.co/vantage-api-docs/core-concepts)
-- [Ordering your first test](https://docs.tryterra.co/vantage-api-docs/getting-started/ordering-your-first-test)
-- [Working with Sandbox](https://docs.tryterra.co/vantage-api-docs/getting-started/working-with-sandbox)
-- [Webhooks](https://docs.tryterra.co/vantage-api-docs/documentation/webhooks)
-- [Managing orders](https://docs.tryterra.co/vantage-api-docs/documentation/managing-orders)
-- [Test Collection Methods](https://docs.tryterra.co/vantage-api-docs/documentation/test-collection-methods)
-- [Results](https://docs.tryterra.co/vantage-api-docs/documentation/results)
-- [Errors](https://docs.tryterra.co/vantage-api-docs/documentation/errors)
-- [Monitoring and debugging](https://docs.tryterra.co/vantage-api-docs/documentation/monitoring)
-- [Best practices](https://docs.tryterra.co/vantage-api-docs/documentation/best-practices)
-- [Acknowledging Results](https://docs.tryterra.co/vantage-api-docs/important-information/acknowledging-results)
-- [Going to production](https://docs.tryterra.co/vantage-api-docs/important-information/going-to-production)
-- API reference: [activation](https://docs.tryterra.co/vantage-api-reference/core-resources/activation), [clients](https://docs.tryterra.co/vantage-api-reference/core-resources/clients), [orders](https://docs.tryterra.co/vantage-api-reference/core-resources/orders), [products](https://docs.tryterra.co/vantage-api-reference/core-resources/products), [results](https://docs.tryterra.co/vantage-api-reference/core-resources/results)
+- [What is Vantage API?](https://docs.tryterra.co/vantage-api/overview)
+- [Account setup and authentication](https://docs.tryterra.co/vantage-api/account-setup-and-api-keys)
+- [Core concepts](https://docs.tryterra.co/vantage-api/core-concepts)
+- [Ordering your first test](https://docs.tryterra.co/vantage-api/ordering-your-first-test)
+- [Working with Sandbox](https://docs.tryterra.co/vantage-api/working-with-sandbox)
+- [Webhooks](https://docs.tryterra.co/vantage-api/webhooks)
+- [Managing orders](https://docs.tryterra.co/vantage-api/managing-orders)
+- [Test Collection Methods](https://docs.tryterra.co/vantage-api/test-collection-methods)
+- [Results](https://docs.tryterra.co/vantage-api/results)
+- [Errors](https://docs.tryterra.co/vantage-api/errors)
+- [Monitoring and debugging](https://docs.tryterra.co/vantage-api/monitoring)
+- [Best practices](https://docs.tryterra.co/vantage-api/best-practices)
+- [Acknowledging Results](https://docs.tryterra.co/vantage-api/acknowledging-results)
+- [Going to production](https://docs.tryterra.co/vantage-api/going-to-production)
+- API reference: [activation](https://docs.tryterra.co/reference/vantage-api/activation), [clients](https://docs.tryterra.co/reference/vantage-api/clients), [orders](https://docs.tryterra.co/reference/vantage-api/orders), [products](https://docs.tryterra.co/reference/vantage-api/products), [results](https://docs.tryterra.co/reference/vantage-api/results)

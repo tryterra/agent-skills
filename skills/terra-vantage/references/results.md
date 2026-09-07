@@ -1,6 +1,6 @@
 # Vantage API Results and Acknowledgment
 
-How to fetch normalized test results and satisfy the mandatory acknowledgment step. Sources: [results (docs)](https://docs.tryterra.co/vantage-api-docs/documentation/results), [acknowledging results](https://docs.tryterra.co/vantage-api-docs/important-information/acknowledging-results), [results (API reference)](https://docs.tryterra.co/vantage-api-reference/core-resources/results).
+How to fetch normalized test results and satisfy the mandatory acknowledgment step. Sources: [results (docs)](https://docs.tryterra.co/vantage-api/results), [acknowledging results](https://docs.tryterra.co/vantage-api/acknowledging-results), [results (API reference)](https://docs.tryterra.co/reference/vantage-api/results).
 
 ## Endpoints
 

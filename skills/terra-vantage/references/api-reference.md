@@ -1,30 +1,30 @@
 # Vantage API Endpoint Routing
 
-Which endpoint does what, and where to fetch the current request/response schema. Base URLs: `https://vantage.tryterra.co` (production), `https://vantage-sandbox.tryterra.co` (sandbox). Auth: Terra dev-id/API key via HTTP Basic or the `dev-id`+`x-api-key` header pair (see SKILL.md). Errors follow the RFC 7807 problem-detail format; see the [Errors doc](https://docs.tryterra.co/vantage-api-docs/documentation/errors.md).
+Which endpoint does what, and where to fetch the current request/response schema. Base URLs: `https://vantage.tryterra.co` (production), `https://vantage-sandbox.tryterra.co` (sandbox). Auth: Terra dev-id/API key via HTTP Basic or the `dev-id`+`x-api-key` header pair (see SKILL.md). Errors follow the RFC 7807 problem-detail format; see the [Errors doc](https://docs.tryterra.co/vantage-api/errors.md).
 
 For exact field lists, validation limits, and full request/response examples, fetch the live `.md` page linked below. Do not rely on remembered field names: the product is evolving and the live page is authoritative.
 
 | Goal                                  | Endpoint                                                          | Current schema (fetch when building the call)                                                                    |
 | ------------------------------------- | ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| List diagnostic categories            | `GET /api/v1/products`                                            | https://docs.tryterra.co/vantage-api-reference/core-resources/products.md                                        |
+| List diagnostic categories            | `GET /api/v1/products`                                            | https://docs.tryterra.co/reference/vantage-api/products.md                                                       |
 | List products in a category           | `GET /api/v1/products/{product_type_id}`                          | same page (`?show_all=true` adds per-product `enabled` flags)                                                    |
 | List orderable variants               | `GET /api/v1/products/{product_id}/variants`                      | same page                                                                                                        |
 | Curate your catalog                   | `PUT /api/v1/products/selection`                                  | same page (full-set write; curated-out products are non-orderable, 403)                                          |
-| Place an order                        | `POST /api/v1/orders` (201)                                       | https://docs.tryterra.co/vantage-api-reference/core-resources/orders.md                                          |
+| Place an order                        | `POST /api/v1/orders` (201)                                       | https://docs.tryterra.co/reference/vantage-api/orders.md                                                         |
 | Get order details + status history    | `GET /api/v1/orders/{order_id}`                                   | same page                                                                                                        |
 | List/filter orders (keyset-paginated) | `GET /api/v1/orders`                                              | same page (`limit`, `cursor`, `since`, `status`, `collection_type`, `missing=true` for delivered-but-resultless) |
 | Simulate a lifecycle event (non-prod) | `POST /api/v1/orders/{order_id}/simulate`                         | same page                                                                                                        |
-| End-user kit activation (HTML form)   | `GET /api/v1/orders/activate?kit_id=...` (unauth)                 | https://docs.tryterra.co/vantage-api-reference/core-resources/activation.md                                      |
+| End-user kit activation (HTML form)   | `GET /api/v1/orders/activate?kit_id=...` (unauth)                 | https://docs.tryterra.co/reference/vantage-api/activation.md                                                     |
 | Submit activation details             | `POST /api/v1/orders/activate` (unauth)                           | same page                                                                                                        |
-| Nearby lab draw sites (GO_TO_LAB)     | `GET /api/v1/labs?zip_code=...`                                   | https://docs.tryterra.co/vantage-api-docs/documentation/test-collection-methods.md                               |
-| Read/update webhook URL               | `GET`/`PATCH /api/v1/clients/webhook-url`                         | https://docs.tryterra.co/vantage-api-reference/core-resources/clients.md                                         |
-| List result activity                  | `GET /api/v1/results` (`status`, `is_acknowledged` in rows)       | https://docs.tryterra.co/vantage-api-reference/core-resources/results.md                                         |
+| Nearby lab draw sites (GO_TO_LAB)     | `GET /api/v1/labs?zip_code=...`                                   | https://docs.tryterra.co/vantage-api/test-collection-methods.md                                                  |
+| Read/update webhook URL               | `GET`/`PATCH /api/v1/clients/webhook-url`                         | https://docs.tryterra.co/reference/vantage-api/clients.md                                                        |
+| List result activity                  | `GET /api/v1/results` (`status`, `is_acknowledged` in rows)       | https://docs.tryterra.co/reference/vantage-api/results.md                                                        |
 | Fetch results (presigned URL)         | `GET /api/v1/results/{order_item_id}?test_taker_id=`              | same page                                                                                                        |
 | Acknowledge results                   | `POST /api/v1/results/{order_item_id}/acknowledge?test_taker_id=` | same page                                                                                                        |
-| Account analytics summary             | `GET /api/v1/overview`                                            | https://docs.tryterra.co/vantage-api-docs/documentation/monitoring.md                                            |
+| Account analytics summary             | `GET /api/v1/overview`                                            | https://docs.tryterra.co/vantage-api/monitoring.md                                                               |
 | Webhook delivery outcomes             | `GET /api/v1/webhook-deliveries`                                  | same page (`outcome=failed` = rejected/invalid/dead_lettered)                                                    |
 
-A worked end-to-end ordering example lives at https://docs.tryterra.co/vantage-api-docs/getting-started/ordering-your-first-test.md
+A worked end-to-end ordering example lives at https://docs.tryterra.co/vantage-api/ordering-your-first-test.md
 
 ## Semantics the schema pages do not spell out
 
