@@ -49,17 +49,17 @@ cp -r skills/terra-unified-api ~/.claude/skills/
 
 ## Skills
 
-| Skill                                                     | Description                                                                                                                      | Status         |
-| --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | -------------- |
-| [`terra-cli`](skills/terra-cli)                           | Terra API CLI: read and change account configuration from the terminal instead of the dashboard, and reach any endpoint directly | ✅ Ready       |
-| [`terra-unified-api`](skills/terra-unified-api)           | Best-practice rules: webhooks & signature verification, data idempotency, connection lifecycle, multi-device data, testing       | ✅ Ready       |
-| [`terra-mobile-sdk`](skills/terra-mobile-sdk)             | Mobile SDK: Apple Health, Samsung Health, Health Connect (iOS, Android, React Native, Flutter)                                   | ✅ Ready       |
-| [`terra-streaming`](skills/terra-streaming)               | Realtime streaming: websockets, Real-Time SDK, live sensor data (iOS, Android, React Native, Flutter, Wear OS)                   | ✅ Ready       |
-| [`terra-planned-workouts`](skills/terra-planned-workouts) | Planned Workouts API: push structured workouts with intervals and targets to wearables                                           | 🧪 Pre-release |
-| [`terra-routes`](skills/terra-routes)                     | Routes API: push GPS courses with waypoints to Garmin, COROS, Wahoo devices                                                      | 🧪 Pre-release |
-| [`terra-lab-reports`](skills/terra-lab-reports)           | Lab Reports API: parse lab report PDFs/images into standardized biomarkers (LOINC, UCUM)                                         | 🧪 Pre-release |
-| [`terra-vantage`](skills/terra-vantage)                   | Vantage API: order blood/DNA test kits, track fulfillment, deliver and acknowledge FHIR results                                  | ✅ Ready       |
-| [`terra-models`](skills/terra-models)                     | Models: run health models (Sleep Window, Health Terrain) over a connected user's data for ready-to-use wellness insights         | ✅ Ready       |
+| Skill                                                     | Description                                                                                                                                              | Status         |
+| --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
+| [`terra-cli`](skills/terra-cli)                           | Terra API CLI: read and change account configuration from the terminal instead of the dashboard, debug webhook delivery, and reach any endpoint directly | ✅ Ready       |
+| [`terra-unified-api`](skills/terra-unified-api)           | Best-practice rules: webhooks & signature verification, data idempotency, connection lifecycle, multi-device data, testing                               | ✅ Ready       |
+| [`terra-mobile-sdk`](skills/terra-mobile-sdk)             | Mobile SDK: Apple Health, Samsung Health, Health Connect (iOS, Android, React Native, Flutter)                                                           | ✅ Ready       |
+| [`terra-streaming`](skills/terra-streaming)               | Realtime streaming: websockets, Real-Time SDK, live sensor data (iOS, Android, React Native, Flutter, Wear OS)                                           | ✅ Ready       |
+| [`terra-planned-workouts`](skills/terra-planned-workouts) | Planned Workouts API: push structured workouts with intervals and targets to wearables                                                                   | 🧪 Pre-release |
+| [`terra-routes`](skills/terra-routes)                     | Routes API: push GPS courses with waypoints to Garmin, COROS, Wahoo devices                                                                              | 🧪 Pre-release |
+| [`terra-lab-reports`](skills/terra-lab-reports)           | Lab Reports API: parse lab report PDFs/images into standardized biomarkers (LOINC, UCUM)                                                                 | 🧪 Pre-release |
+| [`terra-vantage`](skills/terra-vantage)                   | Vantage API: order blood/DNA test kits, track fulfillment, deliver and acknowledge FHIR results                                                          | ✅ Ready       |
+| [`terra-models`](skills/terra-models)                     | Models: run health models (Sleep Window, Health Terrain) over a connected user's data for ready-to-use wellness insights                                 | ✅ Ready       |
 
 ## Contributing
 

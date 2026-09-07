@@ -1,10 +1,11 @@
 {
-  "version": "1.0.0",
+  "version": "2.0.0",
   "organization": "Terra API",
   "date": "September 2026",
-  "abstract": "Drive Terra API account configuration from the terminal with the terra CLI: the admin API surface the dashboard uses, the two-API split, and the commands that replace clicking.",
+  "abstract": "Drive Terra API account configuration from the terminal with the terra CLI: the two-API split, the preflight checks, the guardrails that stop an unattended run, and task playbooks for auditing an account, setting up an environment, the local development loop, debugging a webhook, triaging a report about one user, connecting a user, calling the data API, comparing environments, going to production, credentials, team access, billing, and scripting.",
   "references": [
     "https://github.com/tryterra/terra-cli",
+    "https://docs.tryterra.co/developer-tools/terra-cli/terra-cli",
     "https://docs.tryterra.co/llms.txt"
   ]
 }

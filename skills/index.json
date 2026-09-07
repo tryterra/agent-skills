@@ -2,8 +2,24 @@
   "skills": [
     {
       "name": "terra-cli",
-      "description": ">- Inspect and change Terra API account configuration from the terminal with the terra CLI, instead of clicking in the Terra dashboard: environments (dev-ids), enabled providers, data scopes, webhook destinations, API keys, delivered events, users, team, and billing. Also reaches any admin or data API endpoint directly. Use when a task needs Terra API account state read or changed, when you would otherwise tell the user to open dashboard.tryterra.co, when debugging what a webhook actually delivered, or when the user mentions terra-cli, terra login, TERRA_ADMIN_TOKEN, or a dev-id.",
-      "files": ["SKILL.md"]
+      "description": "Read and change Terra API account configuration from the terminal with the terra CLI, instead of clicking in the Terra API dashboard: environments (dev-ids), enabled providers, data scopes, webhook destinations, API keys and data tokens, delivered webhook events, users, health scores, team, and billing. Also reaches any admin or data API endpoint directly with terra api and terra data-api. Use when a task needs Terra API account state read or changed, when you would otherwise tell the user to open dashboard.tryterra.co, when a webhook did not arrive or has to be resent, when a user connection has to be created or verified, when you want to try a data API request before writing the code that sends it, or when the user mentions terra-cli, terra login, terra agent setup, TERRA_ADMIN_TOKEN, a dev-id, or an x-api-key.",
+      "files": [
+        "SKILL.md",
+        "references/account-audit.md",
+        "references/billing-and-usage.md",
+        "references/command-map.md",
+        "references/comparing-environments.md",
+        "references/credentials.md",
+        "references/data-api.md",
+        "references/environment-setup.md",
+        "references/going-to-production.md",
+        "references/local-development.md",
+        "references/scripting.md",
+        "references/support-triage.md",
+        "references/team-and-access.md",
+        "references/user-connections.md",
+        "references/webhook-debugging.md"
+      ]
     },
     {
       "name": "terra-lab-reports",

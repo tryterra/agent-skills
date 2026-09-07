@@ -12,7 +12,22 @@ compatibility: Requires network access to docs.tryterra.co for full request and 
 
 Run one of Terra API's health models over a connected user's data for a date range and get a ready-to-use insight back: one request in, one insight out. No model to host. Every model is a **wellness indicator, not a medical or diagnostic tool**; never present its output as clinical.
 
-Account configuration – which providers are enabled, which data types they send, where webhooks are delivered, what one actually delivered – lives in the [Terra dashboard](https://dashboard.tryterra.co), which an agent cannot click. The Terra API CLI does the same things from a terminal: install it with `brew install tryterra/tap/terra` on macOS or `npm install -g @tryterra/cli` elsewhere, then `terra reference --format json` lists every command. Reach for it instead of handing the task back to the user. It administers the integration; it does not replace the API calls this skill describes.
+## From the terminal
+
+Account configuration lives in the [Terra dashboard](https://dashboard.tryterra.co), which an agent cannot click. The `terra` CLI does the same from a terminal, and Models has generated commands of its own, including the run log that says why a run did not return what you expected:
+
+```sh
+terra models catalog list                                           # the models available, account-wide
+terra models runs list --env <dev-id> --status error                # failed runs
+terra models runs list --env <dev-id> --user-id <uuid> --model <model>
+terra models runs list --env <dev-id> --run-id <run_id>             # one run, by id
+```
+
+Two things about that log. It holds **30 days** by default, so an older run is not there and an empty page is not evidence a run never happened. But `--run-id` widens the lookup to the full retained history, so a run you have an id for is never cut off by the window.
+
+Because a run costs a credit whether or not it returns an insight, `runs list --status error` is also the fastest read on credits being spent on runs that never produced anything.
+
+Install it with `brew install tryterra/tap/terra` on macOS or `npm install -g @tryterra/cli` elsewhere. The `terra-cli` skill carries the guardrails (`--reveal` on anything returning a credential, `--yes` on anything destructive), the exit codes, and a playbook per task. It administers the integration; it does not replace the API calls this skill describes.
 
 ## When to use this
 

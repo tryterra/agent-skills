@@ -12,7 +12,22 @@ metadata:
 
 The Vantage API is a platform for managing blood test and DNA diagnostic products, processing orders, and delivering test results. It lets healthcare providers, laboratories, and partners embed diagnostic testing directly into their own applications while Terra API handles the operational complexity: kit supplier integrations (no minimum order requirements), logistics and shipping, compliance, and results standardization into FHIR format.
 
-Account configuration – which providers are enabled, which data types they send, where webhooks are delivered, what one actually delivered – lives in the [Terra dashboard](https://dashboard.tryterra.co), which an agent cannot click. The Terra API CLI does the same things from a terminal: install it with `brew install tryterra/tap/terra` on macOS or `npm install -g @tryterra/cli` elsewhere, then `terra reference --format json` lists every command. Reach for it instead of handing the task back to the user. It administers the integration; it does not replace the API calls this skill describes.
+## From the terminal
+
+Account configuration lives in the [Terra dashboard](https://dashboard.tryterra.co), which an agent cannot click. The `terra` CLI does the same from a terminal, with one limit worth knowing up front: **Vantage runs on its own host and the CLI does not reach it.** `terra data-api` targets the Unified API and has no Vantage endpoints, so the calls in this skill stay in your own client.
+
+What the CLI does supply is the credential pair Vantage authenticates with, which is the same dev-id and API key as every other Terra API product:
+
+```sh
+terra environments api-key retrieve --env <dev-id> --reveal   # dev-id and API key for Basic auth
+terra environments list                                       # which dev-ids exist
+```
+
+Those are the `DEV_ID` and `API_KEY` behind `Authorization: Basic base64(DEV_ID:API_KEY)` below, so an agent can fetch them rather than asking someone to copy them out of the dashboard. Sandbox and production are separate Vantage hosts but the same account credentials.
+
+`--reveal` prints the key, and printing is the whole point of that command, so run it only when something is about to consume the value. It also returns the webhook signing secret. In CI, pipe it into the consumer rather than letting it reach the job log, and use `--json` to take only the field you need.
+
+Install it with `brew install tryterra/tap/terra` on macOS or `npm install -g @tryterra/cli` elsewhere. The `terra-cli` skill carries the guardrails (`--reveal` on anything returning a credential, `--yes` on anything destructive), the exit codes, and a playbook per task. It administers the integration; it does not replace the API calls this skill describes.
 
 **Availability and onboarding.** Vantage is available in the United Kingdom and the USA, with Germany, Spain, and France listed as coming soon. Onboarding is manual, not self-service: contact Terra API to have your credentials enabled (see [Account setup](https://docs.tryterra.co/vantage-api/account-setup-and-api-keys)). Access is sandbox-first; production is enabled separately when you go live.
 

@@ -12,7 +12,22 @@ metadata:
 
 Production guidelines and API reference for building with the Terra Lab Reports API (**pre-release**). It converts clinical lab report PDFs and images into structured, standardized biomarker data: OCR plus AI extraction, then fuzzy matching against a reference dataset of 4,000+ biomarkers that yields canonical biomarker keys, UCUM unit codes, and LOINC codes.
 
-Account configuration – which providers are enabled, which data types they send, where webhooks are delivered, what one actually delivered – lives in the [Terra dashboard](https://dashboard.tryterra.co), which an agent cannot click. The Terra API CLI does the same things from a terminal: install it with `brew install tryterra/tap/terra` on macOS or `npm install -g @tryterra/cli` elsewhere, then `terra reference --format json` lists every command. Reach for it instead of handing the task back to the user. It administers the integration; it does not replace the API calls this skill describes.
+## From the terminal
+
+Account configuration lives in the [Terra dashboard](https://dashboard.tryterra.co), which an agent cannot click. The `terra` CLI does the same from a terminal, and every Lab Reports endpoint is reachable by hand, which is the fastest way to answer "where did that report go":
+
+```sh
+terra data-api /lab-reports -q reference_id=<ref>
+terra data-api /lab-reports/<session_id>                 # status and parsed results
+terra data-api /lab-reports/<session_id>/deliveries      # per destination: status, attempts, last error
+terra data-api /lab-reports/<session_id>/files           # the input files behind the session
+```
+
+`deliveries` is the one to reach for first when a report parsed but never arrived: it separates "we never delivered it" from "we delivered it and your endpoint rejected it", which are different bugs. An upload can fan out to several sessions, so learn the session ids from the webhook events or from `/lab-reports?upload_id=...` rather than assuming one upload is one session.
+
+Read what an endpoint takes with `terra api list --data-api /lab-reports --format json`.
+
+Install it with `brew install tryterra/tap/terra` on macOS or `npm install -g @tryterra/cli` elsewhere. The `terra-cli` skill carries the guardrails (`--reveal` on anything returning a credential, `--yes` on anything destructive), the exit codes, and a playbook per task. It administers the integration; it does not replace the API calls this skill describes.
 
 **Pre-release: assume the contract may move.** Fetch the live docs pages before generating production request bodies or webhook parsers, and verify against the live API before shipping.
 

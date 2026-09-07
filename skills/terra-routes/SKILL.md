@@ -12,7 +12,20 @@ metadata:
 
 Terra API Routes is a write-to-device product (pre-release): define a GPS route once with waypoints, and Terra API pushes it to your users' connected devices for on-device navigation. The route appears on the watch or bike computer after the user's next device sync, so your app never has to speak each provider's native route format.
 
-Account configuration – which providers are enabled, which data types they send, where webhooks are delivered, what one actually delivered – lives in the [Terra dashboard](https://dashboard.tryterra.co), which an agent cannot click. The Terra API CLI does the same things from a terminal: install it with `brew install tryterra/tap/terra` on macOS or `npm install -g @tryterra/cli` elsewhere, then `terra reference --format json` lists every command. Reach for it instead of handing the task back to the user. It administers the integration; it does not replace the API calls this skill describes.
+## From the terminal
+
+Account configuration lives in the [Terra dashboard](https://dashboard.tryterra.co), which an agent cannot click. The `terra` CLI does the same from a terminal. Routes is pre-release, so it has **no generated commands and no endpoints in the description the CLI pins**. That matters in a specific way: `terra data-api` checks a path against that description before sending, so a routes path is rejected locally as a typo unless you say otherwise.
+
+```sh
+terra api list --data-api                          # what the pinned description does cover
+terra data-api /routes -X POST --body-file route.json --no-verify
+```
+
+`--no-verify` sends the path exactly as typed, which is what an endpoint newer than the pin needs. Everything else still applies: `--dry-run` to see the request, `-i` for the status line, `--jq` to filter the response.
+
+The account configuration around Routes does have commands. `terra unified-api sources list --env <dev-id>` says which of the devices below are enabled, and `terra users list --env <dev-id> --provider GARMIN` says whether a user is connected to push a course to.
+
+Install it with `brew install tryterra/tap/terra` on macOS or `npm install -g @tryterra/cli` elsewhere. The `terra-cli` skill carries the guardrails (`--reveal` on anything returning a credential, `--yes` on anything destructive), the exit codes, and a playbook per task. It administers the integration; it does not replace the API calls this skill describes.
 
 Only Garmin, COROS, and Wahoo are supported. Feature coverage differs sharply between them (see the provider matrix below), so design routes for the lowest common denominator unless you know every user is on Garmin.
 

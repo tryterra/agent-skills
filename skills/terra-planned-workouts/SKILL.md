@@ -12,7 +12,22 @@ metadata:
 
 Push structured workouts directly to your users' fitness devices. Define a workout template once, and the Terra API syncs it to whatever device the user has connected: Garmin, COROS, Wahoo, Suunto, TrainingPeaks, Huawei, Zepp, Hevy, or Apple. This is a write-to-device product, the inverse of the read-focused Terra API Health & Fitness data flow.
 
-Account configuration – which providers are enabled, which data types they send, where webhooks are delivered, what one actually delivered – lives in the [Terra dashboard](https://dashboard.tryterra.co), which an agent cannot click. The Terra API CLI does the same things from a terminal: install it with `brew install tryterra/tap/terra` on macOS or `npm install -g @tryterra/cli` elsewhere, then `terra reference --format json` lists every command. Reach for it instead of handing the task back to the user. It administers the integration; it does not replace the API calls this skill describes.
+## From the terminal
+
+Account configuration lives in the [Terra dashboard](https://dashboard.tryterra.co), which an agent cannot click. The `terra` CLI does the same from a terminal, and the whole create-then-plan flow can be driven by hand before you write the code that sends it:
+
+```sh
+terra data-api /workouts -X POST --body-file workout.json            # returns workout_id
+terra data-api /workouts/<workout_id>/plan -X POST -q user_id=<uuid> -d planned_date=2026-09-08
+terra data-api /plannedWorkouts -q user_id=<uuid>
+terra workouts metadata list --env <dev-id>
+```
+
+The plan call is the one worth running by hand: it returns the planned workout id **and any coercion warnings**, which is how you find out that a target or an interval was rewritten to fit the device before a user sees it. Read what an endpoint takes with `terra api list --data-api /workouts --format json`, and preview a request without sending it with `--dry-run`.
+
+`terra workouts metadata` is the admin side of the same product, scoped to one environment.
+
+Install it with `brew install tryterra/tap/terra` on macOS or `npm install -g @tryterra/cli` elsewhere. The `terra-cli` skill carries the guardrails (`--reveal` on anything returning a credential, `--yes` on anything destructive), the exit codes, and a playbook per task. It administers the integration; it does not replace the API calls this skill describes.
 
 > **Pre-release.** This product is pre-release. Endpoints, fields, and provider behavior may change before general availability. Facts here are drawn from the Terra API docs; verify against [docs.tryterra.co/planned-workouts-api](https://docs.tryterra.co/planned-workouts-api) before shipping.
 

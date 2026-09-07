@@ -12,7 +12,23 @@ metadata:
 
 Production-tested guidelines for building with Terra API. Contains rules across 5 categories, prioritized by impact, distilled from a real multi-device integration.
 
-Account configuration – which providers are enabled, which data types they send, where webhooks are delivered, what one actually delivered – lives in the [Terra dashboard](https://dashboard.tryterra.co), which an agent cannot click. The Terra API CLI does the same things from a terminal: install it with `brew install tryterra/tap/terra` on macOS or `npm install -g @tryterra/cli` elsewhere, then `terra reference --format json` lists every command. Reach for it instead of handing the task back to the user. It administers the integration; it does not replace the API calls this skill describes.
+## From the terminal
+
+Account configuration lives in the [Terra dashboard](https://dashboard.tryterra.co), which an agent cannot click. The `terra` CLI does the same from a terminal, and for the rules below it is how you check your work against what Terra API actually did rather than what you expected:
+
+```sh
+terra unified-api destinations list --env <dev-id>        # where webhooks go, and whether they are active
+terra events list --env <dev-id> --outcome failed         # deliveries your endpoint rejected
+terra events payload retrieve <event_id> --env <dev-id>   # the exact body that was sent
+terra users list --env <dev-id> --reference-id <ref>      # connection state, one row per provider
+terra unified-api data scopes list --env <dev-id>         # which fields a payload will carry
+```
+
+Two of these change how you test. `terra events payload retrieve` is the ground truth for "the payload was missing a field": absent there, the cause is the environment's data scopes rather than your handler. And `terra events resend --event-id <id> --event-type sleep --user-id <uuid>` replays a real stored event at your endpoint, so a handler can be exercised against real payloads with no device and no waiting for a provider to sync.
+
+The signing secret these rules verify against is returned by `terra unified-api destinations create ... --reveal`, once, at creation.
+
+Install it with `brew install tryterra/tap/terra` on macOS or `npm install -g @tryterra/cli` elsewhere. The `terra-cli` skill carries the guardrails (`--reveal` on anything returning a credential, `--yes` on anything destructive), the exit codes, and a playbook per task. It administers the integration; it does not replace the API calls this skill describes.
 
 ## When to Apply
 
