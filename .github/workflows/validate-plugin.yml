@@ -1,0 +1,36 @@
+name: Validate plugin
+
+# Lives in the public mirror, next to validate.yml, for the same reason: the
+# publishing bot cannot write under .github/workflows, so this directory is
+# edited here. It runs the two plugin validators on the tree as published,
+# which is exactly what plugin hosts install.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Fetch the Agent Plugins manifest schema
+        run: curl -fsSL https://agent-plugins.org/schemas/1.0.0/plugin.schema.json -o "$RUNNER_TEMP/plugin.schema.json"
+
+      - name: Validate plugin.json against the Agent Plugins schema
+        run: npx --yes ajv-cli@5.0.0 validate --spec=draft2020 -s "$RUNNER_TEMP/plugin.schema.json" -d plugin.json
+
+      - name: Validate the Claude Code marketplace and plugin, strictly
+        run: |
+          npx --yes @anthropic-ai/claude-code@2.1.272 plugin validate . --strict
+          npx --yes @anthropic-ai/claude-code@2.1.272 plugin validate .claude-plugin/plugin.json --strict
