@@ -1,30 +1,20 @@
 {
-  "name": "terra-agent-skills",
+  "name": "terra",
   "owner": {
     "name": "Terra API",
     "email": "dev@tryterra.co"
   },
   "metadata": {
-    "description": "Agent skills for building with Terra API",
-    "version": "0.1.0"
+    "description": "Connect your coding agent to Terra API",
+    "version": "1.0.0"
   },
   "plugins": [
     {
       "name": "terra",
-      "description": "Skills for integrating Terra API \u2013 authentication, webhooks, data models, and historical health & fitness data",
+      "description": "Set up, manage and debug your Terra API integration from your coding agent. Ask for the result and the agent does the work through the terra CLI: environments, enabled providers, webhook destinations, credentials, connected users, delivered events and billing, with skills for the Unified API, the mobile and streaming SDKs, planned workouts, routes, lab reports, Vantage and Models.",
       "source": "./",
-      "strict": false,
-      "skills": [
-        "./skills/terra-cli",
-        "./skills/terra-unified-api",
-        "./skills/terra-mobile-sdk",
-        "./skills/terra-streaming",
-        "./skills/terra-planned-workouts",
-        "./skills/terra-routes",
-        "./skills/terra-lab-reports",
-        "./skills/terra-vantage",
-        "./skills/terra-models"
-      ]
+      "category": "development",
+      "homepage": "https://github.com/tryterra/agent-skills"
     }
   ]
 }

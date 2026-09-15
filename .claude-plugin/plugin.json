@@ -1,0 +1,24 @@
+{
+  "name": "terra",
+  "displayName": "Terra API",
+  "version": "1.0.0",
+  "description": "Set up, manage and debug your Terra API integration from your coding agent. Ask for the result and the agent does the work through the terra CLI: environments, enabled providers, webhook destinations, credentials, connected users, delivered events and billing, with skills for the Unified API, the mobile and streaming SDKs, planned workouts, routes, lab reports, Vantage and Models.",
+  "author": {
+    "name": "Terra API",
+    "email": "dev@tryterra.co",
+    "url": "https://tryterra.co"
+  },
+  "homepage": "https://docs.tryterra.co",
+  "repository": "https://github.com/tryterra/agent-skills",
+  "license": "MIT",
+  "keywords": [
+    "terra",
+    "terra-api",
+    "wearables",
+    "health-data",
+    "fitness-api",
+    "webhooks",
+    "cli"
+  ],
+  "hooks": "./hooks/hooks.json"
+}

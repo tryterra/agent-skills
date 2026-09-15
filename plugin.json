@@ -1,0 +1,44 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "terra",
+  "version": "1.0.0",
+  "description": "Set up, manage and debug your Terra API integration from your coding agent. Ask for the result and the agent does the work through the terra CLI: environments, enabled providers, webhook destinations, credentials, connected users, delivered events and billing, with skills for the Unified API, the mobile and streaming SDKs, planned workouts, routes, lab reports, Vantage and Models.",
+  "author": {
+    "name": "Terra API",
+    "email": "dev@tryterra.co",
+    "url": "https://tryterra.co"
+  },
+  "homepage": "https://docs.tryterra.co",
+  "repository": "https://github.com/tryterra/agent-skills",
+  "license": "MIT",
+  "keywords": [
+    "terra",
+    "terra-api",
+    "wearables",
+    "health-data",
+    "fitness-api",
+    "webhooks",
+    "cli"
+  ],
+  "extensions": {
+    "com.openai": {
+      "hooks": "./hooks/hooks.json",
+      "interface": {
+        "displayName": "Terra API",
+        "shortDescription": "Set up, manage and debug your Terra API integration",
+        "longDescription": "Connects your coding agent to Terra API, the unified health and fitness data API for 500+ wearables. Ask for the result and the agent does the work through the terra CLI: create environments, turn providers on and off, point webhooks at your server, manage credentials, see which users have connected and replay the events your integration received. Skills cover the Unified API, the mobile and streaming SDKs, planned workouts, routes, lab reports, Vantage and Models.",
+        "developerName": "Terra API",
+        "category": "Developer Tools",
+        "capabilities": ["Interactive", "Write"],
+        "websiteURL": "https://tryterra.co",
+        "privacyPolicyURL": "https://tryterra.co/privacy",
+        "termsOfServiceURL": "https://tryterra.co/terms-of-service",
+        "defaultPrompt": [
+          "Get started with Terra API.",
+          "Which wearable providers are enabled in my dev environment, and where are its webhooks going?",
+          "A sleep webhook never arrived for one of my users. Find out what Terra API delivered, and resend it."
+        ]
+      }
+    }
+  }
+}
