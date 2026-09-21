@@ -19,18 +19,18 @@ Account configuration lives in the [Terra dashboard](https://dashboard.tryterra.
 **Setting up, once.** The backend that mints per-user tokens needs a credential of its own:
 
 ```sh
-terra environments list --json dev_id,name                    # the dev-id the app is built against
-terra data-tokens create --env <dev-id> --name mobile --scopes auth:write --reveal
+terra environments list --select dev_id,name                    # the dev-id the app is built against
+terra data-tokens create --env <dev-id> --name mobile --scopes auth:write
 ```
 
 **Checking your work, as often as you like.** These are read-only and print no credential material:
 
 ```sh
-terra data-tokens list --env <dev-id> --json token_id,name,scopes,expires_at,last_used_at,revoked_at
-terra users list --env <dev-id> --provider APPLE --json user_id,reference_id,active
+terra data-tokens list --env <dev-id> --select token_id,name,scopes,expires_at,last_used_at,revoked_at
+terra users list --env <dev-id> --provider APPLE --select user_id,reference_id,active
 ```
 
-`data-tokens list` is metadata only, which is what makes it the right check: it says whether a usable token exists and what it is scoped for, without re-showing any bearer. Re-showing one is the separate, `keys:read`-gated `terra data-tokens secret retrieve`.
+`data-tokens list` is metadata only, which is what makes it the right check: it says whether a usable token exists and what it is scoped for, without re-showing any bearer. Re-showing one is the separate, `keys:read`-gated `terra data-tokens retrieve-secret`.
 
 **Exercising the mint path by hand.** This one is not a read: it mints the short-lived token `initConnection()` takes, and prints it.
 
@@ -44,13 +44,13 @@ Useful for checking the flow end to end before the backend exists, but it is sti
 
 The reference files and shipped SDK versions call `POST /auth/generateAuthToken`. That is the deprecated spelling of this endpoint and is identical to it, same parameters and same response, kept indefinitely because released SDKs call that path. Either works; new code should use `/auth/tokens`.
 
-Reach for `terra environments api-key retrieve --reveal` only when something genuinely needs the environment's API key. Nothing in the mobile flow does, and it prints the webhook signing secret alongside it.
+Reach for `terra environments retrieve-api-key` only when something genuinely needs the environment's API key. Nothing in the mobile flow does, and it prints the webhook signing secret alongside it.
 
 **Never ship the admin token or the environment API key in an app.** The SDK takes a short-lived auth token minted per user, and `terra data-tokens create --scopes auth:write` is the explicitly scoped, revocable credential for the backend that mints them: several coexist per environment, so rotation is mint-new then revoke-old with no cutover.
 
 After a device connects, `terra users list --reference-id <ref>` says whether the record landed and stayed active, which separates an SDK problem from a permissions one.
 
-Install it with `brew install tryterra/tap/terra` on macOS or `npm install -g @tryterra/cli` elsewhere. The `terra-cli` skill carries the guardrails (`--reveal` on anything returning a credential, `--yes` on anything destructive), the exit codes, and a playbook per task. It administers the integration; it does not replace the API calls this skill describes.
+Install it with `brew install tryterra/tap/terra` on macOS or `npm install -g @tryterra/cli` elsewhere. The `terra-cli` skill carries the guardrails (`--yes` on destructive commands and careful handling of credential output), the exit codes, and a playbook per task. It administers the integration; it does not replace the API calls this skill describes.
 
 ## When the mobile SDK is the right tool
 

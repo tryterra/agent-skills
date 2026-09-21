@@ -24,7 +24,7 @@ By default auth runs against Terra API's own OAuth app for the provider. To run
 it against the customer's:
 
 ```sh
-terra unified-api sources credentials retrieve GARMIN --env <dev-id> --reveal
+terra unified-api sources credentials retrieve GARMIN --env <dev-id>
 terra unified-api sources credentials replace GARMIN --env <dev-id> \
   --client-id <id> --client-secret <secret> --yes
 # full replace: this clears redirect-url, sandbox and verification-secret
@@ -51,19 +51,19 @@ back to the default.
 ```sh
 terra unified-api destinations list --env <dev-id>
 terra unified-api destinations create --env <dev-id> \
-  --type webhook --url https://example.com/hook --reveal
+  --type webhook --url https://example.com/hook
 terra unified-api destinations update <destination_id> --env <dev-id> --active false
 terra unified-api destinations delete <destination_id> --env <dev-id> --yes
 ```
 
-`create` returns the destination's signing secret, so it needs `--reveal` or it
-refuses to run. Capture the secret at creation: it is what the webhook handler
+`create` returns the destination's signing secret. Capture it at creation: it is what the webhook handler
 verifies signatures with. `--event-types` is repeatable and narrows what a
 destination receives; leaving it off sends everything.
 
 A Supabase destination is provisioned through its own OAuth flow rather than a
-URL: `terra unified-api destinations supabase oauth start`, then
-`... oauth projects list`, then `... supabase provision`.
+URL: `terra unified-api destinations supabase start-oauth`, then
+`... supabase poll-oauth <oauth_session_id>`, then
+`... supabase list-projects <oauth_session_id>`, then `... supabase provision`.
 
 ## Which data is sent
 

@@ -131,7 +131,7 @@ terra data-api /lab-reports/<session_id>/deliveries
 
 ## Reading the response
 
-`--jq` filters it. There is no `--json` on the raw commands, because the
+`--jq` filters it. There is no `--select` on the raw commands, because the
 response fields are not known for every path. `-i` prints the status line and
 response headers to stderr, so the body stays pipeable, and they print for a
 failed request too.
@@ -141,7 +141,7 @@ terra data-api /userInfo -q user_id=<uuid> --jq '.user.provider'
 terra data-api /integrations -i | jq '.providers | length'
 ```
 
-`--paginate` walks a cursor-paginated list into NDJSON and needs `-X GET`;
+`--paginate` walks a cursor-paginated list in the selected format and needs `-X GET`;
 `--max-pages` caps it at 10 by default, `0` for no limit.
 
 A DELETE confirms before it is sent, and needs `--yes` where there is no

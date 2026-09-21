@@ -27,7 +27,7 @@ The plan call is the one worth running by hand: it returns the planned workout i
 
 `terra workouts metadata` is the admin side of the same product, scoped to one environment.
 
-Install it with `brew install tryterra/tap/terra` on macOS or `npm install -g @tryterra/cli` elsewhere. The `terra-cli` skill carries the guardrails (`--reveal` on anything returning a credential, `--yes` on anything destructive), the exit codes, and a playbook per task. It administers the integration; it does not replace the API calls this skill describes.
+Install it with `brew install tryterra/tap/terra` on macOS or `npm install -g @tryterra/cli` elsewhere. The `terra-cli` skill carries the guardrails (`--yes` on destructive commands and careful handling of credential output), the exit codes, and a playbook per task. It administers the integration; it does not replace the API calls this skill describes.
 
 > **Pre-release.** This product is pre-release. Endpoints, fields, and provider behavior may change before general availability. Facts here are drawn from the Terra API docs; verify against [docs.tryterra.co/planned-workouts-api](https://docs.tryterra.co/planned-workouts-api) before shipping.
 

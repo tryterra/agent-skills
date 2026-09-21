@@ -9,20 +9,17 @@ with. There are three kinds and they are not interchangeable.
 | Environment API key | The data API, as one environment | Exists per environment                | Until rotated                                   |
 | Data token          | The data API, explicitly scoped  | `terra data-tokens create`            | 365 days by default, up to 1825, or never       |
 
-Every command here returns plaintext credential material, so **every one of
-them needs `--reveal`** or it refuses to print. The flag is an explicit opt-in
-that stops a secret being printed by accident; it does nothing to protect one
-you have chosen to print. Once `--reveal` is passed the value goes to stdout
-like any other output, so in CI it lands in the job log. Redirect it into the
-consumer rather than letting it print, and prefer `--json` to narrow the
-response to the fields you actually need.
+Commands that return credentials print them directly to stdout. Capture the
+response for the consumer instead of letting it enter a transcript or CI log,
+and use `--select` or `--jq` to take only the fields needed. Listing token
+metadata does not reveal the bearer.
 
 ## Admin tokens
 
 ```sh
 terra whoami --format json          # id, scopes, dev_ids, expiry
 terra tokens list                   # every admin token on the account
-terra tokens rotate --reveal --yes  # extend this one
+terra tokens rotate --yes  # extend this one
 terra tokens delete <token_id> --yes
 ```
 
@@ -44,8 +41,8 @@ stored token server-side and removes it locally; a token supplied through
 ## The environment API key
 
 ```sh
-terra environments api-key retrieve --env <dev-id> --reveal
-terra environments api-key rotate --env <dev-id> --reveal --yes
+terra environments retrieve-api-key --env <dev-id>
+terra environments rotate-api-key --env <dev-id> --yes
 ```
 
 `retrieve` prints the dev-id, the API key, and the webhook signing secret, and
@@ -62,8 +59,8 @@ revoke-old with no atomic swap.
 
 ```sh
 terra data-tokens list --env <dev-id>
-terra data-tokens create --env <dev-id> --name ci --scopes auth:write --reveal
-terra data-tokens secret retrieve <token_id> --env <dev-id> --reveal
+terra data-tokens create --env <dev-id> --name ci --scopes auth:write
+terra data-tokens retrieve-secret <token_id> --env <dev-id>
 terra data-tokens delete <token_id> --env <dev-id> --yes
 ```
 
@@ -75,11 +72,11 @@ which is what makes them the right answer for unattended access.
 `--scopes` takes data-plane names only; an admin-plane name is rejected with a 400. `--expires-in-days` defaults to 365 and caps at 1825, and
 `--never-expires` is the non-expiring shape. The two are mutually exclusive.
 The bearer comes back at mint and is retrievable later through
-`data-tokens secret retrieve`, which is gated on `keys:read`.
+`data-tokens retrieve-secret`, which is gated on `keys:read`.
 
 ## Migrating off the legacy API key
 
-The CLI's own help recommends this: `terra environments api-key rotate` exists
+The CLI's own help recommends this: `terra environments rotate-api-key` exists
 for the dashboard's legacy settings page, and data tokens are the shape to move
 to. The legacy key is a single shared secret, so rotating it is an atomic
 cutover that breaks anything still holding the old value the instant it lands.
@@ -87,13 +84,13 @@ Data tokens coexist, so the migration is additive and reversible:
 
 ```sh
 # 1. Mint a token with only the scopes the consumer actually uses
-terra data-tokens create --env <dev-id> --name backend --scopes auth:write --reveal
+terra data-tokens create --env <dev-id> --name backend --scopes auth:write
 
 # 2. Deploy that value, and confirm it is being used
 terra data-tokens list --env <dev-id>
 
 # 3. Only then retire the old credential
-terra environments api-key rotate --env <dev-id> --reveal --yes
+terra environments rotate-api-key --env <dev-id> --yes
 ```
 
 Do them in that order and nothing has a window where both credentials are
@@ -106,7 +103,7 @@ not touch the others.
 The customer's own OAuth app for a provider, rather than Terra API's:
 
 ```sh
-terra unified-api sources credentials retrieve GARMIN --env <dev-id> --reveal
+terra unified-api sources credentials retrieve GARMIN --env <dev-id>
 ```
 
 The client secret is write-only and reads come back masked, so a retrieve
@@ -123,7 +120,7 @@ print.
 
 ## Handling a credential you have printed
 
-Once `--reveal` has printed a secret it is in the transcript. Do not echo it
+Once a command has printed a secret it is in the transcript. Do not echo it
 again, do not put it in a commit, and do not paste it into a file the user did
 not ask for. Where a value has to reach a config file, write it and say that
 you did, rather than repeating it in the reply.

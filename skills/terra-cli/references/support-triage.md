@@ -57,7 +57,7 @@ supplied it, so the report is upstream.
 
 ```sh
 terra events list --env <dev-id> --user-id <uuid> --data-type sleep
-terra events payload retrieve <event_id> --env <dev-id>
+terra events retrieve-payload <event_id> --env <dev-id>
 ```
 
 Now compare three things: what the provider gave (step 3), what was delivered

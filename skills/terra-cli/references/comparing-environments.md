@@ -11,12 +11,12 @@ rather than clicking twice in the dashboard.
 
 Four things account for almost every "works in prod, not staging":
 
-| Check                                          | Command                                                                               |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------- |
-| Which providers are enabled                    | `terra unified-api sources list --env <dev-id>`                                       |
-| Which data types and fields are sent           | `terra unified-api data scopes list --env <dev-id>`                                   |
-| Where webhooks go, and whether they are active | `terra unified-api destinations list --env <dev-id> --json id,url,active,event_types` |
-| Which scores are on                            | `terra unified-api scores list --env <dev-id>`                                        |
+| Check                                          | Command                                                                                 |
+| ---------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Which providers are enabled                    | `terra unified-api sources list --env <dev-id>`                                         |
+| Which data types and fields are sent           | `terra unified-api data scopes list --env <dev-id>`                                     |
+| Where webhooks go, and whether they are active | `terra unified-api destinations list --env <dev-id> --select id,url,active,event_types` |
+| Which scores are on                            | `terra unified-api scores list --env <dev-id>`                                          |
 
 Two more that bite less often: `terra unified-api sources credentials retrieve
 <PROVIDER>` (one environment on the customer's OAuth app and the other on
@@ -46,7 +46,7 @@ terra unified-api sources list --env dev-staging --jq '[.[].provider] | sort | j
 
 Field names vary by resource, so read one row first rather than guessing:
 `terra unified-api sources list --env dev-prod --format json | head`, or
-`--json` with no value to list the selectable fields.
+`--select` with no value to list the selectable fields.
 
 ## Bringing one environment up to another
 

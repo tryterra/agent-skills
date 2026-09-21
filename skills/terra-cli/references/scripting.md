@@ -26,7 +26,7 @@ see [credentials.md](credentials.md).
 ## Output formats
 
 Output is JSON when piped and a table on a terminal. `--format
-json|table|ndjson` overrides that. `json` and `ndjson` reproduce the document
+json|table|yaml|csv|ndjson` overrides that. `json` and `ndjson` reproduce the document
 the API sent, with field order and characters intact, and numbers keep the
 precision the API sent in every format, so a string-encoded 64-bit id is never
 turned into a float. `table` escapes tabs, newlines and escape sequences inside
@@ -39,13 +39,13 @@ response with no body, such as a delete's 204, prints nothing in every format.
 ## Narrowing a response
 
 ```sh
-terra users list --json user_id,provider,active
-terra users list --json                          # list the available fields
+terra users list --select user_id,provider,active
+terra users list --select                          # list the available fields
 terra users list --jq '[.[] | select(.active)] | length'
 terra api /me --jq '.scopes'
 ```
 
-`--json <fields>` names fields in the order you want them and applies to every
+`--select <fields>` names fields in the order you want them and applies to every
 format, so one flag picks both the keys of a JSON document and the columns of a
 table. A field that does not exist is refused before the request is sent. It
 exists only where the API description says what the response contains, so
@@ -61,14 +61,16 @@ data is a usage error, so a script can tell either apart from an API failure.
 List commands fetch one page and say on stderr whether more is available.
 
 ```sh
-terra users list --paginate | jq -r .user_id
+terra users list --paginate --jq '.[].user_id'
 terra users list --paginate --max-pages 0
 ```
 
-`--paginate` walks the cursor to the end and prints NDJSON whatever `--format`
-says, so a consumer can process each line as it arrives. **`--max-pages`
-defaults to 10**; hitting the cap is announced rather than truncating silently,
-which is easy to miss when stdout is piped. Pass `0` for no limit.
+`--paginate` walks the cursor and renders one document in the selected format.
+Use `--format ndjson` for one record per line. `--jq` sees the full result,
+so aggregates include every fetched page. **`--max-pages` defaults to 10**;
+the cap is announced on stderr. Pass `0` for no limit, bearing in mind the whole
+walk is held in memory. If a later page fails, the command exits nonzero and
+prints the pages already fetched, but does not run `--jq` on partial data.
 
 Requests are paced 100ms apart to stay under the rate limit. Filters go on the
 first request only, because the cursor pins the server-side window, and the CLI
@@ -160,16 +162,15 @@ terra environments list --show-headers
 redacted and bodies show only their byte count, so the output is safe to paste
 into an issue, and the response body still goes to stdout.
 
-| Symptom                                          | Cause                                                      | Fix                                                                         |
-| ------------------------------------------------ | ---------------------------------------------------------- | --------------------------------------------------------------------------- |
-| `no environment selected`                        | The command acts on one environment and none was given     | `--env`, `TERRA_ENV`, or `terra environments use`                           |
-| `not logged in`                                  | No stored token and no `TERRA_ADMIN_TOKEN`                 | `terra login`, or set the variable                                          |
-| A credential will not print                      | Secret gating, deliberately                                | Add `--reveal`, and log in with `--scope keys:read` if the scope is missing |
-| A destructive command refuses to run             | No terminal to confirm against                             | Add `--yes`                                                                 |
-| `More results are available`                     | The list has more pages                                    | Add `--paginate`                                                            |
-| `unknown flag: --json`                           | The response is not described, so there are no fields      | Use `--jq`                                                                  |
-| `the endpoint does not exist on this deployment` | A bare 404: wrong path, or the surface is not on that host | Check `terra config --list` for the base URL in use                         |
-| The token was written to a file, not the keyring | No OS keyring was available; the file is mode 0600         | Nothing to fix                                                              |
+| Symptom                                          | Cause                                                      | Fix                                                 |
+| ------------------------------------------------ | ---------------------------------------------------------- | --------------------------------------------------- |
+| `no environment selected`                        | The command acts on one environment and none was given     | `--env`, `TERRA_ENV`, or `terra environments use`   |
+| `not logged in`                                  | No stored token and no `TERRA_ADMIN_TOKEN`                 | `terra login`, or set the variable                  |
+| A destructive command refuses to run             | No terminal to confirm against                             | Add `--yes`                                         |
+| `More results are available`                     | The list has more pages                                    | Add `--paginate`                                    |
+| `unknown flag: --select`                         | The response is not described, so there are no fields      | Use `--jq`                                          |
+| `the endpoint does not exist on this deployment` | A bare 404: wrong path, or the surface is not on that host | Check `terra config --list` for the base URL in use |
+| The token was written to a file, not the keyring | No OS keyring was available; the file is mode 0600         | Nothing to fix                                      |
 
 `terra api <path>` reaches an endpoint without the generated command's
 validation or formatting in the way, which separates "the CLI built the wrong

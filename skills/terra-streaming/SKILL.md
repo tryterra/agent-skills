@@ -12,6 +12,24 @@ metadata:
 
 Guidelines for building on the Terra API Streaming (Real-Time) API, which delivers live, roughly per-second metrics from wearables. This skill carries the architecture and the protocol gotchas inline; platform setup and the full consumer protocol live in `references/`.
 
+## Start from an example app
+
+For a new app, prefer the published example for a React Native producer; use `streaming-consumer-web-app` for a web consumer, then adapt it to the
+user's requirements. Install the CLI if missing, discover the current catalog,
+and clone the closest fit:
+
+```sh
+npm install -g @tryterra/cli
+terra examples list --select name,title,description
+terra examples clone streaming-mobile-app my-app
+```
+
+Listing and cloning need no login or selected environment. The destination
+must not exist and its parent must exist. Read the downloaded README and
+AGENTS.md and follow `next_steps` to install dependencies, configure, and run
+it before building on it. Cloning only downloads files. For an existing app,
+use the example as a reference and adapt the relevant pieces in place.
+
 ## From the terminal
 
 Account configuration lives in the [Terra dashboard](https://dashboard.tryterra.co), which an agent cannot click. The `terra` CLI does the same from a terminal. The streaming websocket surface itself has no CLI commands, and **the CLI does not mint the short-lived token a streaming client authenticates with**: that is minted by your backend, per session, through the flow this skill describes. What the CLI covers is the layer under that: the long-lived credential your backend holds in order to mint them, and whether the user being streamed for exists at all.
@@ -19,17 +37,17 @@ Account configuration lives in the [Terra dashboard](https://dashboard.tryterra.
 A stream that will not open is usually a credential without the right scope, a user id with no connection behind it, or a provider that was never enabled in this environment. All three are read-only checks, so run them before debugging the socket:
 
 ```sh
-terra environments list --json dev_id,name
-terra data-tokens list --env <dev-id> --json token_id,name,scopes,expires_at,last_used_at,revoked_at
-terra users list --env <dev-id> --user-id <uuid> --json user_id,provider,active
+terra environments list --select dev_id,name
+terra data-tokens list --env <dev-id> --select token_id,name,scopes,expires_at,last_used_at,revoked_at
+terra users list --env <dev-id> --user-id <uuid> --select user_id,provider,active
 terra unified-api sources list --env <dev-id>
 ```
 
-`data-tokens list` answers the credential question without printing a secret: it shows which tokens exist, what each is scoped for, and whether one has expired or been revoked. **Do not mint a token to find out whether a token works, and do not reach for `terra environments api-key retrieve --reveal` here**: it prints the environment's API key and webhook signing secret, neither of which tells you anything about a socket, and in CI both land in the job log.
+`data-tokens list` answers the credential question without printing a secret: it shows which tokens exist, what each is scoped for, and whether one has expired or been revoked. **Do not mint a token to find out whether a token works, and do not reach for `terra environments retrieve-api-key` here**: it prints the environment's API key and webhook signing secret, neither of which tells you anything about a socket, and in CI both land in the job log.
 
-Minting is a setup step rather than a diagnostic. When the list genuinely shows no usable token, `terra data-tokens create --env <dev-id> --name streaming --scopes auth:write --reveal` returns the bearer once, and several tokens coexist per environment so the old one keeps working until you revoke it.
+Minting is a setup step rather than a diagnostic. When the list genuinely shows no usable token, `terra data-tokens create --env <dev-id> --name streaming --scopes auth:write` returns the bearer once, and several tokens coexist per environment so the old one keeps working until you revoke it.
 
-Install it with `brew install tryterra/tap/terra` on macOS or `npm install -g @tryterra/cli` elsewhere. The `terra-cli` skill carries the guardrails (`--reveal` on anything returning a credential, `--yes` on anything destructive), the exit codes, and a playbook per task. It administers the integration; it does not replace the API calls this skill describes.
+Install it with `brew install tryterra/tap/terra` on macOS or `npm install -g @tryterra/cli` elsewhere. The `terra-cli` skill carries the guardrails (`--yes` on destructive commands and careful handling of credential output), the exit codes, and a playbook per task. It administers the integration; it does not replace the API calls this skill describes.
 
 ## Streaming vs Health & Fitness
 

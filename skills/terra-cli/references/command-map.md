@@ -31,28 +31,35 @@ alias for `environments`.
 
 ### Session and configuration
 
-`whoami`, `login`, `logout`, `config`, `version`, `reference`, `ask`,
+`whoami`, `login`, `logout`, `config`, `version`, `reference`, `docs ask --question <question>`,
 `agent setup`, `completion <shell>`
+
+### Example apps
+
+For a new app, run `terra examples list` and clone the closest fit with
+`terra examples clone <example> [directory]`. No login or environment is
+needed. Read the downloaded README and AGENTS.md, install its dependencies,
+and build on the working app. Use examples as references for existing projects.
 
 ### Platform
 
 | Group          | Commands                                                                            |
 | -------------- | ----------------------------------------------------------------------------------- |
-| `environments` | `list`, `retrieve`, `create`, `update`, `use`, `api-key retrieve`, `api-key rotate` |
-| `users`        | `list`, `stats retrieve`                                                            |
-| `events`       | `list`, `retrieve`, `payload retrieve`, `resend`                                    |
+| `environments` | `list`, `retrieve`, `create`, `update`, `use`, `retrieve-api-key`, `rotate-api-key` |
+| `users`        | `list`, `stats`                                                                     |
+| `events`       | `list`, `retrieve`, `retrieve-payload`, `stats`, `resend`                           |
 | `tokens`       | `list`, `rotate`, `delete`                                                          |
-| `data-tokens`  | `list`, `create`, `delete`, `secret retrieve`                                       |
+| `data-tokens`  | `list`, `create`, `delete`, `retrieve-secret`                                       |
 
 ### Unified API
 
-| Resource       | Commands                                                                                                                                      |
-| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sources`      | `list`, `enable`, `disable`, `credentials retrieve`, `credentials replace`, `scopes retrieve`, `scopes replace`                               |
-| `destinations` | `list`, `create`, `update`, `delete`, `supabase oauth start`, `supabase oauth retrieve`, `supabase oauth projects list`, `supabase provision` |
-| `data`         | `scopes list`, `scopes update`, `scopes replace`, `processing list`, `processing update`                                                      |
-| `widget`       | `retrieve`, `update`                                                                                                                          |
-| `scores`       | `list`, `retrieve`, `update`, `history list`, `analytics retrieve`                                                                            |
+| Resource       | Commands                                                                                                                            |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `sources`      | `list`, `enable`, `disable`, `credentials retrieve`, `credentials replace`, `scopes retrieve`, `scopes replace`                     |
+| `destinations` | `list`, `create`, `update`, `delete`, `supabase start-oauth`, `supabase poll-oauth`, `supabase list-projects`, `supabase provision` |
+| `data`         | `scopes list`, `scopes update`, `scopes replace`, `processing list`, `processing update`                                            |
+| `widget`       | `retrieve`, `update`                                                                                                                |
+| `scores`       | `list`, `retrieve`, `update`, `history list`, `analytics retrieve`                                                                  |
 
 ### Other products
 
@@ -63,13 +70,13 @@ alias for `environments`.
 
 ### Account
 
-| Group          | Commands                                                                                                                                                                                                          |
-| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `account`      | `update`, `metadata retrieve`, `metadata update`                                                                                                                                                                  |
-| `company`      | `retrieve`, `update`, `onboarding retrieve`, `onboarding update`, `feature-flags list`, `terms retrieve`, `terms create`, `points opt-in`, `referral-code retrieve`, `referral-code create`, `referrals retrieve` |
-| `team`         | `members list`, `members retrieve`, `members update`, `members delete`, `invitations list`, `invitations create`, `invitations delete`                                                                            |
-| `billing`      | `subscriptions list`, `subscriptions create`, `subscriptions cancel-incomplete`, `invoices list`, `invoices upcoming retrieve`, `payment-method retrieve`, `usage retrieve`                                       |
-| `entitlements` | `list`                                                                                                                                                                                                            |
+| Group          | Commands                                                                                                                                                                                                         |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `account`      | `retrieve`, `update`, `retrieve-metadata`, `update-metadata`                                                                                                                                                     |
+| `company`      | `retrieve`, `update`, `retrieve-onboarding`, `update-onboarding`, `list-feature-flags`, `retrieve-terms`, `agree-terms`, `opt-in-points`, `retrieve-referral-code`, `ensure-referral-code`, `retrieve-referrals` |
+| `team`         | `members list`, `members retrieve`, `members update`, `members delete`, `invitations list`, `invitations create`, `invitations delete`                                                                           |
+| `billing`      | `subscriptions list`, `subscriptions create`, `subscriptions cancel-incomplete`, `invoices list`, `invoices upcoming`, `payment-method retrieve`, `usage retrieve`                                               |
+| `entitlements` | `list`                                                                                                                                                                                                           |
 
 ### Raw
 
@@ -82,7 +89,8 @@ The data API has no generated commands at all. Its endpoints are listed in
 
 - `global_flags` sits at the document root and applies to every node, so a flag
   missing from a leaf may still be accepted there.
-- A flag with no `default` has the zero value for its type, not an unknown one.
+- `api_default` is the schema default; `cli_default` is the local parser
+  default. An absent API default does not imply zero or an empty value.
 - `long` carries the required scope and the behavior the flag list does not
   show, including whether an operation is a full replace.
 - `terra <command> --help` truncates a long parameter list and says so.

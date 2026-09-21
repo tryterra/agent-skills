@@ -25,7 +25,7 @@ terra data-api /routes -X POST --body-file route.json --no-verify
 
 The account configuration around Routes does have commands. `terra unified-api sources list --env <dev-id>` says which of the devices below are enabled, and `terra users list --env <dev-id> --provider GARMIN` says whether a user is connected to push a course to.
 
-Install it with `brew install tryterra/tap/terra` on macOS or `npm install -g @tryterra/cli` elsewhere. The `terra-cli` skill carries the guardrails (`--reveal` on anything returning a credential, `--yes` on anything destructive), the exit codes, and a playbook per task. It administers the integration; it does not replace the API calls this skill describes.
+Install it with `brew install tryterra/tap/terra` on macOS or `npm install -g @tryterra/cli` elsewhere. The `terra-cli` skill carries the guardrails (`--yes` on destructive commands and careful handling of credential output), the exit codes, and a playbook per task. It administers the integration; it does not replace the API calls this skill describes.
 
 Only Garmin, COROS, and Wahoo are supported. Feature coverage differs sharply between them (see the provider matrix below), so design routes for the lowest common denominator unless you know every user is on Garmin.
 

@@ -15,8 +15,8 @@ terra login --scope team:write --scope tokens:admin
 ## Who is on the account
 
 ```sh
-terra team members list --json user_id,name,email,role
-terra team invitations list --json id,email,role,created_at,expires_at,claimed_at
+terra team members list --select user_id,name,email,role
+terra team invitations list --select id,email,role,created_at,expires_at,claimed_at
 ```
 
 An invitation with `claimed_at` null has not been accepted. Roles are `admin`
@@ -26,15 +26,15 @@ dashboard's own team editor.
 ## Adding someone
 
 ```sh
-terra team invitations create --email person@example.com --role developer --reveal
+terra team invitations create --email person@example.com --role developer
 ```
 
 Three things about the response:
 
 - It carries a **one-use invitation token, and only its digest is stored**, so
   the value in that response is the only copy. A lost token has to be replaced
-  with a new invitation, not recovered. That is why the command needs
-  `--reveal`.
+  with a new invitation, not recovered. Capture it for the recipient without
+  exposing it in logs.
 - The company comes from the calling token's principal and cannot be named in
   the body, so an invitation always joins your own account.
 - The invitee redeems it while signing in to the dashboard **with that exact
@@ -51,7 +51,7 @@ its author.
 
 ```sh
 # 1. What did they create?
-terra tokens list --json token_id,name,created_by,created_via,scopes,expires_at,last_used_at,revoked_at
+terra tokens list --select token_id,name,created_by,created_via,scopes,expires_at,last_used_at,revoked_at
 
 # 2. Revoke each admin token of theirs
 terra tokens delete <token_id> --yes

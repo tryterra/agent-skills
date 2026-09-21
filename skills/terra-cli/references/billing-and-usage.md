@@ -11,7 +11,7 @@ it to "check" anything, and confirm with the user before running it at all.
 ## Is the product even on the account
 
 ```sh
-terra entitlements list --json capability,source
+terra entitlements list --select capability,source
 ```
 
 This is the check behind **exit code 5**, which means the product is not on the
@@ -23,18 +23,18 @@ exit 1.
 ## What is the account being charged
 
 ```sh
-terra billing subscriptions list --json id,status,collection_method,cancel_at_period_end
-terra billing invoices upcoming retrieve --json amount_due,currency,status
-terra billing invoices list --json id,created_at,amount_due,currency,status
-terra billing payment-method retrieve --json brand,last4,exp_month,exp_year,has_card
+terra billing subscriptions list --select id,status,collection_method,cancel_at_period_end
+terra billing invoices upcoming --select amount_due,currency,status
+terra billing invoices list --select id,created_at,amount_due,currency,status
+terra billing payment-method retrieve --select brand,last4,exp_month,exp_year,has_card
 ```
 
-`invoices upcoming retrieve` is the preview of the next bill, which is the one
+`invoices upcoming` is the preview of the next bill, which is the one
 people actually want when they ask what they will be charged. Both invoice
 commands also return `hosted_invoice_url` and `invoice_pdf` for the human
 copies.
 
-`payment-method retrieve` is masked, so it needs no `--reveal`. `has_card`
+`payment-method retrieve` returns masked card details. `has_card`
 false on an account with an upcoming invoice is worth flagging.
 
 ## Where the usage came from
@@ -58,7 +58,7 @@ To connect a number to the integration that produced it, read the environment's
 own volume:
 
 ```sh
-terra users stats retrieve --env <dev-id> --format json
+terra users stats --env <dev-id> --format json
 ```
 
 That gives cumulative payload and byte volume, per-provider connection counts,
@@ -75,7 +75,7 @@ metered traffic. See [data-api.md](data-api.md).
 ## Reporting it
 
 Give the number, the window it covers, and what moved, rather than a dump of
-the invoice document. `--json` narrows the response to the fields you name and
+the invoice document. `--select` narrows the response to the fields you name and
 is refused before the request is sent if a field does not exist, so it is also
 a way to check what a response contains: run it with no value to list the
 available fields.

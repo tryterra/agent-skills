@@ -11,10 +11,10 @@ cannot change the URL.** It takes only `--active` and `--event-types`, so
 repointing is delete and recreate:
 
 ```sh
-terra unified-api destinations list --env <dev-id> --json id,type,url,active,event_types
+terra unified-api destinations list --env <dev-id> --select id,type,url,active,event_types
 terra unified-api destinations delete <destination_id> --env <dev-id> --yes
 terra unified-api destinations create --env <dev-id> \
-  --type webhook --url https://<new-tunnel>/hook --reveal
+  --type webhook --url https://<new-tunnel>/hook
 ```
 
 **Read `event_types` and `type` off the old row before deleting it.** A
@@ -25,11 +25,11 @@ subscribes to everything. Carry the old values across:
 ```sh
 terra unified-api destinations create --env <dev-id> --type webhook \
   --url https://<new-tunnel>/hook \
-  --event-types sleep --event-types activity --reveal
+  --event-types sleep --event-types activity
 ```
 
-**The new destination has a new signing secret.** `create` returns it, which is
-why `--reveal` is needed, and the handler has to be given the new value or
+**The new destination has a new signing secret.** `create` returns it directly.
+The handler has to be given the new value or
 every delivery fails signature verification. That is the usual cause of a
 handler that worked yesterday and 401s today.
 
@@ -50,7 +50,7 @@ drive a handler under development with real traffic. No device, no waiting for
 a provider to sync:
 
 ```sh
-terra events list --env <dev-id> --data-type sleep --json event_id,event_type,user_id
+terra events list --env <dev-id> --data-type sleep --select event_id,event_type,user_id
 terra events resend --env <dev-id> \
   --event-id <event_id> --event-type sleep --user-id <uuid>
 ```
@@ -63,7 +63,7 @@ roughly 14-day retention window.
 Read the payload first to know what the handler is about to receive:
 
 ```sh
-terra events payload retrieve <event_id> --env <dev-id>
+terra events retrieve-payload <event_id> --env <dev-id>
 ```
 
 ## Checking a command before it changes anything
@@ -76,7 +76,7 @@ terra unified-api destinations create --env staging --url https://x/y --dry-run
 works on every command including `terra api` and `terra data-api`. Its most
 useful job locally is confirming **which environment resolved**, because an
 environment coming from `TERRA_ENV` or the profile default is invisible in the
-command you typed. Filter the preview with `--jq`; `--json` is refused
+command you typed. Filter the preview with `--jq`; `--select` is refused
 alongside it.
 
 ## CI and preview deployments
@@ -87,7 +87,7 @@ config file or the keyring, so there is nothing to clean up:
 ```sh
 export TERRA_ADMIN_TOKEN=terra_at_...
 export TERRA_ENV=dev-staging
-terra unified-api destinations create --type webhook --url "$DEPLOY_URL/hook" --reveal
+terra unified-api destinations create --type webhook --url "$DEPLOY_URL/hook"
 ```
 
 Two constraints to design around:
@@ -98,8 +98,8 @@ Two constraints to design around:
   dev-ids provisioned ahead of time; what CI can do on its own is repoint an
   existing preview environment's destination at the deploy under test.
 - **Destructive commands fail rather than hanging** where there is no terminal,
-  so pass `--yes` on every delete in a pipeline, and `--reveal` on anything
-  returning a credential.
+  so pass `--yes` on an authorized delete in a pipeline. Capture credential
+  output directly for its consumer rather than printing it into the job log.
 
 Branch on the exit code rather than on message text, and remember that `if !
 cmd` clobbers `$?`. See [scripting.md](scripting.md).

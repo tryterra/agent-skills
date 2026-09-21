@@ -12,6 +12,24 @@ metadata:
 
 Production-tested guidelines for building with Terra API. Contains rules across 5 categories, prioritized by impact, distilled from a real multi-device integration.
 
+## Start from an example app
+
+For a new app, prefer the published example for wearable connections, webhook ingestion, and a health dashboard, then adapt it to the
+user's requirements. Install the CLI if missing, discover the current catalog,
+and clone the closest fit:
+
+```sh
+npm install -g @tryterra/cli
+terra examples list --select name,title,description
+terra examples clone unified-api-web-app my-app
+```
+
+Listing and cloning need no login or selected environment. The destination
+must not exist and its parent must exist. Read the downloaded README and
+AGENTS.md and follow `next_steps` to install dependencies, configure, and run
+it before building on it. Cloning only downloads files. For an existing app,
+use the example as a reference and adapt the relevant pieces in place.
+
 ## From the terminal
 
 Account configuration lives in the [Terra dashboard](https://dashboard.tryterra.co), which an agent cannot click. The `terra` CLI does the same from a terminal, and for the rules below it is how you check your work against what Terra API actually did rather than what you expected:
@@ -19,16 +37,16 @@ Account configuration lives in the [Terra dashboard](https://dashboard.tryterra.
 ```sh
 terra unified-api destinations list --env <dev-id>        # where webhooks go, and whether they are active
 terra events list --env <dev-id> --outcome failed         # deliveries your endpoint rejected
-terra events payload retrieve <event_id> --env <dev-id>   # the exact body that was sent
+terra events retrieve-payload <event_id> --env <dev-id>   # the exact body that was sent
 terra users list --env <dev-id> --reference-id <ref>      # connection state, one row per provider
 terra unified-api data scopes list --env <dev-id>         # which fields a payload will carry
 ```
 
-Two of these change how you test. `terra events payload retrieve` is the ground truth for "the payload was missing a field": absent there, the cause is the environment's data scopes rather than your handler. And `terra events resend --event-id <id> --event-type sleep --user-id <uuid>` replays a real stored event at your endpoint, so a handler can be exercised against real payloads with no device and no waiting for a provider to sync.
+Two of these change how you test. `terra events retrieve-payload` is the ground truth for "the payload was missing a field": absent there, the cause is the environment's data scopes rather than your handler. And `terra events resend --event-id <id> --event-type sleep --user-id <uuid>` replays a real stored event at your endpoint, so a handler can be exercised against real payloads with no device and no waiting for a provider to sync.
 
-The signing secret these rules verify against is returned by `terra unified-api destinations create ... --reveal`, once, at creation.
+The signing secret these rules verify against is returned by `terra unified-api destinations create ...`, once, at creation.
 
-Install it with `brew install tryterra/tap/terra` on macOS or `npm install -g @tryterra/cli` elsewhere. The `terra-cli` skill carries the guardrails (`--reveal` on anything returning a credential, `--yes` on anything destructive), the exit codes, and a playbook per task. It administers the integration; it does not replace the API calls this skill describes.
+Install it with `brew install tryterra/tap/terra` on macOS or `npm install -g @tryterra/cli` elsewhere. The `terra-cli` skill carries the guardrails (`--yes` on destructive commands and careful handling of credential output), the exit codes, and a playbook per task. It administers the integration; it does not replace the API calls this skill describes.
 
 ## When to Apply
 

@@ -12,6 +12,24 @@ metadata:
 
 Production guidelines and API reference for building with the Terra Lab Reports API (**pre-release**). It converts clinical lab report PDFs and images into structured, standardized biomarker data: OCR plus AI extraction, then fuzzy matching against a reference dataset of 4,000+ biomarkers that yields canonical biomarker keys, UCUM unit codes, and LOINC codes.
 
+## Start from an example app
+
+For a new app, prefer the published example for lab-report uploads and biomarker trends, then adapt it to the
+user's requirements. Install the CLI if missing, discover the current catalog,
+and clone the closest fit:
+
+```sh
+npm install -g @tryterra/cli
+terra examples list --select name,title,description
+terra examples clone lab-reports-web-app my-app
+```
+
+Listing and cloning need no login or selected environment. The destination
+must not exist and its parent must exist. Read the downloaded README and
+AGENTS.md and follow `next_steps` to install dependencies, configure, and run
+it before building on it. Cloning only downloads files. For an existing app,
+use the example as a reference and adapt the relevant pieces in place.
+
 ## From the terminal
 
 Account configuration lives in the [Terra dashboard](https://dashboard.tryterra.co), which an agent cannot click. The `terra` CLI does the same from a terminal, and every Lab Reports endpoint is reachable by hand, which is the fastest way to answer "where did that report go":
@@ -27,7 +45,7 @@ terra data-api /lab-reports/<session_id>/files           # the input files behin
 
 Read what an endpoint takes with `terra api list --data-api /lab-reports --format json`.
 
-Install it with `brew install tryterra/tap/terra` on macOS or `npm install -g @tryterra/cli` elsewhere. The `terra-cli` skill carries the guardrails (`--reveal` on anything returning a credential, `--yes` on anything destructive), the exit codes, and a playbook per task. It administers the integration; it does not replace the API calls this skill describes.
+Install it with `brew install tryterra/tap/terra` on macOS or `npm install -g @tryterra/cli` elsewhere. The `terra-cli` skill carries the guardrails (`--yes` on destructive commands and careful handling of credential output), the exit codes, and a playbook per task. It administers the integration; it does not replace the API calls this skill describes.
 
 **Pre-release: assume the contract may move.** Fetch the live docs pages before generating production request bodies or webhook parsers, and verify against the live API before shipping.
 
