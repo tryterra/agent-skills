@@ -35,7 +35,7 @@ Terra.instance(devId: "<YOUR_DEV_ID>", referenceId: "<REFERENCE_ID>") { manager,
 }
 ```
 
-`Terra.instance` arguments: `devId` (your Terra developer ID), `referenceId` (your ID for this user, the webhook join key), `requestPermissions` (optional, defaults `true`; see deferred prompting below), and the `completion` callback.
+`Terra.instance` arguments: `devId` (your Terra API developer ID), `referenceId` (your ID for this user, the webhook join key), `requestPermissions` (optional, defaults `true`; see deferred prompting below), and the `completion` callback.
 
 ## 3. Connect Apple Health with initConnection
 
@@ -100,7 +100,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 }
 ```
 
-Delivery fires at lower frequency when the app is killed, only with the phone unlocked and a network connection, and only for data types enabled on the [Terra Dashboard](https://dashboard.tryterra.co). With `customPermissions`, enable the per-category permissions listed in SKILL.md (Daily→`STEPS`, Sleep→`SLEEP_ANALYSIS`, Body→`BMI`+`HEART_RATE`, Activity→`WORKOUT_TYPE`, Nutrition→`NUTRITION_CALORIES`).
+Delivery fires at lower frequency when the app is killed, only with the phone unlocked and a network connection, and only for data types enabled on the [Terra API dashboard](https://dashboard.tryterra.co). With `customPermissions`, enable the per-category permissions listed in SKILL.md (Daily→`STEPS`, Sleep→`SLEEP_ANALYSIS`, Body→`BMI`+`HEART_RATE`, Activity→`WORKOUT_TYPE`, Nutrition→`NUTRITION_CALORIES`).
 
 ## Deferred HealthKit prompting
 

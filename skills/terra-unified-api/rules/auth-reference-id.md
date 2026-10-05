@@ -1,15 +1,15 @@
 ---
 title: Pass Your User ID as reference_id
 impact: HIGH
-impactDescription: the join key between your users and Terra user records
+impactDescription: the join key between your users and Terra API user records
 tags: auth, users
 ---
 
 ## Pass Your User ID as reference_id
 
-**Impact: HIGH (the join key between your users and Terra user records)**
+**Impact: HIGH (the join key between your users and Terra API user records)**
 
-When generating an auth link with `authenticateuser()` (or a widget session), set `reference_id` to your application's user ID. Terra API stores it on the Terra user record and returns it in every webhook and in user-info responses, making it the durable link between your users and their Terra user IDs. Without it, an incoming webhook only identifies a Terra user ID, and you have no reliable way to know which of your users it belongs to, especially after reauth events swap the Terra user ID.
+When generating an auth link with `authenticateuser()` (or a widget session), set `reference_id` to your application's user ID. Terra API stores it on the Terra API user record and returns it in every webhook and in user-info responses, making it the durable link between your users and their Terra API user IDs. Without it, an incoming webhook only identifies a Terra API user ID, and you have no reliable way to know which of your users it belongs to, especially after reauth events swap the Terra API user ID.
 
 **Incorrect (no reference_id, guessing ownership later):**
 
@@ -21,7 +21,7 @@ const res = await client.authentication.authenticateuser({
 }); // webhook arrives: whose data is this?
 ```
 
-**Correct (reference_id ties Terra users to your users):**
+**Correct (reference_id ties Terra API users to your users):**
 
 ```typescript
 const res = await client.authentication.authenticateuser({

@@ -1,6 +1,6 @@
 # Biomarker Reference
 
-Biomarker standardization, UCUM unit codes, LOINC coverage, and common biomarker tables for the Terra Lab Reports API (pre-release).
+Biomarker standardization, UCUM unit codes, LOINC coverage, and common biomarker tables for the Terra API Lab Reports (pre-release).
 
 ## What is the biomarker key?
 

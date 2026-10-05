@@ -6,12 +6,12 @@
   },
   "metadata": {
     "description": "Connect your coding agent to Terra API",
-    "version": "1.0.0"
+    "version": "2.0.0"
   },
   "plugins": [
     {
       "name": "terra",
-      "description": "Set up, manage and debug your Terra API integration from your coding agent. Ask for the result and the agent does the work through the terra CLI: environments, enabled providers, webhook destinations, credentials, connected users, delivered events and billing, with skills for the Unified API, the mobile and streaming SDKs, planned workouts, routes, lab reports, Vantage and Models.",
+      "description": "Set up, manage and debug your Terra API integration from your coding agent. Ask for the result and the agent does the work through the terra CLI or the bundled Terra API MCP server: environments, enabled providers, webhook destinations, credentials, connected users, delivered events and billing, with skills for the Unified API, the mobile and streaming SDKs, planned workouts, routes, lab reports, Vantage and Models.",
       "source": "./",
       "category": "development",
       "homepage": "https://github.com/tryterra/agent-skills"

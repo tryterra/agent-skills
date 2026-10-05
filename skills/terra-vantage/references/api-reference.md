@@ -1,6 +1,6 @@
 # Vantage API Endpoint Routing
 
-Which endpoint does what, and where to fetch the current request/response schema. Base URLs: `https://vantage.tryterra.co` (production), `https://vantage-sandbox.tryterra.co` (sandbox). Auth: Terra dev-id/API key via HTTP Basic or the `dev-id`+`x-api-key` header pair (see SKILL.md). Errors follow the RFC 7807 problem-detail format; see the [Errors doc](https://docs.tryterra.co/vantage-api/errors.md).
+Which endpoint does what, and where to fetch the current request/response schema. Base URLs: `https://vantage.tryterra.co` (production), `https://vantage-sandbox.tryterra.co` (sandbox). Auth: Terra API dev-id and API key via HTTP Basic or the `dev-id`+`x-api-key` header pair (see SKILL.md). Errors follow the RFC 7807 problem-detail format; see the [Errors doc](https://docs.tryterra.co/vantage-api/errors.md).
 
 For exact field lists, validation limits, and full request/response examples, fetch the live `.md` page linked below. Do not rely on remembered field names: the product is evolving and the live page is authoritative.
 
@@ -29,7 +29,7 @@ A worked end-to-end ordering example lives at https://docs.tryterra.co/vantage-a
 ## Semantics the schema pages do not spell out
 
 - **The catalog is three levels**: product types contain products, products contain variants. A variant is the exact item a recipient receives and the thing you order (`variant_id` + `quantity` per order item). `available_collection_types` on a variant is an array of the strings `"AT_HOME"`/`"GO_TO_LAB"`.
-- **Send the address field matching `collection_type`**: `shipping_address` for `AT_HOME`, `requested_lab_address` for `GO_TO_LAB`. The response's `confirmed_lab_address` is the nearest draw site to the requested address, resolved best-effort at order time - it can be `null`, so treat it as informational; `GET /api/v1/labs` remains the way to offer draw-site choice.
+- **Send the address field matching `collection_type`**: `shipping_address` for `AT_HOME`, `requested_lab_address` for `GO_TO_LAB`. The response's `confirmed_lab_address` is the nearest draw site to the requested address, resolved best-effort at order time, so it can be `null`, so treat it as informational; `GET /api/v1/labs` remains the way to offer draw-site choice.
 - **Bind the user's draw-site choice (GO_TO_LAB)**: pass the chosen `GET /labs` row's `code` + `address.postal_code` (ZIP+4 fine, normalized server-side) as `requested_lab` on POST /orders. Outcomes: bound (`confirmed_lab` = the full site, and `confirmed_lab_address` = its address, superseding nearest-site resolution), `400` `unknown_lab_code` on a definitively unknown code (re-fetch and re-select; nothing was created, retry is safe), or accepted **unbound** during a lookup outage (`confirmed_lab` null; GET echoes `requested_lab` so selected-but-unbound is distinguishable from no-selection).
 - **Gate the country before ordering**: each variant carries `supported_ship_to_countries` (ISO-3166 alpha-2). Orders outside it 400 with an `invalid_fields` entry tagged `unsupported_ship_to_country` on `shipping_address.country_code` / `requested_lab_address.country_code`, plus `supported_ship_to_countries` in the problem detail.
 - **IDs are strings** in order responses and webhooks (64-bit snowflakes). Catalog reads return numeric ids, but the order request's `variant_id` is a string.

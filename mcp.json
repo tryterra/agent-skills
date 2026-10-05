@@ -1,0 +1,9 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "terra": {
+      "type": "streamable-http",
+      "url": "https://access.tryterra.co/api/v3/admin/mcp"
+    }
+  }
+}

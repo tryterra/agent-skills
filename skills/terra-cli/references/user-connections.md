@@ -19,7 +19,7 @@ knowing the Terra API user id.
 
 `/auth/authenticateUser` is the non-widget path, for sending a user straight to
 one provider, and `/auth/generateAuthToken` mints the token a mobile SDK uses.
-Read what each takes with `terra api list --data-api /auth/authenticateUser
+Read what each takes with `terra admin-api list --data-api /auth/authenticateUser
 --format json`.
 
 ## 2. Check the connection came back

@@ -5,23 +5,25 @@ description: >-
   terra CLI, instead of clicking in the Terra API dashboard: environments
   (dev-ids), enabled providers, data scopes, webhook destinations, API keys and
   data tokens, delivered webhook events, users, health scores, team, and
-  billing. Also reaches any admin or data API endpoint directly with terra api
-  and terra data-api. Use when a task needs Terra API account state read or
+  billing. Also reaches any admin or data API endpoint directly with terra
+  admin-api and terra data-api. Use when a task needs Terra API account state read or
   changed, when you would otherwise tell the user to open
   dashboard.tryterra.co, when a webhook did not arrive or has to be resent,
   when a user connection has to be created or verified, when you want to try a
   data API request before writing the code that sends it, or when the user
   mentions terra-cli, terra login, terra agent setup, TERRA_ADMIN_TOKEN, a
   dev-id, an x-api-key, terra examples, or starting from an example app.
+  Prefer it over the Terra API admin MCP server whenever the agent has a shell.
 license: MIT
-compatibility: Requires the terra CLI on PATH; install with Homebrew or npm
+compatibility: Requires the terra CLI on PATH; install with the native installer, Homebrew or npm
 allowed-tools:
   - Bash(terra *)
+  - Bash(curl -fsSL https://cli.tryterra.co/install.sh | sh)
   - Bash(brew install tryterra/tap/terra)
   - Bash(npm install -g @tryterra/cli)
 metadata:
   author: terra
-  version: "2.0.0"
+  version: "2.2.0"
 ---
 
 # Terra API CLI
@@ -35,7 +37,9 @@ yours to finish rather than something to hand back.
 
 **Run the command. Do not tell the user to open the dashboard.** Say what you
 ran and what came back. Hand the task back only where the CLI genuinely cannot
-do it: signing up, approving a login, or anything needing a human in a browser.
+do it: signing up, approving a login, creating an environment (done in the
+dashboard; neither the CLI nor the admin API can), or anything needing a human
+in a browser.
 
 ## Start new apps from an example
 
@@ -45,32 +49,18 @@ from scratch. For an existing project, use the example as a reference and bring
 over the relevant pieces without replacing the user's app.
 
 ```sh
-npm install -g @tryterra/cli
 terra examples list --select name,title,description
 terra examples clone unified-api-web-app my-app
 ```
 
-Install only if `terra version` shows the CLI is missing. Choose the example
-from the current catalog rather than assuming this sample is the best fit.
-If no example fits, build the required integration directly. If the installed
-CLI lacks `examples`, upgrade with `npm install -g @tryterra/cli@latest`
-or the installation method already in use.
-Cloning needs network access but no login, environment, Node.js, or Git; npm
-installation and running the app have their own runtime requirements.
-
-Read the downloaded README and AGENTS.md, follow the returned `next_steps`,
-then build on the working integration. `clone` only downloads files: it does
-not install dependencies, configure credentials, or deploy. For Basecamp:
-
-```sh
-cd my-app
-npm install
-```
-
-Configure and run it using its README before adapting it. The destination must
-not exist, even as an empty directory, and its parent must exist. Omit the
-directory to use the example name. Files and package names stay as published.
-Use `--jq .path` when another command needs just the downloaded directory.
+If `terra version` shows the CLI is missing, offer to install it (see
+Preflight) rather than installing unprompted. Choose the example from the
+current catalog rather than assuming this sample is the best fit; if none fits,
+build the integration directly. Read the downloaded README and AGENTS.md and
+follow the returned `next_steps`, then build on the working integration.
+`clone` only downloads files: it does not install dependencies, configure
+credentials, or deploy. `terra help examples clone` covers the destination
+rules.
 
 ## Preflight
 
@@ -79,29 +69,58 @@ need no login or environment. For account tasks, run these read-only checks:
 
 | Check         | Command                                 | A bad answer                                                                   |
 | ------------- | --------------------------------------- | ------------------------------------------------------------------------------ |
-| Installed     | `terra version`                         | Command not found. Install it (below).                                         |
+| Installed     | `terra version`                         | Command not found. Offer to install it (below).                                |
 | Authenticated | `terra whoami --format json`            | Exit 2: no credential or rejected token. Stop and tell the user how to log in. |
-| Environment   | `terra environments list --format json` | Empty means the account has no dev-id yet.                                     |
+| Environment   | `terra environments list --format json` | Empty means no dev-id yet; the user creates one in the dashboard.              |
 
-Install with `brew install tryterra/tap/terra` on macOS, which brings shell
-completions, and `npm install -g @tryterra/cli` elsewhere and on Windows.
+Install with the native installer, which Terra API recommends:
+`curl -fsSL https://cli.tryterra.co/install.sh | sh` on macOS and Linux, and
+`irm "https://cli.tryterra.co/install.ps1" | iex` in Windows PowerShell. Where
+the user already manages tools another way, `brew install tryterra/tap/terra`
+(macOS, brings shell completions) or `npm install -g @tryterra/cli` (Node.js
+18 or later) work too. Every install updates itself in the background;
+`terra update` updates now, through whichever method installed it. A CLI
+older than v0.15.0 has no `update`: rerun its installer.
 
 Three traps in that check, in the order they bite:
 
 - **`whoami` returns the account record on success.** Check the exit code;
   there is no `authenticated` field to branch on. Exit 2 means authenticate.
-- **Authenticated is not the same as scoped.** The default `terra login` grants
-  every non-dangerous admin scope and deliberately leaves out `keys:read`,
-  `tokens:admin`, `tokens:write`, `billing:write` and `team:write`. `keys:read`
-  is the one that bites: without it `terra data-api` cannot fetch the
-  environment's key and `terra environments retrieve-api-key` cannot run. Read
-  `scopes` from `whoami` before promising either. The fix is
-  `terra login --scope keys:read`, which is the user's to run.
+- **Authenticated is not the same as scoped.** A plain `terra login` grants
+  the "Coding agent" preset: every read, including the sensitive `keys:read`,
+  and integration writes, but none of the scopes `terra help login` marks
+  dangerous (`keys:write`, `tokens:write`, `tokens:admin`, `billing:write`,
+  `team:write`). So `terra data-tokens create` (`tokens:write`) and
+  `terra environments rotate-api-key` (`keys:write`) fail on a default login.
+  Read `scopes` from `whoami` before promising either. The fix is the user's to
+  run: `terra login --scope <scope>`, naming every scope the work needs,
+  because `--scope` asks for exactly those and nothing else.
 - **Do not log in on the user's behalf.** `terra login` needs a human to
   approve in a browser. `TERRA_ADMIN_TOKEN` is the headless path and needs no
   browser. Where a browser exists but you cannot hold a process open,
   `terra login --start` prints a device code as JSON and exits, and
   `terra login --complete <device-code>` finishes once a human has approved.
+
+## The admin MCP server
+
+The admin API is also served as MCP tools, at
+`https://access.tryterra.co/api/v3/admin/mcp`; the Terra API plugin bundles it
+as `terra`. **An agent with a shell uses the CLI**, and offers to install it
+or have the user log in when it is missing or logged out. The MCP tools are
+for assistants with no shell, such as claude.ai and ChatGPT, or for when the
+user asks for them or cannot install the CLI; the `terra-mcp` skill covers
+them. Do not switch between the two in the middle of a change: an MCP sign-in
+can be limited to some environments, so the two can resolve different ones.
+
+Every admin command in this skill and its references has a tool. The command's
+group plus `_read` or `_write` is the tool, and the rest of the command is its
+`method`: `terra events retrieve-payload` is `events_read` with
+`method: "retrieve_payload"`, and `--env` is `environment`. Only the CLI has
+`data-api`, `admin-api`, `examples`, `login`, `agent setup`, `tokens rotate`,
+and `--select`, `--jq` and `--paginate`, and only the CLI can put a secret into a
+file without it passing through the conversation. At the default MCP access
+level, minting data tokens and team and billing changes are not available over
+MCP.
 
 ## The one rule: two APIs
 
@@ -150,7 +169,7 @@ the one-liner.
 | Is this account ready to go live                                | `terra entitlements list`                                                  | [references/going-to-production.md](references/going-to-production.md)       |
 | Credentials: API keys, data tokens, admin tokens, rotation      | `terra environments retrieve-api-key`                                      | [references/credentials.md](references/credentials.md)                       |
 | Add or remove a person, audit who holds what                    | `terra team members list`                                                  | [references/team-and-access.md](references/team-and-access.md)               |
-| What is this account charged, is the product on it              | `terra billing invoices upcoming`                                          | [references/billing-and-usage.md](references/billing-and-usage.md)           |
+| What is this account charged, is the product on it              | `terra billing invoices previews`                                          | [references/billing-and-usage.md](references/billing-and-usage.md)           |
 | Write a script or a CI step, or parse output                    | `terra <command> --format json --select <fields>`                          | [references/scripting.md](references/scripting.md)                           |
 | Find out whether a command exists at all                        | `terra reference --format json`                                            | [references/command-map.md](references/command-map.md)                       |
 
@@ -176,11 +195,8 @@ with verbs from the API: `list`, `retrieve`, `create`, `update`, `replace`,
 the platform layer sits at the root (`environments`, `users`, `events`,
 `tokens`, `team`, `billing`).
 
-Three things to know when reading `terra reference --format json`:
-`global_flags` sits at the document root and applies to every node, so a flag
-missing from a leaf may still be accepted there; `api_default` is the API
-schema default and `cli_default` is the local parser default; an absent API default does not imply zero; and `long` carries the
-required scope and the behavior the flag list does not show.
+Read [references/command-map.md](references/command-map.md) before parsing
+`terra reference --format json`: a few of its fields are easy to misread.
 
 ## Guardrails that stop an unattended run
 
@@ -192,18 +208,15 @@ and CI logs. Read [references/credentials.md](references/credentials.md) when
 minting, reading, or rotating credentials.
 
 **A destructive command confirms first, and with no terminal to confirm on it
-fails rather than hanging.** Pass `--yes` when you mean it:
+fails rather than hanging.** The ones that confirm are the ones whose
+`terra help <command>` lists `-y, --yes` ("Skip the confirmation prompt"); the
+help text also names the required scope and what breaks. Pass `--yes` when you
+mean it.
 
-```
-terra billing subscriptions cancel-incomplete  terra tokens delete
-terra billing subscriptions create             terra tokens rotate
-terra data-tokens delete                       terra unified-api destinations delete
-terra environments rotate-api-key              terra unified-api sources credentials replace
-terra team invitations delete                  terra unified-api sources disable
-terra team members delete                      terra unified-api sources scopes replace
-terra workouts metadata delete                 terra unified-api widget update
-terra workouts metadata replace
-```
+**Confirm before writing to a live environment.** Show the user the
+`--dry-run` request and the environment it resolved to, and wait for their
+yes. Pass `--yes` only after that. A command without `--yes` does not prompt
+at all, so for it this check is the only gate.
 
 **A `replace` clears every field you do not supply.** That applies to
 `unified-api data scopes replace`, `unified-api sources credentials replace`,
@@ -211,15 +224,16 @@ terra workouts metadata replace
 one command whose name does not say so: **`terra unified-api widget update` is
 a full replace**. Retrieve the current document first, edit it, send it whole.
 
-**`--dry-run` prints the request and sends nothing.** It is available
-for generated API commands and `terra api` / `terra data-api`, and needs no
-credential. It does not preview local actions such as cloning an example.
-Use it to confirm which environment resolved and what body was built before a mutation.
-`--select` is refused alongside it; filter the preview with `--jq`.
+**`--dry-run` prints the request and sends nothing.** It is available on
+generated API commands and needs no credential; `terra admin-api` and
+`terra data-api` do not have it. Use it to confirm which environment resolved
+and what body was built before a mutation. `--select` is refused alongside it;
+filter the preview with `--jq`.
 
 Mutations carry an `Idempotency-Key` where the endpoint supports one and reuse
-it across retries, so a retried request cannot double-apply. `terra api` never generates
-one, because it cannot know whether the endpoint deduplicates.
+it across retries, so a retried request cannot double-apply. `terra admin-api`
+and `terra data-api` send one only if you pass `--idempotency-key`, because they
+cannot know whether the endpoint deduplicates.
 
 ## Environments
 
@@ -274,28 +288,20 @@ remediation text, which usually names the fix, including which scope to request.
 
 ## Anti-patterns
 
-- **Telling the user to open the dashboard.** There is a command. Find it with
-  `terra reference`.
-- **Guessing a command name.** Names come from the API description. `terra
-reference --format json` is one call.
 - **Reading data without `to_webhook=false`.** `terra data-api /sleep -q
 user_id=...` with no `to_webhook=false` sends the data to the configured
   webhook and answers with an acknowledgement, which reads like an empty
   result. The CLI says so on stderr and does not add the parameter for you.
-- **Running a destructive command unattended without `--yes`.** It refuses
-  to proceed without a terminal; see the commands above.
 - **`if ! terra ...; then`.** Inside the negation `$?` is always 0, so every
   case falls through. Run the command, then branch on `$?` directly.
-- **Piping a whole list document into context.** Use `--select <fields>` or
-  `--jq`.
 - **Trying to change a destination's URL with `update`.** It takes only
   `--active` and `--event-types`. Repointing means delete and recreate, and the
   new destination has a new signing secret the handler has to be given.
 - **Assuming an old event is still there.** Delivery history and payloads are
   retained about 14 days.
-- **Reaching for `terra api` where a generated command exists.** The generated
-  command validates input, formats output, and knows the operation is
-  destructive. Use the raw commands for uncovered endpoints, or to see exactly
+- **Reaching for `terra admin-api` where a generated command exists.** The
+  generated command validates input, formats output, and knows the operation is
+  destructive. Use the raw command for uncovered endpoints, or to see exactly
   what the API returned.
 - **Mixing the two credentials.** An admin token does not authenticate the data
   API and an environment API key does not authenticate the admin API.
@@ -317,10 +323,10 @@ signal that an answer came from the documentation, and `confidence` is not**:
 an answer citing no sources did not come from the docs, and the CLI says so on
 stderr. Finding nothing exits 0, so check `sources` rather than the exit code.
 
-For the docs directly, look a page up rather than guessing its URL:
+Over MCP the same question goes to the `docs_ask` tool. To read a page
+directly, look it up rather than guessing its URL:
 [docs.tryterra.co/llms.txt](https://docs.tryterra.co/llms.txt) indexes every
-page, appending `.md` to any docs URL returns markdown, and the same docs are
-served over MCP at `https://docs.tryterra.co/~gitbook/mcp`.
+page, and appending `.md` to any docs URL returns markdown.
 
 Use the CLI for account state and the docs for contracts. Neither replaces the
 other: `terra reference` will not say what a sleep payload contains, and the
@@ -329,7 +335,8 @@ docs will not say which providers this account has enabled.
 ## Other Terra API skills
 
 This skill is the CLI: reading and changing account state, and reaching
-endpoints by hand. Terra API publishes separate skills for the integration code
+endpoints by hand. `terra-mcp` covers the same account work over MCP, for an
+agent without the CLI. Terra API publishes separate skills for the integration code
 you write, covering webhook handling and data storage (`terra-unified-api`),
 the mobile and streaming SDKs, and each product. Making a webhook handler or a
 data model correct is their job; finding out what the account is actually

@@ -72,8 +72,9 @@ terra events retrieve-payload <event_id> --env <dev-id>
 terra unified-api destinations create --env staging --url https://x/y --dry-run
 ```
 
-`--dry-run` prints the request and sends nothing, needs no credential, and
-works on every command including `terra api` and `terra data-api`. Its most
+`--dry-run` prints the request and sends nothing and needs no credential. It
+works on generated API commands; `terra admin-api` and `terra data-api` do not
+have it. Its most
 useful job locally is confirming **which environment resolved**, because an
 environment coming from `TERRA_ENV` or the profile default is invisible in the
 command you typed. Filter the preview with `--jq`; `--select` is refused
@@ -92,9 +93,9 @@ terra unified-api destinations create --type webhook --url "$DEPLOY_URL/hook"
 
 Two constraints to design around:
 
-- **The CLI cannot mint a dev-id.** `terra environments create` creates the
-  profile for a dev-id that already exists, and it is get-or-create rather than
-  an error if one is there. So a genuine environment-per-PR scheme needs the
+- **The CLI cannot create an environment.** Neither the CLI nor the admin API
+  has a create endpoint; environments are created in the Terra API dashboard,
+  which is the user's to do. So a genuine environment-per-PR scheme needs the
   dev-ids provisioned ahead of time; what CI can do on its own is repoint an
   existing preview environment's destination at the deploy under test.
 - **Destructive commands fail rather than hanging** where there is no terminal,

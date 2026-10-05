@@ -1,5 +1,5 @@
 {
-  "version": "1.1.0",
+  "version": "1.2.0",
   "organization": "Terra API",
   "date": "August 2026",
   "abstract": "Guidance for the Terra API Models product: run a health model (Sleep Window, Menstrual Cycle Tracker, Smart Fill) over a connected user's data for a date range to return a ready-to-use wellness insight. Covers the /v2/models catalog and /v2/models/run endpoints and auth, the three generally-available models and their data needs, the extra table param Smart Fill requires, handling empty or unsupported results (HTTP 200, not errors), per-run pricing, and the boundary with the Unified API.",

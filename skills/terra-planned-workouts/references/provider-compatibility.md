@@ -150,7 +150,7 @@ Strength training routines only. Supports create, update, and retrieve. No delet
 
 ### Apple
 
-Workouts sync via the Terra iOS SDK: the server queues the sync action, the SDK polls, pushes to WorkoutKit, and reports back.
+Workouts sync via the Terra API iOS SDK: the server queues the sync action, the SDK polls, pushes to WorkoutKit, and reports back.
 
 - **Strengths:** heart rate targets (absolute BPM, % max, % threshold, zones); power targets (absolute watts, % FTP, zones); pace and speed targets; cadence targets; calorie-based completion; block repeats via IntervalBlock iterations.
 - **Limitations:** single target per step (extras dropped with a warning); single warmup and single cooldown per workout (WorkoutKit supports one of each; extras dropped with a warning); no exercise names (WorkoutKit steps are goals and alerts, so strength is limited to timed interval blocks, not sets/reps); no swim stroke types; no RPE; no multiple targets per step; no retrieve (no server-side WorkoutKit read API).

@@ -24,9 +24,11 @@ terra tokens delete <token_id> --yes
 ```
 
 Reading a scope you do not have fails naming the scope to request. The default
-login grants every non-dangerous admin scope and excludes `keys:read`,
-`keys:write`, `tokens:admin`, `tokens:write`, `billing:write` and `team:write`.
-Ask for one at login rather than working around it:
+login (the "Coding agent" preset) grants every scope except the ones
+`terra help login` marks dangerous: `keys:write`, `tokens:write`,
+`tokens:admin`, `billing:write` and `team:write`. `keys:read` is sensitive but
+granted. Ask for a missing one at login rather than working around it, naming
+every scope the work needs, because `--scope` asks for exactly those:
 
 ```sh
 terra login --scope keys:read --scope providers:write
@@ -47,7 +49,7 @@ terra environments rotate-api-key --env <dev-id> --yes
 
 `retrieve` prints the dev-id, the API key, and the webhook signing secret, and
 needs `keys:read`. `rotate` mints a new secret and returns it once; it needs
-both `account:write` and `keys:read`, and **the rotated-away secret stops
+`keys:write`, and **the rotated-away secret stops
 working immediately**, so anything still holding it breaks at once. Confirm
 with the user before rotating a production key, and have the place that
 consumes it ready to take the new value.

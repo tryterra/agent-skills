@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "organization": "Terra API",
   "date": "July 2026",
   "abstract": "Best practices for the Terra API Streaming (Real-Time) API: the full data-type and connection-type enums, the producer/broker/consumer architecture, the websocket handshake and opcodes, single-use token minting, heartbeats and close codes, replay/backfill, and per-platform RT SDK setup for iOS, Android, React Native, Flutter, and Wear OS.",

@@ -5,29 +5,31 @@ license: MIT
 compatibility: Requires network access to docs.tryterra.co for full payload examples
 metadata:
   author: terra
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Terra API Routes
 
 Terra API Routes is a write-to-device product (pre-release): define a GPS route once with waypoints, and Terra API pushes it to your users' connected devices for on-device navigation. The route appears on the watch or bike computer after the user's next device sync, so your app never has to speak each provider's native route format.
 
-## From the terminal
+Only Garmin, COROS, and Wahoo are supported. Feature coverage differs sharply between them (see the provider matrix below), so design routes for the lowest common denominator unless you know every user is on Garmin.
 
-Account configuration lives in the [Terra dashboard](https://dashboard.tryterra.co), which an agent cannot click. The `terra` CLI does the same from a terminal. Routes is pre-release, so it has **no generated commands and no endpoints in the description the CLI pins**. That matters in a specific way: `terra data-api` checks a path against that description before sending, so a routes path is rejected locally as a typo unless you say otherwise.
+## Account tools: CLI or MCP
+
+Routes is pre-release, so it has no account commands and its endpoints are not in the API description the CLI bundles: `terra admin-api list --data-api` will not show them. `terra data-api` sends them anyway, because the server, not the CLI, validates the path:
 
 ```sh
-terra api list --data-api                          # what the pinned description does cover
-terra data-api /routes -X POST --body-file route.json --no-verify
+terra data-api /routes -X POST --body-file route.json
+terra data-api /pushedRoutes -q user_id=<uuid>
 ```
 
-`--no-verify` sends the path exactly as typed, which is what an endpoint newer than the pin needs. Everything else still applies: `--dry-run` to see the request, `-i` for the status line, `--jq` to filter the response.
+Add `-i` for the status line, `--jq` to filter the response; a `DELETE` asks for confirmation unless you pass `--yes`.
 
 The account configuration around Routes does have commands. `terra unified-api sources list --env <dev-id>` says which of the devices below are enabled, and `terra users list --env <dev-id> --provider GARMIN` says whether a user is connected to push a course to.
 
-Install it with `brew install tryterra/tap/terra` on macOS or `npm install -g @tryterra/cli` elsewhere. The `terra-cli` skill carries the guardrails (`--yes` on destructive commands and careful handling of credential output), the exit codes, and a playbook per task. It administers the integration; it does not replace the API calls this skill describes.
+The route calls themselves are `terra data-api`, which only the CLI has; over MCP, the admin tools cover only enabled providers and connected users.
 
-Only Garmin, COROS, and Wahoo are supported. Feature coverage differs sharply between them (see the provider matrix below), so design routes for the lowest common denominator unless you know every user is on Garmin.
+With a shell, use the CLI, and offer to install it if it is missing: `curl -fsSL https://cli.tryterra.co/install.sh | sh` on macOS and Linux, `irm "https://cli.tryterra.co/install.ps1" | iex` in Windows PowerShell, or Homebrew or npm where the user already uses them. Without one (claude.ai, ChatGPT), use the Terra API admin MCP server: each admin command is a tool whose name and `method` spell it (`terra users list` is `users_read` with `method: "list"`). Only the CLI has `terra data-api`, `terra admin-api` and `terra examples`, and `--select` and `--jq` have no MCP equivalent. The `terra-cli` and `terra-mcp` skills carry the guardrails (confirming changes, keeping credentials out of transcripts), the errors, and a playbook per task. They administer the integration; they do not replace the API calls this skill describes.
 
 ## Two-Phase Workflow
 
@@ -138,6 +140,6 @@ All three support re-sync. COROS has no in-place update, so a re-sync re-POSTs a
 
 For full payload examples beyond the one above (trail running with course points, road biking with a speed target, the minimal 2-waypoint route), fetch the live page: https://docs.tryterra.co/routes-api-pre-release/sport-specific-examples.md
 
-Full docs: [Routes API overview](https://docs.tryterra.co/routes-api-pre-release/overview), [introduction](https://docs.tryterra.co/routes-api-pre-release/introduction), [core concepts](https://docs.tryterra.co/routes-api-pre-release/core-concepts), [provider compatibility](https://docs.tryterra.co/routes-api-pre-release/provider-compatibility). If the terra-docs MCP server (`https://docs.tryterra.co/~gitbook/mcp`) is connected, use its tools to search and fetch the docs instead.
+Full docs: [Routes API overview](https://docs.tryterra.co/routes-api-pre-release/overview), [introduction](https://docs.tryterra.co/routes-api-pre-release/introduction), [core concepts](https://docs.tryterra.co/routes-api-pre-release/core-concepts), [provider compatibility](https://docs.tryterra.co/routes-api-pre-release/provider-compatibility). Ask `terra docs ask` (or `docs_ask` over MCP) before fetching a page: it answers from the docs and cites its sources. Append `.md` to any docs URL for markdown.
 
 Note: the Routes docs space is pre-release and may not be published yet. If a page above returns "Page Not Found", rely on this skill's bundled references and verify against the live API.

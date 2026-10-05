@@ -5,7 +5,7 @@ license: MIT
 compatibility: Requires network access to docs.tryterra.co for the full websocket protocol reference
 metadata:
   author: terra
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Terra API Streaming Best Practices
@@ -14,25 +14,18 @@ Guidelines for building on the Terra API Streaming (Real-Time) API, which delive
 
 ## Start from an example app
 
-For a new app, prefer the published example for a React Native producer; use `streaming-consumer-web-app` for a web consumer, then adapt it to the
-user's requirements. Install the CLI if missing, discover the current catalog,
-and clone the closest fit:
+For a new app, start from the published example and adapt it to the user's requirements: `streaming-mobile-app` for a React Native producer, `streaming-consumer-web-app` for a web consumer. Run `terra version` and, if the CLI is missing, offer to install it (see below). Then list the current catalog and clone the closest fit:
 
 ```sh
-npm install -g @tryterra/cli
 terra examples list --select name,title,description
 terra examples clone streaming-mobile-app my-app
 ```
 
-Listing and cloning need no login or selected environment. The destination
-must not exist and its parent must exist. Read the downloaded README and
-AGENTS.md and follow `next_steps` to install dependencies, configure, and run
-it before building on it. Cloning only downloads files. For an existing app,
-use the example as a reference and adapt the relevant pieces in place.
+Neither needs a login. Read the downloaded README and AGENTS.md and follow `next_steps` to install dependencies, configure and run it before building on it. Cloning only downloads files. For an existing app, use the example as a reference and adapt the relevant pieces in place.
 
-## From the terminal
+## Account tools: CLI or MCP
 
-Account configuration lives in the [Terra dashboard](https://dashboard.tryterra.co), which an agent cannot click. The `terra` CLI does the same from a terminal. The streaming websocket surface itself has no CLI commands, and **the CLI does not mint the short-lived token a streaming client authenticates with**: that is minted by your backend, per session, through the flow this skill describes. What the CLI covers is the layer under that: the long-lived credential your backend holds in order to mint them, and whether the user being streamed for exists at all.
+The streaming websocket surface has no account commands, and **neither the CLI nor the MCP mints the producer or consumer token a socket authenticates with**: your backend mints those, per session, through the flow this skill describes. What the account tools cover is the layer under that: the long-lived credential your backend holds, and whether the user being streamed for exists at all.
 
 A stream that will not open is usually a credential without the right scope, a user id with no connection behind it, or a provider that was never enabled in this environment. All three are read-only checks, so run them before debugging the socket:
 
@@ -45,24 +38,24 @@ terra unified-api sources list --env <dev-id>
 
 `data-tokens list` answers the credential question without printing a secret: it shows which tokens exist, what each is scoped for, and whether one has expired or been revoked. **Do not mint a token to find out whether a token works, and do not reach for `terra environments retrieve-api-key` here**: it prints the environment's API key and webhook signing secret, neither of which tells you anything about a socket, and in CI both land in the job log.
 
-Minting is a setup step rather than a diagnostic. When the list genuinely shows no usable token, `terra data-tokens create --env <dev-id> --name streaming --scopes auth:write` returns the bearer once, and several tokens coexist per environment so the old one keeps working until you revoke it.
+Minting is a setup step rather than a diagnostic. When the list genuinely shows no usable token, `terra data-tokens create --env <dev-id> --name streaming --scopes auth:write` returns the bearer, and several tokens coexist per environment so the old one keeps working until you revoke it. Over MCP, minting a data token needs the user's approval in the dashboard and an access level the default MCP sign-in does not grant, so this one step is simpler with the CLI.
 
-Install it with `brew install tryterra/tap/terra` on macOS or `npm install -g @tryterra/cli` elsewhere. The `terra-cli` skill carries the guardrails (`--yes` on destructive commands and careful handling of credential output), the exit codes, and a playbook per task. It administers the integration; it does not replace the API calls this skill describes.
+With a shell, use the CLI, and offer to install it if it is missing: `curl -fsSL https://cli.tryterra.co/install.sh | sh` on macOS and Linux, `irm "https://cli.tryterra.co/install.ps1" | iex` in Windows PowerShell, or Homebrew or npm where the user already uses them. Without one (claude.ai, ChatGPT), use the Terra API admin MCP server: each admin command is a tool whose name and `method` spell it (`terra users list` is `users_read` with `method: "list"`). Only the CLI has `terra data-api`, `terra admin-api` and `terra examples`, and `--select` and `--jq` have no MCP equivalent. The `terra-cli` and `terra-mcp` skills carry the guardrails (confirming changes, keeping credentials out of transcripts), the errors, and a playbook per task. They administer the integration; they do not replace the API calls this skill describes.
 
 ## Streaming vs Health & Fitness
 
-The Streaming API is for realtime, sub-second-to-per-second signals only. The RT SDKs accept seventeen `DataTypes` values, covering cardiac (heart rate, HRV, RR intervals, ECG), movement (steps, cadence, distance, speed, floors climbed, activity), cycling (power, bike cadence), motion sensors (acceleration, gyroscope), energy (calories, MET), and location. See [references/data-types.md](references/data-types.md) for the full enum. Anything with a longer span – workouts, sleep, daily totals, body, nutrition – belongs to the [Unified API](https://docs.tryterra.co/unified-api/getting-started), not here. If you need a completed workout summary rather than a live feed, you are on the wrong API.
+The Streaming API is for realtime, sub-second-to-per-second signals only. The RT SDKs accept seventeen `DataTypes` values, covering cardiac (heart rate, HRV, RR intervals, ECG), movement (steps, cadence, distance, speed, floors climbed, activity), cycling (power, bike cadence), motion sensors (acceleration, gyroscope), energy (calories, MET), and location. See [references/data-types.md](references/data-types.md) for the full enum. Anything with a longer span – workouts, sleep, daily totals, body, nutrition – belongs to the [Unified API](https://docs.tryterra.co/unified-api/getting-started), not here. If you need a completed workout summary rather than a live feed, you are on the wrong API. Connecting Apple Health, Samsung Health or Health Connect is the mobile SDK (`terra-mobile-sdk`), not the Real-Time SDK.
 
 Devices only appear on the stream when they actually broadcast over BLE, ANT+, or a supported custom Bluetooth protocol (heart-rate straps like the Polar H10 or Wahoo TICKR, and some watches). No broadcast means no stream.
 
-**Requesting a data type is not the same as receiving it.** Terra does not gate or filter by device: the broker passes payloads through opaquely, so what arrives is decided entirely by the wearable's own broadcast profile. Most heart-rate straps are cardiac only and will never produce `STEPS` or `LOCATION` however the SDK is configured. Render per-signal state and degrade gracefully rather than treating a missing data type as an error. See [references/data-types.md](references/data-types.md).
+**Requesting a data type is not the same as receiving it.** Terra API does not gate or filter by device: the broker passes payloads through opaquely, so what arrives is decided entirely by the wearable's own broadcast profile. Most heart-rate straps are cardiac only and will never produce `STEPS` or `LOCATION` however the SDK is configured. Render per-signal state and degrade gracefully rather than treating a missing data type as an error. See [references/data-types.md](references/data-types.md).
 
 ## Architecture: producer, broker, consumer
 
 Realtime streaming has four parts and you build three connections between them. See [getting-started](https://docs.tryterra.co/streaming-api/getting-started).
 
 1. **Wearable** – the strap, watch, or sensor, broadcasting over BLE or ANT+.
-2. **Producer** – your mobile app, running a Terra Real-Time (RT) SDK. It receives the wearable's data and forwards it to the Terra API.
+2. **Producer** – your mobile app, running a Terra API Real-Time (RT) SDK. It receives the wearable's data and forwards it to the Terra API.
 3. **Terra API WebSocket broker** – the server that routes the live stream. This is Terra API infrastructure; you never host it.
 4. **Consumer** – your backend, which connects to the broker and receives the stream.
 
@@ -72,21 +65,21 @@ The three connections you build:
 - **App to broker**: your app opens a _producer_ connection and forwards the wearable's data.
 - **Broker to backend**: your backend opens a _consumer_ connection and receives the data live.
 
-You identify a user by your own `reference_id`. The Terra API mints a Terra user ID for that user (no auth widget needed); that ID is what the token endpoints take and what arrives as the `uid` field on every payload.
+You identify a user by your own `reference_id`. The Terra API mints a Terra API user ID for that user (no auth widget needed); that ID is what the token endpoints take and what arrives as the `uid` field on every payload.
 
 ## Tokens
 
-Every websocket connection authenticates with a short-lived token minted by your backend from your Dev ID and API key. **All three tokens are single-use** – the server deletes each one after a successful IDENTIFY, so every reconnect needs a freshly minted token. Never ship your API key into the app; mint tokens server-side and hand them off.
+Every websocket connection authenticates with a short-lived token minted by your backend, which authenticates the mint with an `auth:write` data token (`Authorization: Bearer terra_dt_...`) or the environment's `dev-id` and `x-api-key`. **All three tokens are single-use** – the server deletes each one after a successful IDENTIFY, so every reconnect needs a freshly minted token. Never ship a credential that can mint tokens into the app, in development or production; mint server-side and hand the token off. For the phone-registration token, the credential your backend holds is the `auth:write` data token from "Account tools" above, not the environment API key.
 
 | Token                | Endpoint                                                   | Used by                                                     | IDENTIFY type     |
 | -------------------- | ---------------------------------------------------------- | ----------------------------------------------------------- | ----------------- |
-| Phone-registration   | `POST https://api.tryterra.co/v2/auth/generateAuthToken`   | RT SDK `initConnection` (registers the phone as a producer) | n/a (SDK-managed) |
+| Phone-registration   | `POST https://api.tryterra.co/v2/auth/tokens`              | RT SDK `initConnection` (registers the phone as a producer) | n/a (SDK-managed) |
 | Producer             | `POST https://ws.tryterra.co/auth/user?id=<terra_user_id>` | producer connection sending data                            | 0 (USER)          |
 | Consumer / developer | `POST https://ws.tryterra.co/auth/developer`               | your backend consumer                                       | 1 (DEVELOPER)     |
 
-Note the hosts: only `generateAuthToken` lives on the main API (`api.tryterra.co`). The producer and consumer token endpoints are served over HTTPS by the websocket host (`ws.tryterra.co`) and do **not** exist on `api.tryterra.co`. For the exact request/response schemas, fetch [the REST endpoints reference](https://docs.tryterra.co/reference/streaming-api/api-endpoints.md) when building the request.
+Note the hosts: only the phone-registration endpoint lives on the main API (`api.tryterra.co`); the reference files and shipped SDKs call it by its deprecated, identical name `/auth/generateAuthToken`, and new code should use `/auth/tokens`. The producer and consumer token endpoints are served over HTTPS by the websocket host (`ws.tryterra.co`) and do **not** exist on `api.tryterra.co`. For the exact request/response schemas, fetch [the REST endpoints reference](https://docs.tryterra.co/reference/streaming-api/api-endpoints.md) when building the request.
 
-The phone-registration token is single-use and **expires 3 minutes** after minting (returned as `expires_in`), so mint it just-in-time – when the app is about to call `initConnection`, not at app startup or ahead of a queue. The producer endpoint needs the Terra user ID in the `id` query parameter; retrieve it from the SDK's `getUserId`.
+The phone-registration token is single-use and **expires 3 minutes** after minting (returned as `expires_in`), so mint it just-in-time – when the app is about to call `initConnection`, not at app startup or ahead of a queue. The producer endpoint needs the Terra API user ID in the `id` query parameter; retrieve it from the SDK's `getUserId`.
 
 ## The websocket
 
@@ -105,7 +98,7 @@ These are the things that bite. The step-by-step consumer walkthrough is in [ref
 - **`seq` is monotonic but sparse.** Gaps between consecutive sequence numbers are normal and do not mean lost data. Use `seq` only to order DISPATCHes and as the `after` bound for replay.
 - **REPLAY takes exclusive bounds; send both.** `after` and `before` are both required – a REPLAY that omits `before` returns no messages. On reconnect, set `after` to the last `seq` you processed and `before` to the `seq` of the first live DISPATCH to backfill exactly the gap.
 - **Replay lags a few seconds.** A payload becomes replayable a few seconds after it was delivered live. If a REPLAY returns fewer messages than expected, wait a moment and request again.
-- **Test without hardware.** From the Streaming page of the [Terra dashboard](https://dashboard.tryterra.co/dashboard/streaming), create a test user; the Terra API streams synthetic live data through the real API so you can validate a consumer end to end before touching a device.
+- **Test without hardware.** From the Streaming page of the [Terra API dashboard](https://dashboard.tryterra.co/dashboard/streaming), create a test user; the Terra API streams synthetic live data through the real API so you can validate a consumer end to end before touching a device.
 - **Re-init the RT SDK on every app open or foreground.** Producer registration does not survive backgrounding.
 - **Apple Watch records at reduced frequency outside a workout session.** Start a workout session on the watch to capture data at the highest frequency.
 
@@ -114,14 +107,14 @@ These are the things that bite. The step-by-step consumer walkthrough is in [ref
 Read the reference for the surface you are building.
 
 - [references/consumer-protocol.md](references/consumer-protocol.md) – **read this before writing the backend consumer.** The handshake walkthrough (HELLO, heartbeats, IDENTIFY, READY, DISPATCH), DISPATCH field semantics, the REPLAY backfill recipe, and close-code handling, with pointers to the live doc for exact payload shapes.
-- [references/data-types.md](references/data-types.md) - read when choosing what to request from the RT SDK, or when a stream is silent. The full `DataTypes` and `Connections` enums, why requesting is not receiving, and the Wear OS exercise-prefixed type labels.
+- [references/data-types.md](references/data-types.md) – read when choosing what to request from the RT SDK, or when a stream is silent. The full `DataTypes` and `Connections` enums, why requesting is not receiving, and the Wear OS exercise-prefixed type labels.
 - [references/ios.md](references/ios.md) – read when the producer app is native iOS or you are wiring an Apple Watch. Apple Developer Program membership is required.
 - [references/android.md](references/android.md) – read when the producer app is native Android, including ANT+ and programmatic device scans.
 - [references/react-native.md](references/react-native.md) – read when the producer app is React Native.
 - [references/flutter.md](references/flutter.md) – read when the producer app is Flutter (note the `startRealtimeToApp` vs `startRealtimeToServer` split).
 - [references/wear-os.md](references/wear-os.md) – read when streaming from a Wear OS watch paired to an Android phone.
 
-Full docs: [docs.tryterra.co/streaming-api](https://docs.tryterra.co/streaming-api/getting-started) (append `.md` to any docs URL for a markdown version). If the terra-docs MCP server (`https://docs.tryterra.co/~gitbook/mcp`) is connected, use its tools to search and fetch the docs instead.
+Full docs: [docs.tryterra.co/streaming-api](https://docs.tryterra.co/streaming-api/getting-started). Ask `terra docs ask` (or `docs_ask` over MCP) before fetching a page: it answers from the docs and cites its sources. Append `.md` to any docs URL for markdown.
 
 ## Decisions that are yours to make
 

@@ -42,14 +42,14 @@ response with no body, such as a delete's 204, prints nothing in every format.
 terra users list --select user_id,provider,active
 terra users list --select                          # list the available fields
 terra users list --jq '[.[] | select(.active)] | length'
-terra api /me --jq '.scopes'
+terra admin-api /me --jq '.scopes'
 ```
 
 `--select <fields>` names fields in the order you want them and applies to every
 format, so one flag picks both the keys of a JSON document and the columns of a
 table. A field that does not exist is refused before the request is sent. It
 exists only where the API description says what the response contains, so
-`terra api` and `terra data-api` do not have it and `--jq` is the answer there.
+`terra admin-api` and `terra data-api` do not have it and `--jq` is the answer there.
 
 `--jq` is built in, so it works on machines without jq installed, including
 Windows. A string result prints bare, as `jq -r` would. An expression that
@@ -172,6 +172,6 @@ into an issue, and the response body still goes to stdout.
 | `the endpoint does not exist on this deployment` | A bare 404: wrong path, or the surface is not on that host | Check `terra config --list` for the base URL in use |
 | The token was written to a file, not the keyring | No OS keyring was available; the file is mode 0600         | Nothing to fix                                      |
 
-`terra api <path>` reaches an endpoint without the generated command's
+`terra admin-api <path>` reaches an endpoint without the generated command's
 validation or formatting in the way, which separates "the CLI built the wrong
 request" from "the API answered this".

@@ -1,8 +1,8 @@
 {
-  "version": "1.1.0",
+  "version": "1.2.0",
   "organization": "Terra API",
   "date": "July 2026",
-  "abstract": "Order at-home and go-to-lab diagnostic tests and deliver results with the Terra Vantage API: a platform for managing blood test and DNA diagnostic products, processing orders, and delivering results in FHIR format. Covers the product-to-order-to-results workflow, authentication with Terra dev-id/API key (HTTP Basic or headers), the AT_HOME and GO_TO_LAB collection methods, kit activation, webhook events with HMAC signature verification and retry semantics, sandbox lifecycle simulation, delivery debugging, the mandatory results-acknowledgment step, and the manual partner onboarding required to get started.",
+  "abstract": "Order at-home and go-to-lab diagnostic tests and deliver results with Terra API Vantage: a platform for managing blood test and DNA diagnostic products, processing orders, and delivering results in FHIR format. Covers the product-to-order-to-results workflow, authentication with Terra API dev-id and API key (HTTP Basic or headers), the AT_HOME and GO_TO_LAB collection methods, kit activation, webhook events with HMAC signature verification and retry semantics, sandbox lifecycle simulation, delivery debugging, the mandatory results-acknowledgment step, and the manual partner onboarding required to get started.",
   "references": [
     "https://docs.tryterra.co/vantage-api/overview",
     "https://docs.tryterra.co/vantage-api/account-setup-and-api-keys",

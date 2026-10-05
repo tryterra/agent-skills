@@ -11,12 +11,12 @@ default once with `terra environments use <dev-id>`.
 ```sh
 terra unified-api sources list --env <dev-id>              # what is enabled
 terra unified-api sources enable GARMIN --env <dev-id>     # idempotent
-terra unified-api sources disable GARMIN --env <dev-id> --yes
+terra unified-api sources disable GARMIN --env <dev-id>
 ```
 
 Enabling a provider makes it appear in the auth widget and start syncing to the
-environment's destinations. `disable` is destructive, so it confirms, and with
-no terminal it needs `--yes`.
+environment's destinations. `disable` does not prompt, so it runs the moment
+you send it: confirm with the user first on a live environment.
 
 ### Bring your own OAuth app
 
@@ -40,11 +40,12 @@ reads come back masked, so a retrieve cannot recover a secret you did not keep.
 ```sh
 terra unified-api sources scopes retrieve GARMIN --env <dev-id>
 terra unified-api sources scopes replace GARMIN --env <dev-id> \
-  --scopes <scope> --scopes <scope> --yes
+  --scopes <scope> --scopes <scope>
 ```
 
-Also a full replace; passing no `--scopes` clears the provider's custom scopes
-back to the default.
+Also a full replace: `--scopes` is required, and the list you send becomes the
+whole set. It does not prompt, so retrieve first and confirm on a live
+environment.
 
 ## Destinations
 
@@ -78,13 +79,13 @@ terra unified-api data processing update --env <dev-id> --type json      # json 
 activity payload the destination receives. `data scopes replace` sets the whole
 selection at once and clears what it does not name. `data processing` switches
 the normalization output format for the environment, and the endpoint supports
-a server-side preview through `terra api ... -q dry_run=true`.
+a server-side preview through `terra admin-api ... -q dry_run=true`.
 
 ## The auth widget
 
 ```sh
 terra unified-api widget retrieve --env <dev-id>
-terra unified-api widget update --env <dev-id> --widget-name Acme --app-logo <url> --yes
+terra unified-api widget update --env <dev-id> --widget-name Acme --app-logo <url>
 ```
 
 **`widget update` is a full replace despite the verb**: any field you do not

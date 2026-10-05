@@ -4,7 +4,7 @@ description: Run Terra API health models (Sleep Window, Menstrual Cycle Tracker,
 license: MIT
 metadata:
   author: terra
-  version: "1.1.0"
+  version: "1.2.0"
 compatibility: Requires network access to docs.tryterra.co for full request and response schemas.
 ---
 
@@ -12,9 +12,9 @@ compatibility: Requires network access to docs.tryterra.co for full request and 
 
 Run one of Terra API's health models over a connected user's data for a date range and get a ready-to-use insight back: one request in, one insight out. No model to host. Every model is a **wellness indicator, not a medical or diagnostic tool**; never present its output as clinical.
 
-## From the terminal
+## Account tools: CLI or MCP
 
-Account configuration lives in the [Terra dashboard](https://dashboard.tryterra.co), which an agent cannot click. The `terra` CLI does the same from a terminal, and Models has generated commands of its own, including the run log that says why a run did not return what you expected:
+Models has account commands of its own, including the run log that says why a run did not return what you expected:
 
 ```sh
 terra models catalog list                                           # the models available, account-wide
@@ -27,7 +27,7 @@ Two things about that log. It holds **30 days** by default, so an older run is n
 
 Because a run costs a credit whether or not it returns an insight, `runs list --status error` is also the fastest read on credits being spent on runs that never produced anything.
 
-Install it with `brew install tryterra/tap/terra` on macOS or `npm install -g @tryterra/cli` elsewhere. The `terra-cli` skill carries the guardrails (`--yes` on destructive commands and careful handling of credential output), the exit codes, and a playbook per task. It administers the integration; it does not replace the API calls this skill describes.
+With a shell, use the CLI, and offer to install it if it is missing: `curl -fsSL https://cli.tryterra.co/install.sh | sh` on macOS and Linux, `irm "https://cli.tryterra.co/install.ps1" | iex` in Windows PowerShell, or Homebrew or npm where the user already uses them. Without one (claude.ai, ChatGPT), use the Terra API admin MCP server: each admin command is a tool whose name and `method` spell it (`terra users list` is `users_read` with `method: "list"`). Only the CLI has `terra data-api`, `terra admin-api` and `terra examples`, and `--select` and `--jq` have no MCP equivalent. The `terra-cli` and `terra-mcp` skills carry the guardrails (confirming changes, keeping credentials out of transcripts), the errors, and a playbook per task. They administer the integration; they do not replace the API calls this skill describes.
 
 ## When to use this
 
@@ -64,7 +64,7 @@ curl --request GET \
   --header 'dev-id: YOUR_DEV_ID'
 ```
 
-Fetch https://docs.tryterra.co/models/models.md for the exact params and the full per-model response schema before you build request or response types; the response shape differs per model and evolves.
+Fetch https://docs.tryterra.co/models/models.md for the exact params and the full per-model response schema before you build request or response types; the response shape differs per model and evolves. Ask `terra docs ask` (or `docs_ask` over MCP) before fetching a page: it answers from the docs and cites its sources. Append `.md` to any docs URL for markdown.
 
 ## Reading the result (the part agents get wrong)
 
@@ -82,7 +82,7 @@ Fetch https://docs.tryterra.co/models/models.md for the exact params and the ful
 
 ## Pricing
 
-Usage-based: **$0.01 per model run**, drawn from your plan's monthly credit allowance. One run is one model over one user for one date range, regardless of how much data the range covers; running two models, or the same model on two users, is two runs. A run started from the Terra Dashboard and one made through this API bill through the identical path. Details: https://docs.tryterra.co/unified-api/pricing
+Usage-based: **$0.01 per model run**, drawn from your plan's monthly credit allowance. One run is one model over one user for one date range, regardless of how much data the range covers; running two models, or the same model on two users, is two runs. A run started from the Terra API dashboard and one made through this API bill through the identical path. Details: https://docs.tryterra.co/unified-api/pricing
 
 ## Boundaries
 

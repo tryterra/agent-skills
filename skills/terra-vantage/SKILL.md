@@ -1,57 +1,59 @@
 ---
 name: terra-vantage
-description: Order at-home and go-to-lab diagnostic tests and deliver results with the Terra Vantage API. Use when ordering blood tests or DNA tests, integrating at-home test kits, placing diagnostics orders, browsing test products and variants, handling kit activation, simulating order lifecycles in sandbox, tracking fulfillment and shipping, receiving results-status webhooks, fetching FHIR-format lab results, or acknowledging results (a mandatory compliance step before patients can view them). Covers the product-to-order-to-results workflow, authentication (Terra dev-id/API key via HTTP Basic or headers), the AT_HOME vs GO_TO_LAB collection methods, webhook events and HMAC signature verification, delivery debugging, the sandbox environment, and the manual partner onboarding required to get started.
+description: Order at-home and go-to-lab diagnostic tests and deliver results with Terra API Vantage. Use when ordering blood tests or DNA tests, integrating at-home test kits, placing diagnostics orders, browsing test products and variants, handling kit activation, simulating order lifecycles in sandbox, tracking fulfillment and shipping, receiving results-status webhooks, fetching FHIR-format lab results, or acknowledging results (a mandatory compliance step before patients can view them). Covers the product-to-order-to-results workflow, authentication (Terra API dev-id and API key via HTTP Basic or headers), the AT_HOME vs GO_TO_LAB collection methods, webhook events and HMAC signature verification, delivery debugging, the sandbox environment, and the manual partner onboarding required to get started.
 license: MIT
 compatibility: Requires network access to docs.tryterra.co for current endpoint schemas
 metadata:
   author: terra
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
-# Terra Vantage API
+# Terra API Vantage
 
 The Vantage API is a platform for managing blood test and DNA diagnostic products, processing orders, and delivering test results. It lets healthcare providers, laboratories, and partners embed diagnostic testing directly into their own applications while Terra API handles the operational complexity: kit supplier integrations (no minimum order requirements), logistics and shipping, compliance, and results standardization into FHIR format.
 
+**Availability and onboarding.** Vantage is available in the United Kingdom and the USA, with Germany, Spain, and France listed as coming soon. Onboarding is manual, not self-service: contact Terra API to have your credentials enabled (see [Account setup](https://docs.tryterra.co/vantage-api/account-setup-and-api-keys)). Access is sandbox-first; production is enabled separately when you go live.
+
 ## Start from an example app
 
-For a new app, prefer the published example for a diagnostics storefront and operations console, then adapt it to the
-user's requirements. Install the CLI if missing, discover the current catalog,
-and clone the closest fit:
+For a new app, start from the published example for a diagnostics storefront and operations console, and adapt it to the user's requirements. Run `terra version` and, if the CLI is missing, offer to install it (see below). Then list the current catalog and clone the closest fit:
 
 ```sh
-npm install -g @tryterra/cli
 terra examples list --select name,title,description
 terra examples clone vantage-web-app my-app
 ```
 
-Listing and cloning need no login or selected environment. The destination
-must not exist and its parent must exist. Read the downloaded README and
-AGENTS.md and follow `next_steps` to install dependencies, configure, and run
-it before building on it. Cloning only downloads files. For an existing app,
-use the example as a reference and adapt the relevant pieces in place.
+Neither needs a login. Read the downloaded README and AGENTS.md and follow `next_steps` to install dependencies, configure and run it before building on it. Cloning only downloads files. For an existing app, use the example as a reference and adapt the relevant pieces in place.
 
-## From the terminal
+## Account tools: CLI or MCP
 
-Account configuration lives in the [Terra dashboard](https://dashboard.tryterra.co), which an agent cannot click. The `terra` CLI does the same from a terminal, with one limit worth knowing up front: **Vantage runs on its own host and the CLI does not reach it.** `terra data-api` targets the Unified API and has no Vantage endpoints, so the calls in this skill stay in your own client.
+The account tools do not call the Vantage order, product or result endpoints: those stay in your own client, and `terra data-api` has no Vantage paths. What they do is supply Vantage's credentials and set the environment's Vantage API version.
 
-What the CLI does supply is the credential pair Vantage authenticates with, which is the same dev-id and API key as every other Terra API product:
+**Credentials.** Vantage authenticates with the same dev-id and API key as every other Terra API product:
 
 ```sh
-terra environments retrieve-api-key --env <dev-id>   # dev-id and API key for Basic auth
-terra environments list                                       # which dev-ids exist
+terra environments list                                # which dev-ids exist
+terra environments retrieve-api-key --env <dev-id>     # dev-id and API key for Basic auth
 ```
 
 Those are the `DEV_ID` and `API_KEY` behind `Authorization: Basic base64(DEV_ID:API_KEY)` below, so an agent can fetch them rather than asking someone to copy them out of the dashboard. Sandbox and production are separate Vantage hosts but the same account credentials.
 
-`retrieve-api-key` prints the key, and printing is the whole point of that command, so run it only when something is about to consume the value. It also returns the webhook signing secret. In CI, pipe it into the consumer rather than letting it reach the job log, and use `--select` to take only the field you need.
+`retrieve-api-key` prints the key, and printing is the whole point of that command, so run it only when something is about to consume the value. It also returns the webhook signing secret. In CI, pipe it into the consumer rather than letting it reach the job log, and use `--select` to take only the field you need. Over MCP, `environments_read` with `method: "retrieve_api_key"` returns the same pair into the conversation, so prefer the CLI when the value only has to reach a file.
 
-Install it with `brew install tryterra/tap/terra` on macOS or `npm install -g @tryterra/cli` elsewhere. The `terra-cli` skill carries the guardrails (`--yes` on destructive commands and careful handling of credential output), the exit codes, and a playbook per task. It administers the integration; it does not replace the API calls this skill describes.
+**API version.** Vantage response shapes are versioned by date, and the environment's pinned version decides the shape of every request that sends no `X-Terra-Version` header and of **every webhook delivery** (the header never applies to webhooks):
 
-**Availability and onboarding.** Vantage is available in the United Kingdom and the USA, with Germany, Spain, and France listed as coming soon. Onboarding is manual, not self-service: contact Terra API to have your credentials enabled (see [Account setup](https://docs.tryterra.co/vantage-api/account-setup-and-api-keys)). Access is sandbox-first; production is enabled separately when you go live.
+```sh
+terra vantage api-version retrieve --env <dev-id>                          # pinned, latest, and every version you can move to
+terra vantage api-version update --env <dev-id> --version <date> --dry-run # preview the change
+```
+
+An update takes effect on the environment's next Vantage request, older or newer than the current pin, and there is no unpin. Because it changes the shape your webhook handler receives, move the pin only once the handler accepts both shapes, telling them apart by the `X-Terra-Version` header each delivery carries. Read [Versioning](https://docs.tryterra.co/vantage-api/versioning.md) for what each version changes.
+
+With a shell, use the CLI, and offer to install it if it is missing: `curl -fsSL https://cli.tryterra.co/install.sh | sh` on macOS and Linux, `irm "https://cli.tryterra.co/install.ps1" | iex` in Windows PowerShell, or Homebrew or npm where the user already uses them. Without one (claude.ai, ChatGPT), use the Terra API admin MCP server: each admin command is a tool whose name and `method` spell it (`terra users list` is `users_read` with `method: "list"`). Only the CLI has `terra data-api`, `terra admin-api` and `terra examples`, and `--select` and `--jq` have no MCP equivalent. The `terra-cli` and `terra-mcp` skills carry the guardrails (confirming changes, keeping credentials out of transcripts), the errors, and a playbook per task. They administer the integration; they do not replace the API calls this skill describes.
 
 ## Authentication
 
-Vantage uses your standard **Terra API credentials** (the `dev-id` and API key from the Terra dashboard – the same pair as every other Terra API product), presented either way on every authenticated endpoint:
+Vantage uses your standard **Terra API credentials** (the `dev-id` and API key from the Terra API dashboard – the same pair as every other Terra API product), presented either way on every authenticated endpoint:
 
 1. **HTTP Basic** (what the docs show): username = `dev-id`, password = API key, i.e. `Authorization: Basic base64(DEV_ID:API_KEY)`. Older docs called these `CLIENT_ID`/`CLIENT_SECRET` – same values.
 2. **Header pair**: `dev-id: <id>` + `x-api-key: <key>`.
@@ -92,7 +94,7 @@ Each order sets a `collection_type` that determines how the sample is taken and 
 | `AT_HOME`         | Kit shipped to the recipient; they self-collect and follow the kit instructions | `shipping_address`      |
 | `GO_TO_LAB`       | Sample drawn at a lab draw site (Patient Service Center)                        | `requested_lab_address` |
 
-For `GO_TO_LAB`, the requested lab address is used as a proxy to route the order to the closest available lab, and `GET /api/v1/labs?zip_code=` lists nearby draw sites (US) to offer the user beforehand. To bind the order to the user's chosen site, pass the row's `code` + `address.postal_code` as `requested_lab` on POST /orders, and the response then carries `confirmed_lab` (full site details); an unknown code 400s with `invalid_fields` tag `unknown_lab_code` (re-fetch /labs, re-select); a temporary lookup outage accepts the order unbound (`confirmed_lab` null, `requested_lab` echoed on GET). The response's `confirmed_lab_address` is the nearest draw site to the requested address (best-effort - may be `null`; informational, not a binding reservation). A variant advertises which methods it supports in `available_collection_types` (an array of the strings `"AT_HOME"`/`"GO_TO_LAB"`) and which countries it can be ordered in as `supported_ship_to_countries` (ISO-3166 alpha-2; the shipping destination for AT_HOME, the requested lab's country for GO_TO_LAB); gate both the method choice and the address form on them before ordering.
+For `GO_TO_LAB`, the requested lab address is used as a proxy to route the order to the closest available lab, and `GET /api/v1/labs?zip_code=` lists nearby draw sites (US) to offer the user beforehand. To bind the order to the user's chosen site, pass the row's `code` + `address.postal_code` as `requested_lab` on POST /orders, and the response then carries `confirmed_lab` (full site details); an unknown code 400s with `invalid_fields` tag `unknown_lab_code` (re-fetch /labs, re-select); a temporary lookup outage accepts the order unbound (`confirmed_lab` null, `requested_lab` echoed on GET). The response's `confirmed_lab_address` is the nearest draw site to the requested address (best-effort, may be `null`; informational, not a binding reservation). A variant advertises which methods it supports in `available_collection_types` (an array of the strings `"AT_HOME"`/`"GO_TO_LAB"`) and which countries it can be ordered in as `supported_ship_to_countries` (ISO-3166 alpha-2; the shipping destination for AT_HOME, the requested lab's country for GO_TO_LAB); gate both the method choice and the address form on them before ordering.
 
 ## Kit Activation
 
@@ -131,33 +133,25 @@ Two ways to drive a sandbox order through its lifecycle:
 ## Gotchas
 
 - **IDs are JSON strings.** `order_id`, `order_item_id`, `recipient_id`, `test_taker_id`, `variant_id`, and `event_id` in order responses and webhooks are 64-bit snowflakes serialized as strings – never parse them as numbers (JavaScript corrupts them). Catalog reads (`/products*`) still return numeric `id` fields; order requests take `variant_id` as a string.
-- **One vocabulary on both surfaces.** REST reads and webhook payloads use the same `order.*` fulfillment statuses (payment failure = `order.payment_failed`) and the same `results.*` statuses - webhook statuses match REST reads verbatim. (Historic: webhooks once said `fulfillment.*` and REST said `order.failed`; both retired.)
+- **One vocabulary on both surfaces.** REST reads and webhook payloads use the same `order.*` fulfillment statuses (payment failure = `order.payment_failed`) and the same `results.*` statuses: webhook statuses match REST reads verbatim. (Historic: webhooks once said `fulfillment.*` and REST said `order.failed`; both retired.)
 - **Signature timestamp is Unix SECONDS.** `X-Terra-Signature: t=<unix_seconds>,v1=<hex>`; treating `t` as milliseconds makes every verification fail. Sign-check against the raw body.
 - **`test_taker_id` is required to read or acknowledge results.** Both endpoints take it as a query parameter; it first appears on the `results.kit_activated` webhook.
 - **Send an `Idempotency-Key` header on order creation** (unique per attempt) – retries with the same key + body replay the original result instead of double-ordering; same key + different body → `409`. Without the header there is NO server-side dedupe (`client_order_reference_id` is reconciliation-only): on ambiguous failure, list recent orders and match your reference before retrying.
-- **Acknowledgment gates patient access and shifts liability.** Must be an explicit end-user action.
-- **Track by `order_item_id`, not `order_id`.** Results, activation, and acknowledgment are all per item.
 - **Presigned result URLs expire in 15 minutes.** Re-fetch to re-mint rather than caching the URL.
-- **Collection type dictates the address field.** `shipping_address` for `AT_HOME`, `requested_lab_address` for `GO_TO_LAB`.
 - **Catalog curation blocks ordering.** `PUT /api/v1/products/selection` is a full-set write; curated-out products vanish from reads and ordering one returns `403`.
 - **Sandbox and production hold separate webhook URLs**, and access is enabled per environment (sandbox first).
+- **The pinned API version shapes webhooks, and the request header cannot override it there.** `X-Terra-Version` on a request changes only that response; webhook deliveries always use the environment's pin. Check it with `terra vantage api-version retrieve` before writing a parser, and store each delivery's `X-Terra-Version` header with its body.
 
 ## Live Documentation
 
-Append `.md` to any page URL for markdown. If the terra-docs MCP server (`https://docs.tryterra.co/~gitbook/mcp`) is connected, use its tools to search and fetch these pages instead.
+[references/api-reference.md](references/api-reference.md) maps each endpoint to its reference page. The guides worth reading in full:
 
 - [What is Vantage API?](https://docs.tryterra.co/vantage-api/overview)
 - [Account setup and authentication](https://docs.tryterra.co/vantage-api/account-setup-and-api-keys)
-- [Core concepts](https://docs.tryterra.co/vantage-api/core-concepts)
-- [Ordering your first test](https://docs.tryterra.co/vantage-api/ordering-your-first-test)
+- [Versioning](https://docs.tryterra.co/vantage-api/versioning)
 - [Working with Sandbox](https://docs.tryterra.co/vantage-api/working-with-sandbox)
-- [Webhooks](https://docs.tryterra.co/vantage-api/webhooks)
-- [Managing orders](https://docs.tryterra.co/vantage-api/managing-orders)
-- [Test Collection Methods](https://docs.tryterra.co/vantage-api/test-collection-methods)
-- [Results](https://docs.tryterra.co/vantage-api/results)
-- [Errors](https://docs.tryterra.co/vantage-api/errors)
-- [Monitoring and debugging](https://docs.tryterra.co/vantage-api/monitoring)
-- [Best practices](https://docs.tryterra.co/vantage-api/best-practices)
 - [Acknowledging Results](https://docs.tryterra.co/vantage-api/acknowledging-results)
+- [Best practices](https://docs.tryterra.co/vantage-api/best-practices)
 - [Going to production](https://docs.tryterra.co/vantage-api/going-to-production)
-- API reference: [activation](https://docs.tryterra.co/reference/vantage-api/activation), [clients](https://docs.tryterra.co/reference/vantage-api/clients), [orders](https://docs.tryterra.co/reference/vantage-api/orders), [products](https://docs.tryterra.co/reference/vantage-api/products), [results](https://docs.tryterra.co/reference/vantage-api/results)
+
+Ask `terra docs ask` (or `docs_ask` over MCP) before fetching a page: it answers from the docs and cites its sources. Append `.md` to any docs URL for markdown.

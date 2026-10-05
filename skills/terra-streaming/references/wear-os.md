@@ -20,7 +20,7 @@ Add to the watch app's `AndroidManifest.xml` so it can reach Wear OS Health Serv
 </queries>
 ```
 
-## Instantiate Terra
+## Instantiate `Terra`
 
 ```kotlin
 terra = Terra(context: Context, streamDataSet: Set<StreamDataTypes>)

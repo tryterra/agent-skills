@@ -1,7 +1,8 @@
 # The command surface
 
 Read when you need to know whether a command exists before reaching for
-`terra api`, or to pick the right group for a task.
+`terra admin-api`, or to pick the right group for a task. Also read before
+parsing `terra reference --format json` (its fields are explained at the end).
 
 **`terra reference` is authoritative, not this page.** Commands are generated
 from the API description, so the surface grows with a spec sync and this
@@ -11,8 +12,8 @@ snapshot ages. Confirm before running something you have not run this session:
 terra reference --format json          # everything, machine-readable
 terra reference unified-api            # one subtree as prose, far fewer tokens
 terra help <command>                   # every parameter of one command
-terra api list                         # every admin endpoint and its command
-terra api list --uncovered             # endpoints with no command yet
+terra admin-api list                   # every admin endpoint and its command
+terra admin-api list --uncovered       # endpoints with no command yet
 ```
 
 Prefer `terra reference <group>` over the whole document: the full JSON is
@@ -43,13 +44,13 @@ and build on the working app. Use examples as references for existing projects.
 
 ### Platform
 
-| Group          | Commands                                                                            |
-| -------------- | ----------------------------------------------------------------------------------- |
-| `environments` | `list`, `retrieve`, `create`, `update`, `use`, `retrieve-api-key`, `rotate-api-key` |
-| `users`        | `list`, `stats`                                                                     |
-| `events`       | `list`, `retrieve`, `retrieve-payload`, `stats`, `resend`                           |
-| `tokens`       | `list`, `rotate`, `delete`                                                          |
-| `data-tokens`  | `list`, `create`, `delete`, `retrieve-secret`                                       |
+| Group          | Commands                                                                  |
+| -------------- | ------------------------------------------------------------------------- |
+| `environments` | `list`, `retrieve`, `update`, `use`, `retrieve-api-key`, `rotate-api-key` |
+| `users`        | `list`, `stats`                                                           |
+| `events`       | `list`, `retrieve`, `retrieve-payload`, `stats`, `resend`, `generate`     |
+| `tokens`       | `list`, `rotate`, `delete`                                                |
+| `data-tokens`  | `list`, `create`, `delete`, `retrieve-secret`                             |
 
 ### Unified API
 
@@ -63,24 +64,25 @@ and build on the working app. Use examples as references for existing projects.
 
 ### Other products
 
-| Group      | Commands                                                                                       |
-| ---------- | ---------------------------------------------------------------------------------------------- |
-| `workouts` | `metadata list`, `metadata retrieve`, `metadata update`, `metadata replace`, `metadata delete` |
-| `models`   | `catalog list`, `runs list`                                                                    |
+| Group      | Commands                                                                    |
+| ---------- | --------------------------------------------------------------------------- |
+| `workouts` | `metadata list`, `metadata retrieve`, `metadata replace`, `metadata delete` |
+| `models`   | `catalog list`, `runs list`                                                 |
+| `vantage`  | `api-version retrieve`, `api-version update`                                |
 
 ### Account
 
-| Group          | Commands                                                                                                                                                                                                         |
-| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `account`      | `retrieve`, `update`, `retrieve-metadata`, `update-metadata`                                                                                                                                                     |
-| `company`      | `retrieve`, `update`, `retrieve-onboarding`, `update-onboarding`, `list-feature-flags`, `retrieve-terms`, `agree-terms`, `opt-in-points`, `retrieve-referral-code`, `ensure-referral-code`, `retrieve-referrals` |
-| `team`         | `members list`, `members retrieve`, `members update`, `members delete`, `invitations list`, `invitations create`, `invitations delete`                                                                           |
-| `billing`      | `subscriptions list`, `subscriptions create`, `subscriptions cancel-incomplete`, `invoices list`, `invoices upcoming`, `payment-method retrieve`, `usage retrieve`                                               |
-| `entitlements` | `list`                                                                                                                                                                                                           |
+| Group          | Commands                                                                                                                                                                                                     |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `account`      | `retrieve`, `update`                                                                                                                                                                                         |
+| `company`      | `retrieve`, `update`                                                                                                                                                                                         |
+| `team`         | `members list`, `members retrieve`, `members update`, `members delete`, `invitations list`, `invitations create`, `invitations delete`                                                                       |
+| `billing`      | `subscriptions list`, `subscriptions create`, `subscriptions cancel-incomplete`, `invoices list`, `invoices previews`, `invoices pay`, `invoice-details update`, `payment-method retrieve`, `usage retrieve` |
+| `entitlements` | `list`                                                                                                                                                                                                       |
 
 ### Raw
 
-`api <path>`, `api list [<path>]`, `data-api <path>`
+`admin-api <path>`, `admin-api list [<path>]`, `data-api <path>`
 
 The data API has no generated commands at all. Its endpoints are listed in
 [data-api.md](data-api.md).

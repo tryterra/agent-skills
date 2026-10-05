@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "organization": "Terra API",
   "date": "July 2026",
   "abstract": "Push GPS routes to users' fitness devices with Terra API Routes (pre-release): the create-then-push workflow, the RouteTemplate and Waypoint data model, per-provider wire formats and feature gaps for Garmin, COROS, and Wahoo, cascade re-pushes, and route deletion.",

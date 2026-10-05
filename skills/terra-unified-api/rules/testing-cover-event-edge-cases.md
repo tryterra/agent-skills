@@ -15,11 +15,11 @@ The Terra API failure modes that reach production are rarely the happy path; the
 - **Dedup replay**: the same `X-Terra-Trace-Id` delivered twice processes once and still returns 200; two chunks sharing one `terra-reference` both process
 - **Empty `data[]`**: a data event with no records completes without writes or errors
 - **Missing `user_id`**: malformed payloads are logged and acknowledged, not crashed on
-- **Unknown Terra user**: data for a user you have no connection row for (webhook raced ahead of auth, or a missed reauth swap)
+- **Unknown Terra API user**: data for a user you have no connection row for (webhook raced ahead of auth, or a missed reauth swap)
 - **Unknown event type**: logged and acknowledged (forward compatibility)
 - **`type = 0` falsiness**: activity type `0` is a valid value; `if (item.type)` drops it
 - **Enrichment-null regression**: a delivery with null scores does not erase stored scores (the COALESCE path)
-- **Reauth ID swap**: after `user_reauth`, data for the new Terra user ID lands on the same connection
+- **Reauth ID swap**: after `user_reauth`, data for the new Terra API user ID lands on the same connection
 
 **Incorrect (happy-path-only suite):**
 

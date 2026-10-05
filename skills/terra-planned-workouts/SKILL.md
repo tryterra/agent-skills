@@ -5,16 +5,18 @@ license: MIT
 compatibility: Requires network access to docs.tryterra.co for the full Garmin exercise catalog and payload examples
 metadata:
   author: terra
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Terra API Planned Workouts
 
 Push structured workouts directly to your users' fitness devices. Define a workout template once, and the Terra API syncs it to whatever device the user has connected: Garmin, COROS, Wahoo, Suunto, TrainingPeaks, Huawei, Zepp, Hevy, or Apple. This is a write-to-device product, the inverse of the read-focused Terra API Health & Fitness data flow.
 
-## From the terminal
+> **Pre-release.** This product is pre-release. Endpoints, fields, and provider behavior may change before general availability. Facts here are drawn from the Terra API docs; verify against [docs.tryterra.co/planned-workouts-api](https://docs.tryterra.co/planned-workouts-api) before shipping.
 
-Account configuration lives in the [Terra dashboard](https://dashboard.tryterra.co), which an agent cannot click. The `terra` CLI does the same from a terminal, and the whole create-then-plan flow can be driven by hand before you write the code that sends it:
+## Account tools: CLI or MCP
+
+The whole create-then-plan flow can be driven by hand before you write the code that sends it:
 
 ```sh
 terra data-api /workouts -X POST --body-file workout.json            # returns workout_id
@@ -23,28 +25,17 @@ terra data-api /plannedWorkouts -q user_id=<uuid>
 terra workouts metadata list --env <dev-id>
 ```
 
-The plan call is the one worth running by hand: it returns the planned workout id **and any coercion warnings**, which is how you find out that a target or an interval was rewritten to fit the device before a user sees it. Read what an endpoint takes with `terra api list --data-api /workouts --format json`, and preview a request without sending it with `--dry-run`.
+The plan call is the one worth running by hand: it returns the planned workout id **and any coercion warnings**, which is how you find out that a target or an interval was rewritten to fit the device before a user sees it. Read what an endpoint takes with `terra admin-api list --data-api /workouts --format json`. These calls create and schedule real workouts on a connected device, so run them against a test user.
 
-`terra workouts metadata` is the admin side of the same product, scoped to one environment.
+`terra workouts metadata` holds Terra API's own metadata for a workout (its `pace_units` and when the row was created), never the workout's data itself.
 
-Install it with `brew install tryterra/tap/terra` on macOS or `npm install -g @tryterra/cli` elsewhere. The `terra-cli` skill carries the guardrails (`--yes` on destructive commands and careful handling of credential output), the exit codes, and a playbook per task. It administers the integration; it does not replace the API calls this skill describes.
+The first three commands are `terra data-api`, which only the CLI has; over MCP, the admin tools cover only the workout metadata.
 
-> **Pre-release.** This product is pre-release. Endpoints, fields, and provider behavior may change before general availability. Facts here are drawn from the Terra API docs; verify against [docs.tryterra.co/planned-workouts-api](https://docs.tryterra.co/planned-workouts-api) before shipping.
-
-## When to Apply
-
-Reach for this skill when you are:
-
-- Pushing a planned or structured workout to a user's watch or bike computer
-- Building reusable workout templates or training plans in an app
-- Working with intervals, warmups, cooldowns, and repeat blocks
-- Setting HR, power, pace, speed, cadence, RPE, or zone targets
-- Personalizing one template per athlete via FTP, max HR, or threshold values
-- Handling `coercion_warnings` when a provider cannot represent a feature
+With a shell, use the CLI, and offer to install it if it is missing: `curl -fsSL https://cli.tryterra.co/install.sh | sh` on macOS and Linux, `irm "https://cli.tryterra.co/install.ps1" | iex` in Windows PowerShell, or Homebrew or npm where the user already uses them. Without one (claude.ai, ChatGPT), use the Terra API admin MCP server: each admin command is a tool whose name and `method` spell it (`terra users list` is `users_read` with `method: "list"`). Only the CLI has `terra data-api`, `terra admin-api` and `terra examples`, and `--select` and `--jq` have no MCP equivalent. The `terra-cli` and `terra-mcp` skills carry the guardrails (confirming changes, keeping credentials out of transcripts), the errors, and a playbook per task. They administer the integration; they do not replace the API calls this skill describes.
 
 ## Two-Phase Workflow
 
-Base URL `https://access.tryterra.co/api/v2`. Every request needs two headers: `dev-id` (your Terra developer ID) and `x-api-key` (your Terra API key).
+Base URL `https://access.tryterra.co/api/v2`. Every request needs two headers: `dev-id` (your Terra API developer ID) and `x-api-key` (your Terra API key).
 
 **Phase 1 – Create a template (once).** `POST /workouts` with the workout structure returns a reusable `workout_id`. The template is generic: it holds structure and, where you want personalization, percentage-based targets.
 
@@ -164,7 +155,7 @@ Coercion is a success path, not an error. How you handle warnings is your choice
 - **Huawei is create-only, running-only, no scheduling.** No update, retrieve, or delete on the device. It ignores `planned_date` – the workout is available immediately and **always** returns a coercion warning noting this. Duplicate workout names per user are rejected with a 400. Non-running sports appear as a run.
 - **Zepp has a 7-day sync window** (today to today + 6 days). Workouts scheduled outside the window are stored in Terra API's database but not pushed to the device until a later write or delete for that user triggers a window refresh. There is no background auto-sync.
 - **Hevy is strength-only.** RPE targets are silently dropped with a warning, there are no block repeats (one block maps to one exercise, one step to one set), and it has no scheduling and no provider-side delete. Updates are supported: when a `provider_workout_id` exists, the existing Hevy routine is updated in place.
-- **Apple syncs via the Terra iOS SDK.** The server queues the action; the SDK pushes to WorkoutKit and reports back via `POST /v2/plannedWorkouts/{id}/synced`. Until then `provider_workout_id` is `null`.
+- **Apple syncs via the Terra API iOS SDK.** The server queues the action; the SDK pushes to WorkoutKit and reports back via `POST /v2/plannedWorkouts/{id}/synced`. Until then `provider_workout_id` is `null`. The app-side setup is in the `terra-mobile-sdk` skill.
 - **Garmin retrieve only returns workouts created by your own credentials.** Workouts made by other apps or on the device itself are invisible to your GET calls.
 - **Deletes remove from Terra API's database but may leave the workout on the device** for providers without a delete endpoint (e.g. Huawei, Hevy).
 
@@ -181,4 +172,4 @@ Two things live in the docs rather than this skill, because they are large and c
 - **The complete Garmin exercise catalog** (1,624 names, also used for Hevy): fetch https://docs.tryterra.co/planned-workouts-api/garmin-exercise-reference.md when you need to pick or verify a specific `exercise_name`.
 - **Sport-specific payload examples** (running, cycling, swimming, strength, multi-sport): fetch https://docs.tryterra.co/planned-workouts-api/sport-specific-examples.md when you want a full working request body beyond the one in this file.
 
-Full API documentation: [docs.tryterra.co/planned-workouts-api](https://docs.tryterra.co/planned-workouts-api) (append `.md` to any docs URL for a markdown version). If the terra-docs MCP server (`https://docs.tryterra.co/~gitbook/mcp`) is connected, use its tools to search and fetch the docs instead.
+Full API documentation: [docs.tryterra.co/planned-workouts-api](https://docs.tryterra.co/planned-workouts-api). Ask `terra docs ask` (or `docs_ask` over MCP) before fetching a page: it answers from the docs and cites its sources. Append `.md` to any docs URL for markdown.

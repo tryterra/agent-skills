@@ -1,0 +1,11 @@
+{
+  "version": "1.0.0",
+  "organization": "Terra API",
+  "date": "October 2026",
+  "abstract": "Manage a Terra API account through the admin MCP server when the terra CLI is not available: when to use it instead of the CLI, signing in and access levels, translating CLI commands into tool calls, previews and dashboard approvals for writes, handling secrets and untrusted results, and the errors the server returns.",
+  "references": [
+    "https://docs.tryterra.co/developer-tools/mcp-server",
+    "https://docs.tryterra.co/developer-tools/terra-cli/terra-cli",
+    "https://docs.tryterra.co/llms.txt"
+  ]
+}

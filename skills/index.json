@@ -2,7 +2,7 @@
   "skills": [
     {
       "name": "terra-cli",
-      "description": "Start from example apps and manage Terra API account configuration with the terra CLI, instead of clicking in the Terra API dashboard: environments (dev-ids), enabled providers, data scopes, webhook destinations, API keys and data tokens, delivered webhook events, users, health scores, team, and billing. Also reaches any admin or data API endpoint directly with terra api and terra data-api. Use when a task needs Terra API account state read or changed, when you would otherwise tell the user to open dashboard.tryterra.co, when a webhook did not arrive or has to be resent, when a user connection has to be created or verified, when you want to try a data API request before writing the code that sends it, or when the user mentions terra-cli, terra login, terra agent setup, TERRA_ADMIN_TOKEN, a dev-id, an x-api-key, terra examples, or starting from an example app.",
+      "description": "Start from example apps and manage Terra API account configuration with the terra CLI, instead of clicking in the Terra API dashboard: environments (dev-ids), enabled providers, data scopes, webhook destinations, API keys and data tokens, delivered webhook events, users, health scores, team, and billing. Also reaches any admin or data API endpoint directly with terra admin-api and terra data-api. Use when a task needs Terra API account state read or changed, when you would otherwise tell the user to open dashboard.tryterra.co, when a webhook did not arrive or has to be resent, when a user connection has to be created or verified, when you want to try a data API request before writing the code that sends it, or when the user mentions terra-cli, terra login, terra agent setup, TERRA_ADMIN_TOKEN, a dev-id, an x-api-key, terra examples, or starting from an example app. Prefer it over the Terra API admin MCP server whenever the agent has a shell.",
       "files": [
         "SKILL.md",
         "references/account-audit.md",
@@ -23,7 +23,7 @@
     },
     {
       "name": "terra-lab-reports",
-      "description": "Best practices and API reference for Terra Lab Reports (pre-release) – convert clinical lab report PDFs and images into structured, standardized biomarker data. Use when parsing blood test results, extracting biomarkers, mapping to LOINC or UCUM unit codes, handling reference ranges, handling lab_report.completed / lab_report.failed webhooks, or working with PDF lab results and lab report OCR. Covers the async upload/standardize/deliver lifecycle, the event envelope (event_id, upload_id), the layered result model (source, biomarker, measurement, interpretation, reference ranges), unmatched-biomarker handling, snowflake IDs, and idempotent webhook processing.",
+      "description": "Best practices and API reference for Terra API Lab Reports (pre-release) – convert clinical lab report PDFs and images into structured, standardized biomarker data. Use when parsing blood test results, extracting biomarkers, mapping to LOINC or UCUM unit codes, handling reference ranges, handling lab_report.completed / lab_report.failed webhooks, or working with PDF lab results and lab report OCR. Covers the async upload/standardize/deliver lifecycle, the event envelope (event_id, upload_id), the layered result model (source, biomarker, measurement, interpretation, reference ranges), unmatched-biomarker handling, snowflake IDs, and idempotent webhook processing.",
       "files": [
         "SKILL.md",
         "references/api-reference.md",
@@ -41,8 +41,13 @@
       ]
     },
     {
+      "name": "terra-mcp",
+      "description": "Manage a Terra API account through the Terra API admin MCP server (access.tryterra.co/api/v3/admin/mcp) from an assistant with no shell, such as claude.ai or ChatGPT, or where the terra CLI cannot be used: environments, enabled providers, data scopes, webhook destinations, delivered events and resends, connected users, models, billing, team, and docs_ask. Use when its tools, such as environments_read, events_read or unified_api_destinations_write, are available, when a tool returns approval_required or asks for an approval_id, when connecting Terra API to Claude, ChatGPT, Cursor, VS Code or Codex as an MCP server, or when debugging insufficient_scope, dev_id_not_found or validation_failed. Not the AI Interface MCP that reads end users' health data.",
+      "files": ["SKILL.md"]
+    },
+    {
       "name": "terra-mobile-sdk",
-      "description": "Integrate the Terra API mobile SDK for on-device health sources that have no web API – Apple Health (HealthKit), Samsung Health, and Health Connect. Use when connecting Apple Health, Samsung Health, or Health Connect from a mobile app; when working with TerraiOS, TerraAndroid, terra-react, or terra_flutter_bridge; when minting a mobile SDK auth token via generateAuthToken; when configuring HealthKit background delivery, initConnection permission popups, getUserId validation, ProGuard rules for Samsung, or Health Connect manifest permissions; or when writing on-device data with postActivity/postBody/postNutrition.",
+      "description": "Integrate the Terra API mobile SDK for on-device health sources that have no web API – Apple Health (HealthKit), Samsung Health, and Health Connect. Use when connecting Apple Health, Samsung Health, or Health Connect from a mobile app; when working with TerraiOS, TerraAndroid, terra-react, or terra_flutter_bridge; when minting a mobile SDK auth token via /auth/tokens or generateAuthToken; when configuring HealthKit background delivery, initConnection permission popups, getUserId validation, ProGuard rules for Samsung, or Health Connect manifest permissions; or when writing on-device data with postActivity/postBody/postNutrition.",
       "files": [
         "SKILL.md",
         "references/android.md",
@@ -117,7 +122,7 @@
     },
     {
       "name": "terra-vantage",
-      "description": "Order at-home and go-to-lab diagnostic tests and deliver results with the Terra Vantage API. Use when ordering blood tests or DNA tests, integrating at-home test kits, placing diagnostics orders, browsing test products and variants, handling kit activation, simulating order lifecycles in sandbox, tracking fulfillment and shipping, receiving results-status webhooks, fetching FHIR-format lab results, or acknowledging results (a mandatory compliance step before patients can view them). Covers the product-to-order-to-results workflow, authentication (Terra dev-id/API key via HTTP Basic or headers), the AT_HOME vs GO_TO_LAB collection methods, webhook events and HMAC signature verification, delivery debugging, the sandbox environment, and the manual partner onboarding required to get started.",
+      "description": "Order at-home and go-to-lab diagnostic tests and deliver results with Terra API Vantage. Use when ordering blood tests or DNA tests, integrating at-home test kits, placing diagnostics orders, browsing test products and variants, handling kit activation, simulating order lifecycles in sandbox, tracking fulfillment and shipping, receiving results-status webhooks, fetching FHIR-format lab results, or acknowledging results (a mandatory compliance step before patients can view them). Covers the product-to-order-to-results workflow, authentication (Terra API dev-id and API key via HTTP Basic or headers), the AT_HOME vs GO_TO_LAB collection methods, webhook events and HMAC signature verification, delivery debugging, the sandbox environment, and the manual partner onboarding required to get started.",
       "files": [
         "SKILL.md",
         "references/api-reference.md",

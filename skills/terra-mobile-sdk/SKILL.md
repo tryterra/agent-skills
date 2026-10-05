@@ -1,20 +1,20 @@
 ---
 name: terra-mobile-sdk
-description: Integrate the Terra API mobile SDK for on-device health sources that have no web API – Apple Health (HealthKit), Samsung Health, and Health Connect. Use when connecting Apple Health, Samsung Health, or Health Connect from a mobile app; when working with TerraiOS, TerraAndroid, terra-react, or terra_flutter_bridge; when minting a mobile SDK auth token via generateAuthToken; when configuring HealthKit background delivery, initConnection permission popups, getUserId validation, ProGuard rules for Samsung, or Health Connect manifest permissions; or when writing on-device data with postActivity/postBody/postNutrition.
+description: Integrate the Terra API mobile SDK for on-device health sources that have no web API – Apple Health (HealthKit), Samsung Health, and Health Connect. Use when connecting Apple Health, Samsung Health, or Health Connect from a mobile app; when working with TerraiOS, TerraAndroid, terra-react, or terra_flutter_bridge; when minting a mobile SDK auth token via /auth/tokens or generateAuthToken; when configuring HealthKit background delivery, initConnection permission popups, getUserId validation, ProGuard rules for Samsung, or Health Connect manifest permissions; or when writing on-device data with postActivity/postBody/postNutrition.
 license: MIT
 compatibility: Requires network access to docs.tryterra.co for full API schemas
 metadata:
   author: terra
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Terra API Mobile SDK
 
 Guidance for integrating the Terra API mobile SDK on iOS, Android, React Native, and Flutter. The workflow and every cross-platform gotcha live here in SKILL.md; per-platform setup detail (capabilities, manifest entries, install coordinates, code snippets, platform quirks) lives in `references/`.
 
-## From the terminal
+## Account tools: CLI or MCP
 
-Account configuration lives in the [Terra dashboard](https://dashboard.tryterra.co), which an agent cannot click. The `terra` CLI does the same from a terminal, and for a mobile integration it supplies the credential your backend holds and confirms that a device actually registered.
+For a mobile integration, the account tools supply the credential your backend holds and confirm that a device actually registered.
 
 **Setting up, once.** The backend that mints per-user tokens needs a credential of its own:
 
@@ -38,7 +38,7 @@ terra users list --env <dev-id> --provider APPLE --select user_id,reference_id,a
 terra data-api /auth/tokens -X POST -q reference_id=<your id>
 ```
 
-`reference_id` is a **query** parameter here, so it takes `-q`. Passing it with `-d` puts it in a JSON body the endpoint does not read, and the call still succeeds: you get back a token that is silently unbound. That matters, because binding is what stops a token attaching a device to the wrong user. Bound, the token is tied to that identifier and redemption ignores whatever the SDK sends. (`/auth/generateWidgetSession` does take a body, so `-d` is right there. Check with `terra api list --data-api <path> --format json` rather than assuming.)
+`reference_id` is a **query** parameter here, so it takes `-q`. Passing it with `-d` puts it in a JSON body the endpoint does not read, and the call still succeeds: you get back a token that is silently unbound. That matters, because binding is what stops a token attaching a device to the wrong user. Bound, the token is tied to that identifier and redemption ignores whatever the SDK sends. (`/auth/generateWidgetSession` does take a body, so `-d` is right there. Check with `terra admin-api list --data-api <path> --format json` rather than assuming.)
 
 Useful for checking the flow end to end before the backend exists, but it is still a credential on stdout, so keep it out of CI logs.
 
@@ -46,11 +46,11 @@ The reference files and shipped SDK versions call `POST /auth/generateAuthToken`
 
 Reach for `terra environments retrieve-api-key` only when something genuinely needs the environment's API key. Nothing in the mobile flow does, and it prints the webhook signing secret alongside it.
 
-**Never ship the admin token or the environment API key in an app.** The SDK takes a short-lived auth token minted per user, and `terra data-tokens create --scopes auth:write` is the explicitly scoped, revocable credential for the backend that mints them: several coexist per environment, so rotation is mint-new then revoke-old with no cutover.
+**Never ship the admin token or the environment API key in an app.** The SDK takes a short-lived auth token minted per user, and `terra data-tokens create --scopes auth:write` is the explicitly scoped, revocable credential for the backend that mints them: several coexist per environment, so rotation is mint-new then revoke-old with no cutover. Over MCP, minting a data token needs the user's approval in the dashboard and an access level the default MCP sign-in does not grant, so this one step is simpler with the CLI.
 
 After a device connects, `terra users list --reference-id <ref>` says whether the record landed and stayed active, which separates an SDK problem from a permissions one.
 
-Install it with `brew install tryterra/tap/terra` on macOS or `npm install -g @tryterra/cli` elsewhere. The `terra-cli` skill carries the guardrails (`--yes` on destructive commands and careful handling of credential output), the exit codes, and a playbook per task. It administers the integration; it does not replace the API calls this skill describes.
+With a shell, use the CLI, and offer to install it if it is missing: `curl -fsSL https://cli.tryterra.co/install.sh | sh` on macOS and Linux, `irm "https://cli.tryterra.co/install.ps1" | iex` in Windows PowerShell, or Homebrew or npm where the user already uses them. Without one (claude.ai, ChatGPT), use the Terra API admin MCP server: each admin command is a tool whose name and `method` spell it (`terra users list` is `users_read` with `method: "list"`). Only the CLI has `terra data-api`, `terra admin-api` and `terra examples`, and `--select` and `--jq` have no MCP equivalent. The `terra-cli` and `terra-mcp` skills carry the guardrails (confirming changes, keeping credentials out of transcripts), the errors, and a playbook per task. They administer the integration; they do not replace the API calls this skill describes.
 
 ## When the mobile SDK is the right tool
 
@@ -62,7 +62,7 @@ The mobile SDK exists for one reason: to reach health sources that have **no web
 
 Every other provider (Garmin, Fitbit, Oura, Whoop, Strava, Dexcom, and 500+ more) connects through the [Unified API](https://docs.tryterra.co/unified-api), not the SDK. Google Fit can be read through the SDK via Health Connect, but the web API is the preferred, more reliable route for it. If a provider you need has a web API, use the web API.
 
-Data captured by the SDK flows to the same Data Destination (webhook) as web API data, and connections are managed with the same auth model. If you are building the receiving webhook or storing the health data, that is the `terra-unified-api` skill's territory; this skill covers the on-device connection.
+Data captured by the SDK flows to the same Data Destination (webhook) as web API data, and connections are managed with the same auth model. If you are building the receiving webhook or storing the health data, that is the `terra-unified-api` skill's territory; this skill covers the on-device connection. Live, per-second data from a BLE or ANT+ wearable is the separate Real-Time SDK, covered by `terra-streaming`.
 
 ## The six-step workflow
 
@@ -70,7 +70,7 @@ The shape is identical on every platform. Platform differences are in the `refer
 
 1. **Install the SDK and grant native capabilities.** Add the package, declare HealthKit/background capabilities (iOS) or manifest permissions and minSDK 28 (Android). See the per-platform reference.
 2. **Initialize the SDK on every app start and every foreground.** Create the `TerraManager` (iOS/Android) or call `initTerra` (RN/Flutter). This call is **asynchronous** and must complete before any other SDK call. Initializing is a prerequisite for everything else, so do it every time the app opens, not just once per install.
-3. **Mint a single-use auth token from YOUR BACKEND.** `POST https://api.tryterra.co/v2/auth/generateAuthToken` with your `dev-id` and `x-api-key` in the headers. The token is single-use **and expires in 3 minutes** (the response includes `expires_in`), so mint it just-in-time when the user initiates the connection, not at app start. It exists so the connection endpoint cannot be abused. In production, **never** ship the API key in the client; call this from your server and hand the token to the client through your own channel. During development only, a client-side call (exposing the key) is tolerable.
+3. **Mint a single-use auth token from YOUR BACKEND.** `POST https://api.tryterra.co/v2/auth/tokens` (the deprecated `/auth/generateAuthToken` is the same endpoint), with your user's identifier as the `reference_id` **query** parameter so the token is bound to that user. Authenticate with the `auth:write` data token from "Account tools" above, sent as `Authorization: Bearer terra_dt_...`; it is bound to one environment, so no `dev-id` header is needed. The `dev-id` and `x-api-key` pair the reference files show still works, but it is the environment's master key. The token is single-use **and expires in 3 minutes** (the response includes `expires_in`), so mint it just-in-time when the user initiates the connection, not at app start. Hand it to the client through your own channel. Never call this endpoint from the app, in development or production: whatever credential can mint tokens must stay on your server.
 4. **Open the connection with `initConnection`.** Pass the connection type, the token, and your permission set. This triggers the OS permission popup. See "Permission popup behavior" below – it is the highest-friction part of the integration.
 5. **Validate with `getUserId` on every re-initialization.** `getUserId` is synchronous and returns the `user_id` if the connection is live or `nil`/`null` if not. Call it right after every init; on `nil`, call `initConnection` again to reconnect. Re-connecting an already-connected user triggers no popup and does not interrupt the user.
 6. **iOS only: enable background delivery.** Call `Terra.setUpBackgroundDelivery()` in your `AppDelegate`'s `didFinishLaunchingWithOptions`. Without it, Apple Health data is not pushed automatically.
@@ -90,7 +90,7 @@ The shape is identical on every platform. Platform differences are in the `refer
 - Fires at a **much lower frequency** when the app is killed.
 - Fires **only when the phone is unlocked**.
 - Fires **only with a network connection**.
-- Delivers **only data types enabled on [the Terra Dashboard](https://dashboard.tryterra.co)**. `terra unified-api data scopes list --env <dev-id>` reads that set without opening it, and `terra unified-api data scopes replace` changes it.
+- Delivers **only data types enabled on [the Terra API dashboard](https://dashboard.tryterra.co)**. `terra unified-api data scopes list --env <dev-id>` reads that set. To change it, `terra unified-api data scopes replace` takes the **complete** set: every type you leave out is deselected, so read the list first and send it back with your additions.
 - If you use `customPermissions`, background delivery needs specific per-category permissions enabled: **Daily** needs `STEPS`; **Sleep** needs `SLEEP_ANALYSIS`; **Body** needs `BMI` and `HEART_RATE`; **Activity** needs `WORKOUT_TYPE`; **Nutrition** needs `NUTRITION_CALORIES`.
 
 `schedulerOn` has **no effect on iOS** – background delivery is controlled entirely by `setUpBackgroundDelivery()`. On Android, `schedulerOn = true` enables Terra API to make scheduled requests while the app is in the foreground.
@@ -123,4 +123,4 @@ Read the file for the platform you are building on:
 - **`references/react-native.md`** – read when integrating **terra-react**: install, iOS + Android native setup, `initTerra`/`initConnection`, the AppDelegate background-delivery edit, `postActivity` (Apple Health only).
 - **`references/flutter.md`** – read when integrating **terra_flutter_bridge**: `flutter pub`, native setup, `TerraFlutter` API, AppDelegate background delivery, getters.
 
-Full docs: [docs.tryterra.co](https://docs.tryterra.co) (append `.md` to any docs URL for a markdown version). Where a signature or enum is not shown here, see the SDK reference linked from [docs.tryterra.co](https://docs.tryterra.co/unified-api/mobile-only-sources). If the terra-docs MCP server (`https://docs.tryterra.co/~gitbook/mcp`) is connected, use its tools to search and fetch the docs instead.
+Full docs: [docs.tryterra.co](https://docs.tryterra.co). Where a signature or enum is not shown here, see the SDK reference linked from [mobile-only sources](https://docs.tryterra.co/unified-api/mobile-only-sources). Ask `terra docs ask` (or `docs_ask` over MCP) before fetching a page: it answers from the docs and cites its sources. Append `.md` to any docs URL for markdown.

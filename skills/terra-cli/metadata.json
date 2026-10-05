@@ -1,5 +1,5 @@
 {
-  "version": "2.0.0",
+  "version": "2.2.0",
   "organization": "Terra API",
   "date": "September 2026",
   "abstract": "Start new Terra API apps from published examples, then adapt the working integration. Drive account configuration from the terminal with current CLI commands, authentication checks, credential handling, output filtering, pagination, and task playbooks.",

@@ -1,38 +1,33 @@
 ---
 name: terra-lab-reports
-description: Best practices and API reference for Terra Lab Reports (pre-release) – convert clinical lab report PDFs and images into structured, standardized biomarker data. Use when parsing blood test results, extracting biomarkers, mapping to LOINC or UCUM unit codes, handling reference ranges, handling lab_report.completed / lab_report.failed webhooks, or working with PDF lab results and lab report OCR. Covers the async upload/standardize/deliver lifecycle, the event envelope (event_id, upload_id), the layered result model (source, biomarker, measurement, interpretation, reference ranges), unmatched-biomarker handling, snowflake IDs, and idempotent webhook processing.
+description: Best practices and API reference for Terra API Lab Reports (pre-release) – convert clinical lab report PDFs and images into structured, standardized biomarker data. Use when parsing blood test results, extracting biomarkers, mapping to LOINC or UCUM unit codes, handling reference ranges, handling lab_report.completed / lab_report.failed webhooks, or working with PDF lab results and lab report OCR. Covers the async upload/standardize/deliver lifecycle, the event envelope (event_id, upload_id), the layered result model (source, biomarker, measurement, interpretation, reference ranges), unmatched-biomarker handling, snowflake IDs, and idempotent webhook processing.
 license: MIT
 compatibility: Requires network access to docs.tryterra.co for full endpoint specs, payload examples, and enum tables
 metadata:
   author: terra
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
-# Terra Lab Reports Best Practices
+# Terra API Lab Reports Best Practices
 
-Production guidelines and API reference for building with the Terra Lab Reports API (**pre-release**). It converts clinical lab report PDFs and images into structured, standardized biomarker data: OCR plus AI extraction, then fuzzy matching against a reference dataset of 4,000+ biomarkers that yields canonical biomarker keys, UCUM unit codes, and LOINC codes.
+Production guidelines and API reference for building with the Terra API Lab Reports (**pre-release**). It converts clinical lab report PDFs and images into structured, standardized biomarker data: OCR plus AI extraction, then fuzzy matching against a reference dataset of 4,000+ biomarkers that yields canonical biomarker keys, UCUM unit codes, and LOINC codes.
+
+**Pre-release: assume the contract may move.** Fetch the live docs pages before generating production request bodies or webhook parsers, and verify against the live API before shipping.
 
 ## Start from an example app
 
-For a new app, prefer the published example for lab-report uploads and biomarker trends, then adapt it to the
-user's requirements. Install the CLI if missing, discover the current catalog,
-and clone the closest fit:
+For a new app, start from the published example for lab-report uploads and biomarker trends, and adapt it to the user's requirements. Run `terra version` and, if the CLI is missing, offer to install it (see below). Then list the current catalog and clone the closest fit:
 
 ```sh
-npm install -g @tryterra/cli
 terra examples list --select name,title,description
 terra examples clone lab-reports-web-app my-app
 ```
 
-Listing and cloning need no login or selected environment. The destination
-must not exist and its parent must exist. Read the downloaded README and
-AGENTS.md and follow `next_steps` to install dependencies, configure, and run
-it before building on it. Cloning only downloads files. For an existing app,
-use the example as a reference and adapt the relevant pieces in place.
+Neither needs a login. Read the downloaded README and AGENTS.md and follow `next_steps` to install dependencies, configure and run it before building on it. Cloning only downloads files. For an existing app, use the example as a reference and adapt the relevant pieces in place.
 
-## From the terminal
+## Account tools: CLI or MCP
 
-Account configuration lives in the [Terra dashboard](https://dashboard.tryterra.co), which an agent cannot click. The `terra` CLI does the same from a terminal, and every Lab Reports endpoint is reachable by hand, which is the fastest way to answer "where did that report go":
+Every Lab Reports endpoint is reachable by hand, which is the fastest way to answer "where did that report go":
 
 ```sh
 terra data-api /lab-reports -q reference_id=<ref>
@@ -43,11 +38,11 @@ terra data-api /lab-reports/<session_id>/files           # the input files behin
 
 `deliveries` is the one to reach for first when a report parsed but never arrived: it separates "we never delivered it" from "we delivered it and your endpoint rejected it", which are different bugs. An upload can fan out to several sessions, so learn the session ids from the webhook events or from `/lab-reports?upload_id=...` rather than assuming one upload is one session.
 
-Read what an endpoint takes with `terra api list --data-api /lab-reports --format json`.
+Read what an endpoint takes with `terra admin-api list --data-api /lab-reports --format json`.
 
-Install it with `brew install tryterra/tap/terra` on macOS or `npm install -g @tryterra/cli` elsewhere. The `terra-cli` skill carries the guardrails (`--yes` on destructive commands and careful handling of credential output), the exit codes, and a playbook per task. It administers the integration; it does not replace the API calls this skill describes.
+Every command above is `terra data-api`, which only the CLI has; over MCP, no admin tool reads lab report sessions, so without a shell call the endpoints from your own client.
 
-**Pre-release: assume the contract may move.** Fetch the live docs pages before generating production request bodies or webhook parsers, and verify against the live API before shipping.
+With a shell, use the CLI, and offer to install it if it is missing: `curl -fsSL https://cli.tryterra.co/install.sh | sh` on macOS and Linux, `irm "https://cli.tryterra.co/install.ps1" | iex` in Windows PowerShell, or Homebrew or npm where the user already uses them. Without one (claude.ai, ChatGPT), use the Terra API admin MCP server: each admin command is a tool whose name and `method` spell it (`terra users list` is `users_read` with `method: "list"`). Only the CLI has `terra data-api`, `terra admin-api` and `terra examples`, and `--select` and `--jq` have no MCP equivalent. The `terra-cli` and `terra-mcp` skills carry the guardrails (confirming changes, keeping credentials out of transcripts), the errors, and a playbook per task. They administer the integration; they do not replace the API calls this skill describes.
 
 ## What the Product Does
 
@@ -150,8 +145,6 @@ The full biomarker dataset (4,000+ entries, ~700 KB) is not bundled; download it
 
 ## Live Documentation
 
-Append `.md` to any page URL for markdown. If the terra-docs MCP server (`https://docs.tryterra.co/~gitbook/mcp`) is connected, use its tools to search and fetch these pages instead.
-
 - [Overview](https://docs.tryterra.co/lab-reports)
 - [Quick Start](https://docs.tryterra.co/lab-reports/quickstart)
 - [Core Concepts](https://docs.tryterra.co/lab-reports/core-concepts)
@@ -159,3 +152,5 @@ Append `.md` to any page URL for markdown. If the terra-docs MCP server (`https:
 - [Webhook Payload](https://docs.tryterra.co/lab-reports/webhook-payload)
 - [Biomarker Reference](https://docs.tryterra.co/lab-reports/biomarker-reference)
 - [Best Practices](https://docs.tryterra.co/lab-reports/best-practices)
+
+Ask `terra docs ask` (or `docs_ask` over MCP) before fetching a page: it answers from the docs and cites its sources. Append `.md` to any docs URL for markdown.

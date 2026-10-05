@@ -13,9 +13,9 @@ Every payload carries `event_id` (string) and `timestamp` (Unix seconds) in addi
 
 ### Fulfillment events (`event_type: "order.status_changed"`)
 
-`data`: `order_id` (string), `status`, plus `tracking_number` and (sandbox only) `supplier_item_id` when available. `status` values: `order.payment_processing`, `order.payment_complete`, `order.payment_failed`, `order.processing`, `order.delayed`, `order.delivery_fulfilled`, `order.completed`, `order.cancelled` - the same vocabulary REST serves.
+`data`: `order_id` (string), `status`, plus `tracking_number` and (sandbox only) `supplier_item_id` when available. `status` values: `order.payment_processing`, `order.payment_complete`, `order.payment_failed`, `order.processing`, `order.delayed`, `order.delivery_fulfilled`, `order.completed`, `order.cancelled`: the same vocabulary REST serves.
 
-REST reads of the same order use the identical vocabulary - match webhook `status` verbatim against `order_status`/`status_history`. (The legacy `order.failed` string is still accepted as a status _filter_ on GET /orders but is never emitted.)
+REST reads of the same order use the identical vocabulary: match webhook `status` verbatim against `order_status`/`status_history`. (The legacy `order.failed` string is still accepted as a status _filter_ on GET /orders but is never emitted.)
 
 ```json
 {
@@ -58,10 +58,10 @@ results.results_ready -> results.escalation_raised
 
 ## Signature Verification
 
-Webhooks are signed with HMAC-SHA256 using the account's Terra signing secret. Verify every request before trusting the body.
+Webhooks are signed with HMAC-SHA256 using the account's Terra API signing secret. Verify every request before trusting the body.
 
 - **Header:** `X-Terra-Signature`, formatted `t=<timestamp>,v1=<hex_signature>`, where `t` is a Unix timestamp in **seconds** (not milliseconds – a millisecond comparison makes every verification fail) and `v1` is the hex HMAC-SHA256 signature.
-- **Additional headers:** `X-Terra-Trace-Id` (equals the `event_id`; quote it to Terra support) and `Content-Type: application/json`.
+- **Additional headers:** `X-Terra-Trace-Id` (equals the `event_id`; quote it to Terra API support) and `Content-Type: application/json`.
 
 Verification steps:
 
@@ -75,6 +75,6 @@ Verification steps:
 
 - Respond with any **2xx quickly** (deliveries time out after ~10 seconds); process asynchronously.
 - Failures (network error, timeout, 408, 429, any 5xx) get up to 5 HTTP attempts with exponential backoff and jitter (~1s, 2s, 4s, 8s) on the first delivery; after that the event is redelivered as single attempts with growing delays (5s doubling, capped at 10 minutes), up to 10 deliveries in total (~14 calls over ~30 minutes) before dead-lettering. Handlers must be idempotent. **Other 4xx responses are recorded as rejected and NOT retried** – a verifier bug that returns 401 permanently drops events.
-- Dead-lettered events can be replayed by Terra – not silently lost.
+- Dead-lettered events can be replayed by Terra API – not silently lost.
 - Ordering is not guaranteed; treat each event as the item's current state.
 - Debug with `GET /api/v1/webhook-deliveries?outcome=failed` (outcomes: `delivered`, `rejected`, `invalid` = no URL registered, `dead_lettered`, `replayed`; `attempts` and `final_status_code` included). Its `event_type` field uses the same strings as the webhook payloads. Cross-check authoritative state via `GET /api/v1/orders/{order_id}` `status_history`. See the [monitoring doc](https://docs.tryterra.co/vantage-api/monitoring.md).

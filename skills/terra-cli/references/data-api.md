@@ -9,12 +9,12 @@ no generated command (all of them).
 `terra data-api` targets one environment, resolved the same way every command
 resolves it (`--env`, then `TERRA_ENV`, then the profile default), and
 authenticates with **that environment's API key rather than your admin token**.
-The CLI fetches the key for you, which needs the `keys:read` scope that the
-default `terra login` leaves out. Two ways past that:
+The CLI fetches the key for you, which needs the `keys:read` scope. A default
+`terra login` grants it; a token narrowed with `--scope` or the Read only
+preset may not. Without it, supply the key directly and skip the lookup:
 
 ```sh
-terra login --scope keys:read     # the user runs this
-export TERRA_API_KEY=<key>        # supply the key directly, no lookup
+export TERRA_API_KEY=<key>
 ```
 
 The key is only ever sent, never printed.
@@ -41,8 +41,8 @@ terra data-api /sleep -q user_id=<uuid> -q start_date=2026-08-01 -q end_date=202
 ## Endpoints
 
 ```sh
-terra api list --data-api                        # every endpoint
-terra api list --data-api /sleep --format json   # what one takes and returns
+terra admin-api list --data-api                        # every endpoint
+terra admin-api list --data-api /sleep --format json   # what one takes and returns
 ```
 
 That second call is the closest thing these commands have to help, and it is
@@ -88,8 +88,7 @@ and a POST can read parameters from the query string:
 | `POST /workouts/{id}/plan`         | the query, `-q`, alongside a required `planned_date` in the body |
 | `DELETE /auth/deauthenticateUser`  | the query, `-q`                                                  |
 
-The CLI checks the path and the method before sending, and stops there:
-parameters are sent as typed and the API decides. So a required query parameter
+Parameters are sent as typed and the API decides. So a required query parameter
 passed with `-d` is not rejected locally, and where the parameter is optional
 the call succeeds with it silently ignored. On `POST /auth/tokens` that returns
 a token with no `reference_id` binding, which is the guarantee that stops a
@@ -99,13 +98,12 @@ Read the endpoint rather than guessing, and copy the parameter locations from
 it:
 
 ```sh
-terra api list --data-api /auth/tokens --format json
+terra admin-api list --data-api /auth/tokens --format json
 ```
 
-The path and method are checked against the pinned API description before
-anything is sent, so a typo fails locally naming what it probably meant. Values
-are not checked; the API decides. `--no-verify` skips the check, which is what
-an endpoint newer than the pin needs.
+The server validates the path, method and parameters, so a request can reach
+an endpoint newer than this CLI. The listing comes from the API description
+bundled with the CLI and may lag the server.
 
 ## Worked examples
 
@@ -149,19 +147,19 @@ terminal.
 
 ## Admin endpoints with no command
 
-`terra api <path>` is the same command pointed at the admin API. Reach for a
+`terra admin-api <path>` is the same command pointed at the admin API. Reach for a
 generated command first: it validates input, formats output, and knows which
 operations are destructive.
 
 ```sh
-terra api /me
-terra api list --uncovered          # admin endpoints with no command
-terra api /environments -X POST -d dev_id=dev-new -d name=Staging
-terra api /environments/<dev-id>/unified-api/destinations/<id> -X DELETE -q dry_run=true
+terra admin-api /me
+terra admin-api list --uncovered          # admin endpoints with no command
+terra admin-api /company -X PATCH --body '{"display_name":"Acme"}'
+terra admin-api /environments/<dev-id>/unified-api/destinations/<id> -X DELETE -q dry_run=true
 ```
 
 That last one is worth knowing: a few endpoints accept a server-side
-`dry_run=true` that reports what _would_ change, which is more than the CLI's
-own `--dry-run` (that prints the request and stops). `terra api` never
-generates an idempotency key, because it cannot know whether the endpoint
-deduplicates.
+`dry_run=true` that reports what _would_ change. The raw commands have no
+`--dry-run` of their own, so this is their only preview. `terra admin-api`
+sends an idempotency key only when you pass `--idempotency-key`, because it
+cannot know whether the endpoint deduplicates.

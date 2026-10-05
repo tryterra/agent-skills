@@ -6,6 +6,7 @@
       "description": "Skills for integrating Terra API \u2013 the unified health & fitness data API.",
       "skills": [
         "terra-cli",
+        "terra-mcp",
         "terra-unified-api",
         "terra-mobile-sdk",
         "terra-streaming",

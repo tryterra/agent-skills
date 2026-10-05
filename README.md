@@ -10,7 +10,9 @@ Install instructions that help AI agents create more accurate [Terra API](https:
 
 [Agent skills](https://agentskills.io) give AI coding agents reusable guidance for building Terra API integrations. Terra maintained skills provide the newest product and API guidance based on the latest recommended practices. They follow the Agent Skills open standard, so they work with Claude Code, Cursor, GitHub Copilot, Gemini CLI, and any other agent that supports the format.
 
-The same set ships as a plugin for Claude Code, Codex and Cursor. The plugin connects your agent directly to your Terra API account through the [Terra CLI](https://docs.tryterra.co/developer-tools/terra-cli/terra-cli), so it can set up, manage and debug your Terra API integration without you clicking through the [Terra Dashboard](https://dashboard.tryterra.co). If the CLI is missing or logged out when a session starts, the agent offers to install it and log you in. It never does either without asking.
+The same set ships as a plugin for Claude Code, Codex and Cursor. The plugin connects your agent directly to your Terra API account, so it can set up, manage and debug your Terra API integration without you clicking through the [Terra Dashboard](https://dashboard.tryterra.co). It works through the [Terra CLI](https://docs.tryterra.co/developer-tools/terra-cli/terra-cli), and bundles the Terra API [admin MCP server](https://docs.tryterra.co/developer-tools/mcp-server) for when the CLI cannot be installed: sign in to it once from your agent, and it asks you to approve sensitive changes in the dashboard. If the CLI is missing or logged out, the agent offers to install it and log you in. It never does either without asking.
+
+Assistants without a shell, such as claude.ai and ChatGPT, can use the admin MCP server on its own: add `https://access.tryterra.co/api/v3/admin/mcp` as a custom connector. The `terra-mcp` skill tells an agent how to use it.
 
 ## Install
 
@@ -42,9 +44,11 @@ npx plugins add tryterra/agent-skills
 The [Terra CLI](https://docs.tryterra.co/developer-tools/terra-cli/terra-cli) installs the skills and configures every coding agent it finds, so you get the latest set without configuration or maintenance. This is the recommended path.
 
 ```bash
-brew install tryterra/tap/terra   # macOS
-npm install -g @tryterra/cli      # everywhere else
+curl -fsSL https://cli.tryterra.co/install.sh | sh   # macOS and Linux
+irm "https://cli.tryterra.co/install.ps1" | iex      # Windows PowerShell
 ```
+
+Homebrew (`brew install tryterra/tap/terra`) and npm (`npm install -g @tryterra/cli`) work too; see [Installation](https://docs.tryterra.co/developer-tools/terra-cli/installation).
 
 ```bash
 terra agent setup
@@ -71,6 +75,7 @@ Manually installed skills do not update themselves. Run `npx skills update -y` t
 | Skill                                                     | What it covers                                                                                                              | Status         |
 | --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | -------------- |
 | [`terra-cli`](skills/terra-cli)                           | Read and change account configuration from the terminal instead of the dashboard, and reach any endpoint directly           | ✅ Ready       |
+| [`terra-mcp`](skills/terra-mcp)                           | Manage the account over the admin MCP server from assistants without a shell, with dashboard approval for sensitive changes | ✅ Ready       |
 | [`terra-unified-api`](skills/terra-unified-api)           | API best practices: webhooks and signature verification, data idempotency, connection lifecycle, multi-device data, testing | ✅ Ready       |
 | [`terra-mobile-sdk`](skills/terra-mobile-sdk)             | Mobile integration for Apple Health, Samsung Health, and Health Connect on iOS, Android, React Native, and Flutter          | ✅ Ready       |
 | [`terra-streaming`](skills/terra-streaming)               | Realtime websocket data and the Real-Time SDK on iOS, Android, React Native, Flutter, and Wear OS                           | ✅ Ready       |

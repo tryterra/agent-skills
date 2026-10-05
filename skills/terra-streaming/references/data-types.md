@@ -39,7 +39,7 @@ This is the most common source of "the stream is empty" reports. Three things mu
 
 Check them in that order. Silence almost always means the device is not broadcasting that signal, not that the connection is broken.
 
-Terra does not gate or filter by device. The broker passes payloads through opaquely and labels them with the `data_type` the producer supplied, so what arrives is decided entirely by the wearable's own broadcast profile.
+Terra API does not gate or filter by device. The broker passes payloads through opaquely and labels them with the `data_type` the producer supplied, so what arrives is decided entirely by the wearable's own broadcast profile.
 
 ### Practical consequences for the code you write
 

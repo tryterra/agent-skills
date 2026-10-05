@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "organization": "Terra API",
   "date": "July 2026",
   "abstract": "Production-tested best practices for integrating Terra API: webhook verification and idempotency, health data storage strategies, connection lifecycle handling, multi-device merging, and testing.",

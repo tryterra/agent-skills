@@ -4,7 +4,7 @@ Order at-home and go-to-lab diagnostic tests and deliver results with the [Terra
 
 Availability is currently the United Kingdom and the USA (Germany, Spain, and France coming soon), and onboarding is manual: contact Terra API to have your credentials enabled (see [Account setup](https://docs.tryterra.co/vantage-api/account-setup-and-api-keys)). Access is sandbox-first, with production enabled separately at go-live.
 
-This skill covers the product-to-order-to-results workflow, authentication (Terra dev-id/API key via HTTP Basic or headers), the `AT_HOME` vs `GO_TO_LAB` collection methods, kit activation, webhook events with HMAC signature verification and retry semantics, sandbox lifecycle simulation, delivery debugging, and the mandatory results-acknowledgment step. Facts are drawn from the Terra Vantage API documentation.
+This skill covers the product-to-order-to-results workflow, authentication (Terra API dev-id and API key via HTTP Basic or headers), the `AT_HOME` vs `GO_TO_LAB` collection methods, kit activation, webhook events with HMAC signature verification and retry semantics, sandbox lifecycle simulation, delivery debugging, and the mandatory results-acknowledgment step. Facts are drawn from the Vantage API documentation.
 
 ## Installation
 
@@ -30,7 +30,7 @@ cp -r skills/terra-vantage ~/.claude/skills/
 ## Highlights
 
 - Three-level catalog (product types, products, variants); order a variant with `POST /api/v1/orders`
-- Auth is your standard Terra dev-id/API key – HTTP Basic (`dev-id` as username) or the `dev-id`/`x-api-key` header pair
+- Auth is your standard Terra API dev-id and API key – HTTP Basic (`dev-id` as username) or the `dev-id`/`x-api-key` header pair
 - `AT_HOME` (self-collection, `shipping_address`) vs `GO_TO_LAB` (lab draw site, `requested_lab_address`, `GET /api/v1/labs` for nearby sites)
 - Acknowledging results is **mandatory and user-triggered**: patients cannot see results until acknowledged, and skipping it transfers liability to you
 - Webhooks are HMAC-SHA256 signed via `X-Terra-Signature` (timestamp in Unix seconds); at-least-once delivery – dedupe on `event_id`

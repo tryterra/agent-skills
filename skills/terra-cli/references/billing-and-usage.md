@@ -24,15 +24,15 @@ exit 1.
 
 ```sh
 terra billing subscriptions list --select id,status,collection_method,cancel_at_period_end
-terra billing invoices upcoming --select amount_due,currency,status
+terra billing invoices previews
 terra billing invoices list --select id,created_at,amount_due,currency,status
 terra billing payment-method retrieve --select brand,last4,exp_month,exp_year,has_card
 ```
 
-`invoices upcoming` is the preview of the next bill, which is the one
-people actually want when they ask what they will be charged. Both invoice
-commands also return `hosted_invoice_url` and `invoice_pdf` for the human
-copies.
+`invoices previews` previews every billable subscription without creating an
+invoice or charging, which is the one people actually want when they ask what
+they will be charged. Run `--select` with no value to see which fields each
+response carries before narrowing it.
 
 `payment-method retrieve` returns masked card details. `has_card`
 false on an account with an upcoming invoice is worth flagging.
@@ -40,19 +40,12 @@ false on an account with an upcoming invoice is worth flagging.
 ## Where the usage came from
 
 ```sh
-terra billing usage retrieve --meter-id <meter_id> --start <int> --end <int>
+terra billing usage retrieve
 ```
 
-All three parameters are required, and **no command lists meters**: `meter_id`
-appears in this endpoint's own response and nowhere else on the admin surface,
-so the id has to come from the billing record or from your Terra API contact.
-Without one, report that rather than guessing an id.
-
-`start` and `end` are integers the description does not further define. The
-response echoes both back alongside `total_usage` and a `summaries` breakdown,
-so read the echoed window to confirm the range the CLI actually sent. Use
-`--dry-run` to check the request before a wide query; it prints what would be
-sent and never reaches the API, so it tells you nothing about the response.
+It takes no parameters: it returns the current live metered items, their
+explicit measurement windows, daily usage in UTC, and exact price decimals.
+Read the window from the response rather than assuming a calendar month.
 
 To connect a number to the integration that produced it, read the environment's
 own volume:

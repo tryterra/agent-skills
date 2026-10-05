@@ -32,7 +32,7 @@ cp -r skills/terra-unified-api ~/.claude/skills/
 - Ack webhooks within the timeout (8s default), process async
 - Dedupe on `X-Terra-Trace-Id` – `terra-reference` is shared by every chunk of a large request
 - `data_enrichment` scores do NOT follow the superset guarantee – COALESCE upserts or you lose data
-- `user_reauth` issues a new Terra user ID – swap it or orphan the connection
+- `user_reauth` issues a new Terra API user ID – swap it or orphan the connection
 - The integrations catalogue is dev-scoped only when you send `dev-id` – without it you get every provider Terra API supports
 
 ## Structure

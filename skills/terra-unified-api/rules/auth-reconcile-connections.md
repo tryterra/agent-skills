@@ -9,12 +9,12 @@ tags: auth, reliability, sync
 
 **Impact: HIGH (missed webhooks otherwise diverge your DB from reality)**
 
-Webhooks are the primary real-time channel, but deliveries can be missed: network issues, a dev environment without tunnelling, provider-side delivery failures. Complement them with an idempotent reconciliation function that fetches verified state from Terra API and converges your database to it, regardless of what webhooks did or did not arrive. Reconciliation and the webhook handler must reach the same end state in any execution order, which they do when both are upserts keyed on the Terra user ID.
+Webhooks are the primary real-time channel, but deliveries can be missed: network issues, a dev environment without tunnelling, provider-side delivery failures. Complement them with an idempotent reconciliation function that fetches verified state from Terra API and converges your database to it, regardless of what webhooks did or did not arrive. Reconciliation and the webhook handler must reach the same end state in any execution order, which they do when both are upserts keyed on the Terra API user ID.
 
 The reconciliation contract:
 
 1. Call `client.user.getinfoforuserid({ reference_id: appUserId })` for verified connection data.
-2. Upsert each returned Terra user as `active` or `revoked` based on its `active` flag.
+2. Upsert each returned Terra API user as `active` or `revoked` based on its `active` flag.
 3. Mark any stored connection Terra API did not return as `revoked` (it no longer exists upstream).
 
 Run it at three triggers: page mount on connection-management screens (catch-up since last visit), on the `?auth=success` redirect (the auth webhook may not have landed yet), and on a schedule, e.g. every 6 hours, sweeping all users with active connections and isolating per-user failures so one bad user does not stop the sweep.
