@@ -1,8 +1,8 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "organization": "Terra API",
   "date": "October 2026",
-  "abstract": "Manage a Terra API account through the admin MCP server when the terra CLI is not available: when to use it instead of the CLI, signing in and access levels, translating CLI commands into tool calls, previews and dashboard approvals for writes, handling secrets and untrusted results, and the errors the server returns.",
+  "abstract": "Manage a Terra API account through the admin MCP server from a chat assistant such as claude.ai or ChatGPT, or wherever the terra CLI is not available: why a chat assistant's code sandbox is no reason to use the CLI, signing in and troubleshooting the connection, translating CLI commands into tool calls, the first calls for common tasks, previews and dashboard approvals for writes, handling secrets and untrusted results, and the errors the server returns.",
   "references": [
     "https://docs.tryterra.co/developer-tools/mcp-server",
     "https://docs.tryterra.co/developer-tools/terra-cli/terra-cli",

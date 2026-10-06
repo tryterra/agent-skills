@@ -2,20 +2,21 @@
 name: terra-cli
 description: >-
   Start from example apps and manage Terra API account configuration with the
-  terra CLI, instead of clicking in the Terra API dashboard: environments
-  (dev-ids), enabled providers, data scopes, webhook destinations, API keys and
-  data tokens, delivered webhook events, users, health scores, team, and
-  billing. Also reaches any admin or data API endpoint directly with terra
-  admin-api and terra data-api. Use when a task needs Terra API account state read or
-  changed, when you would otherwise tell the user to open
+  terra CLI from a coding agent (Claude Code, Codex, Cursor), instead of the
+  Terra API dashboard: environments (dev-ids), enabled providers, data scopes,
+  webhook destinations, API keys and data tokens, delivered webhook events,
+  users, team, and billing. Also reaches any admin or data API endpoint with
+  terra admin-api and terra data-api. Use when a task needs Terra API account
+  state read or changed, when you would otherwise send the user to
   dashboard.tryterra.co, when a webhook did not arrive or has to be resent,
-  when a user connection has to be created or verified, when you want to try a
-  data API request before writing the code that sends it, or when the user
-  mentions terra-cli, terra login, terra agent setup, TERRA_ADMIN_TOKEN, a
-  dev-id, an x-api-key, terra examples, or starting from an example app.
-  Prefer it over the Terra API admin MCP server whenever the agent has a shell.
+  when a user connection has to be created or verified, when trying a data API
+  request before writing the code, or when the user mentions terra-cli, terra
+  login, terra agent setup, TERRA_ADMIN_TOKEN, a dev-id, an x-api-key or terra
+  examples. Preferred over the Terra API admin MCP server in coding agents. Not
+  for chat assistants (claude.ai, Claude Desktop, ChatGPT), even with a code
+  sandbox: use terra-mcp there.
 license: MIT
-compatibility: Requires the terra CLI on PATH; install with the native installer, Homebrew or npm
+compatibility: Requires a coding agent with a terminal on the user's machine or a cloud workspace, and the terra CLI on PATH (native installer, Homebrew or npm). Chat assistants' code sandboxes cannot install it or sign in.
 allowed-tools:
   - Bash(terra *)
   - Bash(curl -fsSL https://cli.tryterra.co/install.sh | sh)
@@ -23,7 +24,7 @@ allowed-tools:
   - Bash(npm install -g @tryterra/cli)
 metadata:
   author: terra
-  version: "2.2.0"
+  version: "2.3.0"
 ---
 
 # Terra API CLI
@@ -105,12 +106,16 @@ Three traps in that check, in the order they bite:
 
 The admin API is also served as MCP tools, at
 `https://access.tryterra.co/api/v3/admin/mcp`; the Terra API plugin bundles it
-as `terra`. **An agent with a shell uses the CLI**, and offers to install it
-or have the user log in when it is missing or logged out. The MCP tools are
-for assistants with no shell, such as claude.ai and ChatGPT, or for when the
-user asks for them or cannot install the CLI; the `terra-mcp` skill covers
-them. Do not switch between the two in the middle of a change: an MCP sign-in
-can be limited to some environments, so the two can resolve different ones.
+as `terra`. **A coding agent uses the CLI**, local or in the cloud, and
+offers to install it or have the user log in when it is missing or logged out,
+even when the MCP tools are listed too. The MCP tools are for chat assistants
+such as claude.ai, Claude Desktop and ChatGPT, or for when the user asks for
+them or cannot install the CLI; the `terra-mcp` skill covers them. **A chat
+assistant's code sandbox is not a terminal for this**: it is discarded after
+the conversation, cannot open the browser `terra login` needs, and usually
+cannot reach the installer. If you are in one, stop here and use `terra-mcp`.
+Do not switch between the two in the middle of a change: an MCP sign-in can
+be limited to some environments, so the two can resolve different ones.
 
 Every admin command in this skill and its references has a tool. The command's
 group plus `_read` or `_write` is the tool, and the rest of the command is its

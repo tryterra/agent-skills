@@ -21,7 +21,7 @@ terra examples list --select name,title,description
 terra examples clone streaming-mobile-app my-app
 ```
 
-Neither needs a login. Read the downloaded README and AGENTS.md and follow `next_steps` to install dependencies, configure and run it before building on it. Cloning only downloads files. For an existing app, use the example as a reference and adapt the relevant pieces in place.
+Neither needs a login. Read the downloaded README and AGENTS.md and follow `next_steps` to install dependencies, configure and run it before building on it. Cloning only downloads files. For an existing app, use the example as a reference and adapt the relevant pieces in place. In a chat assistant, which cannot run the CLI, give the user these commands to run in their own terminal, or link the source at https://github.com/tryterra/terra-examples/tree/main/examples/streaming-mobile-app.
 
 ## Account tools: CLI or MCP
 
@@ -40,7 +40,7 @@ terra unified-api sources list --env <dev-id>
 
 Minting is a setup step rather than a diagnostic. When the list genuinely shows no usable token, `terra data-tokens create --env <dev-id> --name streaming --scopes auth:write` returns the bearer, and several tokens coexist per environment so the old one keeps working until you revoke it. Over MCP, minting a data token needs the user's approval in the dashboard and an access level the default MCP sign-in does not grant, so this one step is simpler with the CLI.
 
-With a shell, use the CLI, and offer to install it if it is missing: `curl -fsSL https://cli.tryterra.co/install.sh | sh` on macOS and Linux, `irm "https://cli.tryterra.co/install.ps1" | iex` in Windows PowerShell, or Homebrew or npm where the user already uses them. Without one (claude.ai, ChatGPT), use the Terra API admin MCP server: each admin command is a tool whose name and `method` spell it (`terra users list` is `users_read` with `method: "list"`). Only the CLI has `terra data-api`, `terra admin-api` and `terra examples`, and `--select` and `--jq` have no MCP equivalent. The `terra-cli` and `terra-mcp` skills carry the guardrails (confirming changes, keeping credentials out of transcripts), the errors, and a playbook per task. They administer the integration; they do not replace the API calls this skill describes.
+In a coding agent (Claude Code, Codex, Cursor and the like, on the user's machine or in the cloud), use the CLI, and offer to install it if it is missing: `curl -fsSL https://cli.tryterra.co/install.sh | sh` on macOS and Linux, `irm "https://cli.tryterra.co/install.ps1" | iex` in Windows PowerShell, or Homebrew or npm where the user already uses them. In a chat assistant (claude.ai, Claude Desktop, ChatGPT), use the Terra API admin MCP server, even when it can run code: its sandbox cannot install the CLI or sign in. Each admin command is a tool whose name and `method` spell it (`terra users list` is `users_read` with `method: "list"`). Only the CLI has `terra data-api`, `terra admin-api` and `terra examples`, and `--select` and `--jq` have no MCP equivalent. The `terra-cli` and `terra-mcp` skills carry the guardrails (confirming changes, keeping credentials out of transcripts), the errors, and a playbook per task. They administer the integration; they do not replace the API calls this skill describes.
 
 ## Streaming vs Health & Fitness
 

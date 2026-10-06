@@ -2,21 +2,23 @@
 name: terra-mcp
 description: >-
   Manage a Terra API account through the Terra API admin MCP server
-  (access.tryterra.co/api/v3/admin/mcp) from an assistant with no shell, such
-  as claude.ai or ChatGPT, or where the terra CLI cannot be used:
-  environments, enabled providers, data scopes, webhook destinations,
-  delivered events and resends, connected users, models, billing, team, and
-  docs_ask. Use when its tools, such as environments_read, events_read or
+  (access.tryterra.co/api/v3/admin/mcp) from a chat assistant such as
+  claude.ai, Claude Desktop or ChatGPT, even one that can run code, or where
+  the terra CLI cannot be used: environments, enabled providers, data scopes,
+  webhook destinations, delivered events and resends, connected users,
+  models, billing, team, and docs_ask. Use in a chat assistant for any Terra
+  API account task, when its tools, such as environments_read, events_read or
   unified_api_destinations_write, are available, when a tool returns
   approval_required or asks for an approval_id, when connecting Terra API to
   Claude, ChatGPT, Cursor, VS Code or Codex as an MCP server, or when debugging
   insufficient_scope, dev_id_not_found or validation_failed. Not the AI
-  Interface MCP that reads end users' health data.
+  Interface MCP that reads end users' health data. Coding agents such as
+  Claude Code, Codex and Cursor use terra-cli instead.
 license: MIT
 compatibility: Requires the Terra API admin MCP server, connected and signed in
 metadata:
   author: terra
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Terra API admin MCP
@@ -35,35 +37,44 @@ It is one URL for every account and environment:
 https://access.tryterra.co/api/v3/admin/mcp
 ```
 
-## Shell or not decides
+## The client decides, not the shell
 
 The MCP tools and the `terra` CLI are generated from the same API description
 and use the same tokens, scopes and approvals, so either can do the account
-work. Which one depends on what you can run:
+work. Which one depends on where you run, so settle it first:
 
-- **You have a shell** (Claude Code, Codex, Cursor and other coding agents):
-  use the CLI and the `terra-cli` skill. It does everything here, and more. If
-  `terra` is missing or logged out, offer to install it or have the user run
-  `terra login`, and wait; do not log in for them. Use these tools instead
-  only when the user asks for the MCP, or cannot install the CLI.
-- **You have no shell** (claude.ai, ChatGPT, and other chat assistants): use
-  these tools. If none are listed, the user has to add the server and sign
-  in (below).
+- **A chat assistant** (claude.ai, Claude Desktop, the Claude mobile apps,
+  ChatGPT): use these tools for every account task. **Do this even if you
+  can run code.** A chat assistant's code sandbox is a throwaway container,
+  not the user's machine: its network is usually closed to the CLI installer
+  and the API, and it cannot open the browser `terra login` needs. Do not
+  install the CLI there, do not ask the user to allowlist a domain so you
+  can, and do not follow a `terra` command in another skill literally:
+  translate it into a tool call (below). If no tools are listed, the user has
+  to add the server and sign in (below).
+- **A coding agent** working in the user's project, on their machine or in a
+  cloud workspace (Claude Code, Codex, Cursor, Copilot, Gemini CLI): use the
+  CLI and the `terra-cli` skill, even though the plugin lists these tools
+  too. The CLI does everything here, and more. If `terra` is missing or
+  logged out, offer to install it or have the user run `terra login`, and
+  wait; do not log in for them. Use these tools instead only when the user
+  asks for the MCP, or cannot install the CLI.
 
 **Do not switch tools in the middle of a change.** An MCP sign-in can be
 limited to some environments and the CLI resolves its own default, so the two
 can act on different environments. Resolve the dev-id once and pass it
 explicitly to whichever you use.
 
-Some work needs the CLI whatever is connected. Say so, and in a coding agent
-offer to install it, rather than working around the gap:
+Some work needs the CLI whatever is connected. Say so rather than working
+around the gap: in a coding agent, offer to install it; in a chat assistant,
+give the user the command to run in their own terminal.
 
-| Task                                                                                | Why the MCP cannot                                                  |
-| ----------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| Start from an example app (`terra examples clone`)                                  | Writes local files                                                  |
-| Call the data API: read health data, widget sessions, planned workouts, lab reports | The MCP is admin only; `terra data-api <path>` reaches any endpoint |
-| Rotate the admin token, or reach an endpoint no tool covers (`terra admin-api`)     | No tool exposes them                                                |
-| Write a credential into `.env` or a CI secret without it entering the conversation  | A tool result always passes through the model                       |
+| Task                                                                                | Why the MCP cannot                                                                        |
+| ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Start from an example app (`terra examples clone`)                                  | Writes local files; link the source at https://github.com/tryterra/terra-examples instead |
+| Call the data API: read health data, widget sessions, planned workouts, lab reports | The MCP is admin only; `terra data-api <path>` reaches any endpoint                       |
+| Rotate the admin token, or reach an endpoint no tool covers (`terra admin-api`)     | No tool exposes them                                                                      |
+| Write a credential into `.env` or a CI secret without it entering the conversation  | A tool result always passes through the model                                             |
 
 ## Which Terra API MCP this is
 
@@ -111,10 +122,18 @@ again with it, or use the CLI.
 
 1. **Are the tools listed?** Look for `environments_read`, `events_read` and
    the rest; hosts add their own prefix, such as `mcp__terra__events_read`.
-   Nothing listed, or a 401, means the server was never added, the user has
-   not signed in, or the 30 days have passed. Ask the user to check that
-   their client shows the connector as connected, sign in again, and start a
-   new conversation or reload.
+   Nothing listed, or a 401, means one of these, in this order of
+   likelihood. Walk the user through them one at a time:
+   1. The connector is not enabled for this conversation. In claude.ai and
+      ChatGPT, it has to be switched on in the conversation's tools menu as
+      well as added in settings.
+   2. The user never signed in, or the 30 days have passed. Disconnect and
+      connect it again from the client's connector settings.
+   3. The server was never added: see Connecting above.
+
+   Then start a new conversation or reload, because most clients read the
+   tool list only at the start.
+
 2. **Which environments?** Call `environments_read` with `method: "list"`.
    When the sign-in is limited to some environments, the server's
    instructions name them, and a sign-in limited to one uses it when
@@ -145,6 +164,24 @@ become arguments with underscores. **Read the tool's description before
 calling it**: it lists each method, the arguments it requires, the scope it
 needs, and whether it previews or needs approval. Pass only the chosen
 method's arguments; an argument that belongs to a sibling method is rejected.
+
+## Common tasks
+
+Read before you change, and pass the same `environment` to every call.
+These are the first calls for each task; the `terra-cli` skill has a fuller
+playbook per task, whose commands translate the same way.
+
+| Goal                                         | Calls, in order                                                                                                                                                                                                                                 |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Audit the account, or get started            | `environments_read` `list`; then for each environment `unified_api_sources_read` `list`, `unified_api_destinations_read` `list` and `users_read` `stats`; `entitlements_list` for the products on the plan                                      |
+| A webhook never arrived, or has to be resent | `events_read` `list` with `reference_id`, which covers every connection the user has (once with `outcome: "failed"`, once without); fix the destination; `events_write` `resend` with the chosen event's `event_id`, `event_type` and `user_id` |
+| One user's data is missing or late           | `users_read` `list` with `reference_id`, one row per provider (is each connection `active`?); `unified_api_sources_read` `list` (is the provider on?); `unified_api_data_read` `scopes_list`; `events_read` `list` with `reference_id`          |
+| Turn a provider on                           | `unified_api_sources_read` `list`; `unified_api_sources_write` `enable` with `provider` and `dry_run: true`; the user's yes; the same call without `dry_run`; `list` again                                                                      |
+| It works in one environment and not another  | The same reads with each `environment`, then compare providers, data scopes and destinations                                                                                                                                                    |
+| Is this account ready to go live             | `entitlements_list`; in the production environment, `unified_api_sources_read` `list`, `unified_api_destinations_read` `list` and `unified_api_data_read` `scopes_list`                                                                         |
+
+What a delivered event or a user's data should look like is a docs
+question: ask `docs_ask` rather than reading payloads to guess.
 
 ## Changing things safely
 
@@ -257,6 +294,7 @@ this account has enabled.
 
 `terra-cli` drives the same admin API from the terminal and carries a
 playbook per task (auditing an account, debugging a webhook, triaging one
-user's data, going to production); its commands translate to tools with the
-table above. The product skills (`terra-unified-api`, `terra-mobile-sdk`,
+user's data, going to production); in a chat assistant, read it for the
+reasoning and translate each command into a tool call with the table above,
+rather than running it. The product skills (`terra-unified-api`, `terra-mobile-sdk`,
 `terra-streaming` and the rest) cover the integration code itself.
