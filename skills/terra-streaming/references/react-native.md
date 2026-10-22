@@ -1,11 +1,11 @@
 # React Native producer
 
-Setting up a React Native app as a producer with `react-native-terra-rt-react`. Sources: [connect-wearable-to-sdk/react-native](https://docs.tryterra.co/streaming-api/connect-wearable-to-sdk/react-native) and [your-app-greater-than-terra/react-native](https://docs.tryterra.co/streaming-api/your-app-greater-than-terra/react-native).
+Setting up a React Native app as a producer with `terra-rt`. Sources: [connect-wearable-to-sdk/react-native](https://docs.tryterra.co/streaming-api/connect-wearable-to-sdk/react-native) and [your-app-greater-than-terra/react-native](https://docs.tryterra.co/streaming-api/your-app-greater-than-terra/react-native).
 
 ## Install
 
 ```bash
-npm install react-native-terra-rt-react
+npm install terra-rt
 ```
 
 - **iOS** also requires the [Apple Developer Program](https://developer.apple.com/programs/enroll/) (see [ios.md](ios.md)); add `Privacy - Bluetooth Always Usage Description` and, if streaming from the phone's own sensors via `Connections.APPLE`, `Privacy - Motion Usage Description` to `Info.plist`; then run `pod install` in `/ios`.
@@ -17,8 +17,8 @@ Data arrives through native event emitters, so set the listeners up once (e.g. i
 
 ```tsx
 import { NativeEventEmitter, NativeModules } from "react-native";
-import { initTerra } from "react-native-terra-rt-react";
-import type { Update, Device } from "react-native-terra-rt-react";
+import { initTerra } from "terra-rt";
+import type { Update, Device } from "terra-rt";
 
 const updateEmitter = new NativeEventEmitter(NativeModules.UpdateHandler);
 updateEmitter.addListener("Update", (u: Update) =>
