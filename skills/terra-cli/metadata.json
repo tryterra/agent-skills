@@ -1,5 +1,5 @@
 {
-  "version": "2.3.0",
+  "version": "2.4.0",
   "organization": "Terra API",
   "date": "October 2026",
   "abstract": "For coding agents (Claude Code, Codex, Cursor), not chat assistants: start new Terra API apps from published examples, then adapt the working integration. Drive account configuration from the terminal with current CLI commands, authentication checks, credential handling, output filtering, pagination, and task playbooks.",

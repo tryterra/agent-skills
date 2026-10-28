@@ -5,7 +5,7 @@ license: MIT
 compatibility: Requires network access to docs.tryterra.co for current endpoint schemas
 metadata:
   author: terra
-  version: "1.2.0"
+  version: "1.3.0"
 ---
 
 # Terra API Vantage
@@ -27,7 +27,7 @@ Neither needs a login. Read the downloaded README and AGENTS.md and follow `next
 
 ## Account tools: CLI or MCP
 
-The account tools do not call the Vantage order, product or result endpoints: those stay in your own client, and `terra data-api` has no Vantage paths. What they do is supply Vantage's credentials and set the environment's Vantage API version.
+The account tools configure and inspect Vantage; they never place, activate or acknowledge an order. Those calls stay in your own client against the Vantage hosts below, and `terra data-api` has no Vantage paths. What the tools do is supply Vantage's credentials, set the environment's API version, markets, product selection and webhook URL, and read its orders, results and webhook events for debugging.
 
 **Credentials.** Vantage authenticates with the same dev-id and API key as every other Terra API product:
 
@@ -48,6 +48,21 @@ terra vantage api-version update --env <dev-id> --version <date> --dry-run # pre
 ```
 
 An update takes effect on the environment's next Vantage request, older or newer than the current pin, and there is no unpin. Because it changes the shape your webhook handler receives, move the pin only once the handler accepts both shapes, telling them apart by the `X-Terra-Version` header each delivery carries. Read [Versioning](https://docs.tryterra.co/vantage-api/versioning.md) for what each version changes.
+
+**Catalogue, webhook and debugging.** Every `terra vantage` command acts on the deployment the environment's production setting selects (sandbox for a testing environment), so pass the right `--env` rather than a host:
+
+```sh
+terra vantage catalogue list --env <dev-id>                                # every product and the markets it is sold in
+terra vantage products list --env <dev-id>                                 # the products this environment lists and orders
+terra vantage products disable --env <dev-id> <product-id> --dry-run       # preview curating one out; enable is the inverse
+terra vantage webhook update --env <dev-id> --url https://... --dry-run    # where Vantage events are delivered
+terra vantage events list --env <dev-id>                                   # what was sent, with every delivery attempt
+terra vantage events generate --env <dev-id> --event-type order.status_changed  # a signed test event to the current URL
+terra vantage orders list --env <dev-id> --client-order-reference-id <ref>
+terra vantage results list --env <dev-id> --status results.results_ready --is-acknowledged=false
+```
+
+`products enable`/`disable` change one product and `batch-enable`/`batch-disable` up to 100 at once; they edit the same selection as `PUT /api/v1/products/selection`, without its full-set replace. `events resend --event-id <id>` sends a past event again to the current URL, so the endpoint can receive it twice. Run `terra reference vantage` for every command and filter. Over MCP the same commands are the `vantage_*` tools, such as `vantage_orders_read` with `method: "list"`.
 
 In a coding agent (Claude Code, Codex, Cursor and the like, on the user's machine or in the cloud), use the CLI, and offer to install it if it is missing: `curl -fsSL https://cli.tryterra.co/install.sh | sh` on macOS and Linux, `irm "https://cli.tryterra.co/install.ps1" | iex` in Windows PowerShell, or Homebrew or npm where the user already uses them. In a chat assistant (claude.ai, Claude Desktop, ChatGPT), use the Terra API admin MCP server, even when it can run code: its sandbox cannot install the CLI or sign in. Each admin command is a tool whose name and `method` spell it (`terra users list` is `users_read` with `method: "list"`). Only the CLI has `terra data-api`, `terra admin-api` and `terra examples`, and `--select` and `--jq` have no MCP equivalent. The `terra-cli` and `terra-mcp` skills carry the guardrails (confirming changes, keeping credentials out of transcripts), the errors, and a playbook per task. They administer the integration; they do not replace the API calls this skill describes.
 

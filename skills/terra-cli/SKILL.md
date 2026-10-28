@@ -24,7 +24,7 @@ allowed-tools:
   - Bash(npm install -g @tryterra/cli)
 metadata:
   author: terra
-  version: "2.3.0"
+  version: "2.4.0"
 ---
 
 # Terra API CLI

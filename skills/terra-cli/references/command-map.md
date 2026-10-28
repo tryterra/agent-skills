@@ -64,11 +64,11 @@ and build on the working app. Use examples as references for existing projects.
 
 ### Other products
 
-| Group      | Commands                                                                    |
-| ---------- | --------------------------------------------------------------------------- |
-| `workouts` | `metadata list`, `metadata retrieve`, `metadata replace`, `metadata delete` |
-| `models`   | `catalog list`, `runs list`                                                 |
-| `vantage`  | `api-version retrieve`, `api-version update`                                |
+| Group      | Commands                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `workouts` | `metadata list`, `metadata retrieve`, `metadata replace`, `metadata delete`                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `models`   | `catalog list`, `runs list`                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `vantage`  | `api-version retrieve`, `api-version update`, `markets retrieve`, `markets update`, `catalogue list`, `products list`, `products enable`, `products disable`, `products batch-enable`, `products batch-disable`, `webhook retrieve`, `webhook update`, `events list`, `events retrieve`, `events retrieve-payload`, `events resend`, `events generate`, `orders list`, `orders retrieve`, `orders retrieve-payload`, `results list`, `results retrieve`, `results retrieve-payload` |
 
 ### Account
 
