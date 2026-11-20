@@ -29,13 +29,13 @@ For the rules below, the account tools are how you check your work against what 
 
 ```sh
 terra unified-api destinations list --env <dev-id>        # where webhooks go, and whether they are active
-terra events list --env <dev-id> --outcome failed         # deliveries your endpoint rejected
+terra events list --env <dev-id> --status failed          # deliveries your endpoint rejected
 terra events retrieve-payload <event_id> --env <dev-id>   # the exact body that was sent
 terra users list --env <dev-id> --reference-id <ref>      # connection state, one row per provider
 terra unified-api data scopes list --env <dev-id>         # which fields a payload will carry
 ```
 
-Two of these change how you test. `terra events retrieve-payload` is the ground truth for "the payload was missing a field": absent there, the cause is the environment's data scopes rather than your handler. And `terra events resend --event-id <id> --event-type sleep --user-id <uuid>` replays a real stored event at your endpoint, so a handler can be exercised against real payloads with no device and no waiting for a provider to sync. A resend may arrive twice, so the handler must already dedupe (`rules/webhooks-dedupe-terra-reference.md`).
+Two of these change how you test. `terra events retrieve-payload` is the ground truth for "the payload was missing a field": absent there, the cause is the environment's data scopes rather than your handler. And `terra events resend --event-id <id> --destination-id <destination_id>` replays a real stored event at your endpoint, so a handler can be exercised against real payloads with no device and no waiting for a provider to sync. A resend may arrive twice, so the handler must already dedupe (`rules/webhooks-dedupe-terra-reference.md`).
 
 The signing secret these rules verify against is returned by `terra unified-api destinations create`, once, at creation.
 

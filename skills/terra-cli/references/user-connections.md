@@ -44,7 +44,7 @@ terra users list --env <dev-id> --provider GARMIN --active true --paginate
 ## 3. If it did not work, read the auth event
 
 ```sh
-terra events list --env <dev-id> --reference-id user-42 --data-type auth
+terra events list --env <dev-id> --reference-id user-42 --type 'unified_api.auth.*'
 ```
 
 The auth event carries the failure message. A common cause is a provider that

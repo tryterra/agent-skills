@@ -50,15 +50,16 @@ drive a handler under development with real traffic. No device, no waiting for
 a provider to sync:
 
 ```sh
-terra events list --env <dev-id> --data-type sleep --select event_id,event_type,user_id
+terra events list --env <dev-id> --type unified_api.sleep.updated --select event_id,type,user_id
+terra unified-api destinations list --env <dev-id> --select id,url,active
 terra events resend --env <dev-id> \
-  --event-id <event_id> --event-type sleep --user-id <uuid>
+  --event-id <event_id> --destination-id <destination_id>
 ```
 
 Point the destination at the tunnel first, then resend a stored event of the
-shape you want to handle. Repeat as the handler changes: a resend is not
+shape you want to handle to that destination's id. Repeat as the handler changes: a resend is not
 consumed, so the same event drives as many attempts as you need, inside the
-roughly 14-day retention window.
+roughly 14 days a payload is retained.
 
 Read the payload first to know what the handler is about to receive:
 

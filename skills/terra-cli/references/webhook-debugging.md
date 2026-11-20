@@ -10,44 +10,59 @@ scoped to one environment.
 
 ## The window
 
-**Delivery history and payloads are retained about 14 days.** An event older
-than that is gone, and an empty result is not proof nothing was sent. Say so
-rather than concluding the integration is broken.
+**Events are kept 30 days, and their payloads about 14.** `events list` looks
+back 7 days unless `--since` moves it, or 14 with `--event-id`. An empty result
+outside the window is not proof nothing was sent. Say so rather than concluding
+the integration is broken.
 
-## 1. Find the delivery
+## 1. Find the event
 
 ```sh
-terra events list --env <dev-id> --outcome failed
-terra events list --env <dev-id> --user-id <uuid> --data-type sleep
+terra events list --env <dev-id> --status failed
+terra events list --env <dev-id> --user-id <uuid> --type unified_api.sleep.updated
 terra events list --env <dev-id> --reference-id user-42
 terra events list --env <dev-id> --provider GARMIN --since <rfc3339> --until <rfc3339>
 ```
 
-Filters compose: `--outcome delivered|failed`, `--data-type`, `--provider`,
-`--user-id`, `--reference-id`, `--since`, `--until`, and `--event-id` for an
-exact lookup, which defaults the window to the 14-day actionable range. Each
-row carries `event_id`, `data_type`, `provider`, `http_status`, `sent_at`,
-`destination_type`, `bytes` and `response_time_ms`. Note that the outcome is a
-request filter, not a response field: read `http_status` on the row.
+Filters compose: `--status pending|delivered|failed|canceled`, `--type`
+(an event type such as `unified_api.sleep.updated`, or a wildcard such as
+`'unified_api.auth.*'`), `--provider`, `--user-id`, `--reference-id`,
+`--destination`, `--since`, `--until`, and `--event-id` for an exact lookup.
+`--type` and `--provider` repeat to match any of several. Each row is one
+event: `event_id`, `type`, `payload_type`, `provider`, `user_id`,
+`reference_id`, `status`, `destination_count`, `attempt_count`, `created_at`
+and `completed_at`. The row's `status` covers every destination the event went
+to; `pending` means retries are still running.
 
 Add `--paginate` to walk the whole window, and `--max-pages 0` to lift the
 10-page cap. Narrow with `--select` rather than reading whole rows:
 
 ```sh
-terra events list --env <dev-id> --outcome failed --paginate \
-  --select event_id,data_type,user_id,provider,http_status,sent_at
+terra events list --env <dev-id> --status failed --paginate \
+  --select event_id,type,user_id,provider,attempt_count,created_at
 ```
 
 ## 2. Read the verdict
 
-| What you see                                                       | What it means                                                                                                                                                                                                                                                  | Next                                                                                                                                                            |
-| ------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| No rows at all, inside the window                                  | Either nothing was generated, or nothing was attempted. Check the destination before blaming generation: an inactive destination, or one narrowed with `event_types` that exclude this type, produces no rows for a user who is generating data perfectly well | `terra unified-api destinations list --env <dev-id> --select id,active,event_types`, then `terra unified-api sources list`, `terra users list --user-id <uuid>` |
-| Rows under `--outcome delivered`                                   | Terra API sent it and the destination accepted it. The problem is in the handler or downstream of it                                                                                                                                                           | Compare `terra events retrieve-payload` against what the handler stored                                                                                         |
-| Failed rows with a 4xx `http_status`                               | The handler rejected it. A 401 or 403 usually means signature verification is failing                                                                                                                                                                          | Check the signing secret against `terra unified-api destinations list`                                                                                          |
-| Failed rows with a 5xx `http_status`, or a long `response_time_ms` | The handler was down or too slow when Terra API called                                                                                                                                                                                                         | Fix the handler, then resend                                                                                                                                    |
-| Failed rows with no `http_status` at all                           | Nothing answered: a dead tunnel, a localhost URL, or a wrong host                                                                                                                                                                                              | `terra unified-api destinations list --env <dev-id>`                                                                                                            |
-| No destination configured at all                                   | Nothing was ever attempted                                                                                                                                                                                                                                     | `terra unified-api destinations create`                                                                                                                         |
+The HTTP detail is per destination, on the event itself:
+
+```sh
+terra events retrieve <event_id> --env <dev-id>
+```
+
+It returns one entry in `deliveries` per destination (`destination_id`,
+`destination_url`, `status`, `last_status_code`, `no_status_reason`), each with
+its `attempts` (`status_code`, `duration_ms`, `not_sent_reason`).
+
+| What you see                                      | What it means                                                                                                                                                                                                                                                  | Next                                                                                                                                                            |
+| ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| No rows at all, inside the window                 | Either nothing was generated, or nothing was attempted. Check the destination before blaming generation: an inactive destination, or one narrowed with `event_types` that exclude this type, produces no rows for a user who is generating data perfectly well | `terra unified-api destinations list --env <dev-id> --select id,active,event_types`, then `terra unified-api sources list`, `terra users list --user-id <uuid>` |
+| `status` `delivered`                              | Terra API sent it and the destination accepted it. The problem is in the handler or downstream of it                                                                                                                                                           | Compare `terra events retrieve-payload` against what the handler stored                                                                                         |
+| `status` `pending`                                | At least one destination is still being retried                                                                                                                                                                                                                | Read the delivery's latest attempt; fix the handler and the retries may land on their own                                                                       |
+| A delivery with a 4xx `last_status_code`          | The handler rejected it. A 401 or 403 usually means signature verification is failing                                                                                                                                                                          | Check the signing secret against `terra unified-api destinations list`                                                                                          |
+| A 5xx `last_status_code`, or a long `duration_ms` | The handler was down or too slow when Terra API called                                                                                                                                                                                                         | Fix the handler, then resend                                                                                                                                    |
+| No `last_status_code`, with a `no_status_reason`  | Nothing answered: a dead tunnel, a localhost URL, or a wrong host. The reason says which                                                                                                                                                                       | `terra unified-api destinations list --env <dev-id>`                                                                                                            |
+| No destination configured at all                  | Nothing was ever attempted                                                                                                                                                                                                                                     | `terra unified-api destinations create`                                                                                                                         |
 
 ## 3. Read what was actually sent
 
@@ -56,7 +71,7 @@ terra events retrieve <event_id> --env <dev-id>
 terra events retrieve-payload <event_id> --env <dev-id>
 ```
 
-`events retrieve` is the delivery metadata. `events retrieve-payload` is the
+`events retrieve` is the delivery record from step 2. `events retrieve-payload` is the
 body Terra API tried to deliver, content-addressed by event id and retained
 separately. That body is the ground truth for "the payload was missing a
 field": if the field is absent there, the cause is the environment's data
@@ -66,23 +81,26 @@ scopes rather than the handler.
 
 ```sh
 terra events resend --env <dev-id> \
-  --event-id <event_id> --event-type sleep --user-id <uuid>
+  --event-id <event_id> --destination-id <destination_id>
 ```
 
-All three parameters are required: the event id alone does not identify the
-resend. Take `--event-type` and `--user-id` from the `events list` row. Fix
-whatever made the first delivery fail before resending, because a resend into a
-still-broken handler just adds a second failed row.
+A resend goes to one destination: take `--destination-id` from the event's
+`deliveries` in `events retrieve`. The destination must be active and accept
+the event's type. Fix whatever made the first delivery fail before resending,
+because a resend into a still-broken handler just adds another failed attempt.
+The payload must still be retained, so an event older than about 14 days
+cannot be resent.
 
 The call answers 202: the event is queued rather than delivered, so the reply
-says nothing about the outcome. Check it afterwards:
+says nothing about the outcome, and the destination may receive the event
+twice under the same `event_id`. Check it afterwards:
 
 ```sh
 terra events retrieve <event_id> --env <dev-id>
 ```
 
-Preview it with `--dry-run` when the event type or the user id came from a
-guess rather than a listing.
+Preview it with `--dry-run` when the event or destination id came from a guess
+rather than a listing.
 
 ## Related checks
 

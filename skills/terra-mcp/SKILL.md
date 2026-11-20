@@ -147,15 +147,15 @@ command is the `method`. A group with only one read or only one write keeps
 that command's own name instead, as `account_update` and
 `unified_api_widget_retrieve` do. Translate in either direction:
 
-| CLI                                                       | MCP                                                                          |
-| --------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| `terra events list --env <dev-id> --outcome failed`       | `events_read` `{method: "list", environment: "<dev-id>", outcome: "failed"}` |
-| `terra events retrieve-payload <event_id> --env <dev-id>` | `events_read` `{method: "retrieve_payload", event_id, environment}`          |
-| `terra unified-api destinations create --url <url>`       | `unified_api_destinations_write` `{method: "create", url, environment}`      |
-| `terra unified-api sources list`                          | `unified_api_sources_read` `{method: "list", environment}`                   |
-| `terra models runs list --status error`                   | `models_read` `{method: "runs_list", status: "error", environment}`          |
-| `terra entitlements list`                                 | `entitlements_list` `{}`                                                     |
-| `terra docs ask --question "..."`                         | `docs_ask` `{question: "..."}`                                               |
+| CLI                                                       | MCP                                                                         |
+| --------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `terra events list --env <dev-id> --status failed`        | `events_read` `{method: "list", environment: "<dev-id>", status: "failed"}` |
+| `terra events retrieve-payload <event_id> --env <dev-id>` | `events_read` `{method: "retrieve_payload", event_id, environment}`         |
+| `terra unified-api destinations create --url <url>`       | `unified_api_destinations_write` `{method: "create", url, environment}`     |
+| `terra unified-api sources list`                          | `unified_api_sources_read` `{method: "list", environment}`                  |
+| `terra models runs list --status error`                   | `models_read` `{method: "runs_list", status: "error", environment}`         |
+| `terra entitlements list`                                 | `entitlements_list` `{}`                                                    |
+| `terra docs ask --question "..."`                         | `docs_ask` `{question: "..."}`                                              |
 
 So every admin command in a Terra API skill has an MCP form (`terra
 data-api`, `terra admin-api` and `terra examples` do not):
@@ -171,14 +171,14 @@ Read before you change, and pass the same `environment` to every call.
 These are the first calls for each task; the `terra-cli` skill has a fuller
 playbook per task, whose commands translate the same way.
 
-| Goal                                         | Calls, in order                                                                                                                                                                                                                                 |
-| -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Audit the account, or get started            | `environments_read` `list`; then for each environment `unified_api_sources_read` `list`, `unified_api_destinations_read` `list` and `users_read` `stats`; `entitlements_list` for the products on the plan                                      |
-| A webhook never arrived, or has to be resent | `events_read` `list` with `reference_id`, which covers every connection the user has (once with `outcome: "failed"`, once without); fix the destination; `events_write` `resend` with the chosen event's `event_id`, `event_type` and `user_id` |
-| One user's data is missing or late           | `users_read` `list` with `reference_id`, one row per provider (is each connection `active`?); `unified_api_sources_read` `list` (is the provider on?); `unified_api_data_read` `scopes_list`; `events_read` `list` with `reference_id`          |
-| Turn a provider on                           | `unified_api_sources_read` `list`; `unified_api_sources_write` `enable` with `provider` and `dry_run: true`; the user's yes; the same call without `dry_run`; `list` again                                                                      |
-| It works in one environment and not another  | The same reads with each `environment`, then compare providers, data scopes and destinations                                                                                                                                                    |
-| Is this account ready to go live             | `entitlements_list`; in the production environment, `unified_api_sources_read` `list`, `unified_api_destinations_read` `list` and `unified_api_data_read` `scopes_list`                                                                         |
+| Goal                                         | Calls, in order                                                                                                                                                                                                                                                                                              |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Audit the account, or get started            | `environments_read` `list`; then for each environment `unified_api_sources_read` `list`, `unified_api_destinations_read` `list` and `users_read` `stats`; `entitlements_list` for the products on the plan                                                                                                   |
+| A webhook never arrived, or has to be resent | `events_read` `list` with `reference_id`, which covers every connection the user has (once with `status: "failed"`, once without); `events_read` `retrieve` for each destination's attempts; fix the destination; `events_write` `resend` with the event's `event_id` and the `destination_id` to send it to |
+| One user's data is missing or late           | `users_read` `list` with `reference_id`, one row per provider (is each connection `active`?); `unified_api_sources_read` `list` (is the provider on?); `unified_api_data_read` `scopes_list`; `events_read` `list` with `reference_id`                                                                       |
+| Turn a provider on                           | `unified_api_sources_read` `list`; `unified_api_sources_write` `enable` with `provider` and `dry_run: true`; the user's yes; the same call without `dry_run`; `list` again                                                                                                                                   |
+| It works in one environment and not another  | The same reads with each `environment`, then compare providers, data scopes and destinations                                                                                                                                                                                                                 |
+| Is this account ready to go live             | `entitlements_list`; in the production environment, `unified_api_sources_read` `list`, `unified_api_destinations_read` `list` and `unified_api_data_read` `scopes_list`                                                                                                                                      |
 
 What a delivered event or a user's data should look like is a docs
 question: ask `docs_ask` rather than reading payloads to guess.
@@ -235,8 +235,8 @@ Behaviours that surprise:
 - **`events_write` `resend` and `generate` deliver to real destinations.**
   A resend may arrive twice, so the handler must dedupe; `generate` sends a
   synthetic event. Check the environment before either.
-- **Delivery history and payloads are kept about 14 days**, and `list`
-  defaults to the last 7. An empty list is not proof that nothing was sent.
+- **Events are kept 30 days and payloads about 14**, and `list` defaults
+  to the last 7. An empty list is not proof that nothing was sent.
 
 ## Secrets and untrusted data
 
@@ -256,7 +256,7 @@ no more of a payload than the task needs.
 
 A read whose result would exceed 64 KiB is refused with
 `response_too_large`. Narrow it rather than retrying: filter by `user_id`,
-`reference_id`, `outcome`, `provider` or a `since`/`until` window, lower
+`reference_id`, `status`, `type`, `provider` or a `since`/`until` window, lower
 `limit`, follow `cursor` for the next page, and pass `samples: false` to
 `retrieve_payload` to leave out time-series samples. An oversized successful
 write returns a short completion summary instead; it did run, so do not send

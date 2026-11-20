@@ -21,7 +21,7 @@ data just stopped" reports: it is a reauthentication problem, not a data one.
 If the connection is missing or inactive, read the auth event for the reason:
 
 ```sh
-terra events list --env <dev-id> --reference-id <ref> --data-type auth
+terra events list --env <dev-id> --reference-id <ref> --type 'unified_api.auth.*'
 ```
 
 ## 2. Can that provider even supply this data type
@@ -56,7 +56,7 @@ supplied it, so the report is upstream.
 ## 4. What was actually delivered
 
 ```sh
-terra events list --env <dev-id> --user-id <uuid> --data-type sleep
+terra events list --env <dev-id> --user-id <uuid> --type unified_api.sleep.updated
 terra events retrieve-payload <event_id> --env <dev-id>
 ```
 
@@ -72,8 +72,9 @@ Now compare three things: what the provider gave (step 3), what was delivered
 
 ## The window
 
-Delivery history and payloads are retained about **14 days**. A report about
-something older cannot be answered from `events`, and an empty result is not
+Events are kept **30 days** and their payloads about **14**, and `events list`
+looks back 7 days unless `--since` moves it. A report about something older
+cannot be answered from `events`, and an empty result is not
 evidence that nothing was sent. Say that rather than concluding the integration
 is broken. Step 3 still works, because it reads the provider data rather than
 the delivery record.

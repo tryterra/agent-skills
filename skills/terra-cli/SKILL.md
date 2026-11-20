@@ -166,7 +166,7 @@ the one-liner.
 | Audit an account, or get started                                | `terra whoami`, `terra environments list`                                  | [references/account-audit.md](references/account-audit.md)                   |
 | Turn a provider on, point webhooks somewhere, choose data types | `terra unified-api sources list --env <dev-id>`                            | [references/environment-setup.md](references/environment-setup.md)           |
 | Work against a tunnel, test a handler, wire up CI               | `terra unified-api destinations list --env <dev-id>`                       | [references/local-development.md](references/local-development.md)           |
-| A webhook never arrived, arrived wrong, or has to be resent     | `terra events list --env <dev-id> --outcome failed`                        | [references/webhook-debugging.md](references/webhook-debugging.md)           |
+| A webhook never arrived, arrived wrong, or has to be resent     | `terra events list --env <dev-id> --status failed`                         | [references/webhook-debugging.md](references/webhook-debugging.md)           |
 | One user's data is missing, late, or wrong                      | `terra users list --env <dev-id> --reference-id <ref>`                     | [references/support-triage.md](references/support-triage.md)                 |
 | Connect a user, or check whether a connection worked            | `terra data-api /auth/generateWidgetSession -X POST -d reference_id=<ref>` | [references/user-connections.md](references/user-connections.md)             |
 | Read or backfill a user's health data, try a request by hand    | `terra data-api /sleep -q user_id=<uuid> -q to_webhook=false`              | [references/data-api.md](references/data-api.md)                             |
@@ -302,8 +302,9 @@ user_id=...` with no `to_webhook=false` sends the data to the configured
 - **Trying to change a destination's URL with `update`.** It takes only
   `--active` and `--event-types`. Repointing means delete and recreate, and the
   new destination has a new signing secret the handler has to be given.
-- **Assuming an old event is still there.** Delivery history and payloads are
-  retained about 14 days.
+- **Assuming an old event is still there.** Events are kept 30 days and
+  payloads about 14, and `events list` looks back only 7 unless `--since`
+  moves it.
 - **Reaching for `terra admin-api` where a generated command exists.** The
   generated command validates input, formats output, and knows the operation is
   destructive. Use the raw command for uncovered endpoints, or to see exactly

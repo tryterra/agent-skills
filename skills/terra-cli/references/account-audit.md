@@ -56,7 +56,7 @@ command rather than pointing at the dashboard.
 | ------------------------------------------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------- |
 | No providers enabled                        | Nobody can connect a wearable yet                      | `terra unified-api sources enable GARMIN --env <dev-id>`                                |
 | No destination                              | Data has nowhere to go, and every webhook is dropped   | `terra unified-api destinations create --env <dev-id> --type webhook --url <https url>` |
-| A destination on localhost or a dead tunnel | Deliveries are failing now                             | `terra events list --env <dev-id> --outcome failed`                                     |
+| A destination on localhost or a dead tunnel | Deliveries are failing now                             | `terra events list --env <dev-id> --status failed`                                      |
 | Providers and a destination, no users       | The account is ready and nobody has connected          | The next step is their auth flow, not the account                                       |
 | Users but no recent events                  | Connections exist and nothing is flowing               | `terra events list --env <dev-id> --paginate` over the retained window                  |
 | A provider enabled with no credentials      | Auth runs on Terra API's shared app rather than theirs | `terra unified-api sources credentials retrieve <PROVIDER> --env <dev-id>`              |
