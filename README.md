@@ -79,7 +79,6 @@ Manually installed skills do not update themselves. Run `npx skills update -y` t
 | [`terra-unified-api`](skills/terra-unified-api)           | API best practices: webhooks and signature verification, data idempotency, connection lifecycle, multi-device data, testing | ✅ Ready       |
 | [`terra-mobile-sdk`](skills/terra-mobile-sdk)             | Mobile integration for Apple Health, Samsung Health, and Health Connect on iOS, Android, React Native, and Flutter          | ✅ Ready       |
 | [`terra-streaming`](skills/terra-streaming)               | Realtime websocket data and the Real-Time SDK on iOS, Android, React Native, Flutter, and Wear OS                           | ✅ Ready       |
-| [`terra-models`](skills/terra-models)                     | Running health models (Sleep Window, Menstrual Cycle Tracker, Smart Fill) over a connected user's data                      | ✅ Ready       |
 | [`terra-vantage`](skills/terra-vantage)                   | Blood and DNA test kit ordering, fulfillment tracking, and FHIR result delivery                                             | ✅ Ready       |
 | [`terra-planned-workouts`](skills/terra-planned-workouts) | Pushing structured interval workouts, with targets, to wearables                                                            | 🧪 Pre-release |
 | [`terra-routes`](skills/terra-routes)                     | Pushing GPS courses with waypoints to devices like Garmin, COROS, and Wahoo                                                 | 🧪 Pre-release |

@@ -57,11 +57,6 @@
       ]
     },
     {
-      "name": "terra-models",
-      "description": "Run Terra API health models (Sleep Window, Menstrual Cycle Tracker, Smart Fill) over a connected user's data for a date range to return ready-to-use wellness insights. Use when building with Terra API Models, the /v2/models or /v2/models/run endpoints, model_run pricing, or turning a user's Terra API data into a sleep-schedule, menstrual-cycle or gap-filled-metrics insight.",
-      "files": ["SKILL.md"]
-    },
-    {
       "name": "terra-planned-workouts",
       "description": "Build with the Terra API Planned Workouts product (pre-release) – define a structured workout once and Terra API pushes it to users' devices. Use when pushing planned or structured workouts to Garmin, COROS, Wahoo, Suunto, TrainingPeaks, Huawei, Zepp, Hevy, or Apple watches, building training plans or workout templates, working with intervals, warmups, targets (HR, power, pace, cadence, RPE, zones), FTP or threshold-based personalization, athlete parameters, swimming or strength templates, or handling provider coercion warnings when a device cannot represent a feature.",
       "files": [
