@@ -10,12 +10,16 @@ authenticates with the environment's API key. That lookup needs `keys:read`, or
 ## 1. Send the user through auth
 
 ```sh
-terra data-api /auth/generateWidgetSession -X POST -d reference_id=user-42
+terra data-api /widget/session -X POST -d reference_id=user-42
 ```
 
 Returns a widget URL to open for the user. `reference_id` is your own
 identifier for them, and it is what makes the connection findable later without
 knowing the Terra API user id.
+
+Use `/widget/session`, not `/auth/generateWidgetSession`. The old path is
+deprecated, takes the same body, and answers accounts created after
+3 September 2026 with a 410.
 
 `/auth/authenticateUser` is the non-widget path, for sending a user straight to
 one provider, and `/auth/generateAuthToken` mints the token a mobile SDK uses.

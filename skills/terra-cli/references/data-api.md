@@ -50,7 +50,7 @@ the right move before building any request body. The surface, grouped:
 
 | Group            | Paths                                                                                                                  |
 | ---------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| Auth             | `/auth/generateWidgetSession`, `/auth/authenticateUser`, `/auth/deauthenticateUser`, `/auth/tokens`                    |
+| Auth             | `/widget/session`, `/auth/authenticateUser`, `/auth/deauthenticateUser`, `/auth/tokens`                                |
 | Health data      | `/activity`, `/sleep`, `/daily`, `/body`, `/nutrition`, `/menstruation`, `/athlete`                                    |
 | Users            | `/userInfo`, `/bulkUserInfo`, `/subscriptions`                                                                         |
 | Providers        | `/integrations`, `/integrations/detailed`                                                                              |
@@ -81,12 +81,12 @@ mutation.
 silently.** Which a parameter takes is set by the endpoint, not by the method,
 and a POST can read parameters from the query string:
 
-| Endpoint                           | `user_id` / `reference_id` goes in                               |
-| ---------------------------------- | ---------------------------------------------------------------- |
-| `POST /auth/tokens`                | the query, `-q`                                                  |
-| `POST /auth/generateWidgetSession` | the body, `-d`                                                   |
-| `POST /workouts/{id}/plan`         | the query, `-q`, alongside a required `planned_date` in the body |
-| `DELETE /auth/deauthenticateUser`  | the query, `-q`                                                  |
+| Endpoint                          | `user_id` / `reference_id` goes in                               |
+| --------------------------------- | ---------------------------------------------------------------- |
+| `POST /auth/tokens`               | the query, `-q`                                                  |
+| `POST /widget/session`            | the body, `-d`                                                   |
+| `POST /workouts/{id}/plan`        | the query, `-q`, alongside a required `planned_date` in the body |
+| `DELETE /auth/deauthenticateUser` | the query, `-q`                                                  |
 
 Parameters are sent as typed and the API decides. So a required query parameter
 passed with `-d` is not rejected locally, and where the parameter is optional
