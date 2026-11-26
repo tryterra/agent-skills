@@ -1,149 +1,173 @@
-# Android (Kotlin) – TerraAndroid
+# Android (Kotlin): terra-android 2.x
 
-Native Kotlin integration for **Samsung Health** and **Health Connect**. Source: [docs.tryterra.co/unified-api/mobile-only-sources/android-kotlin](https://docs.tryterra.co/unified-api/mobile-only-sources/android-kotlin).
+Native Kotlin integration for **Health Connect** and **Samsung Health**. Sources: [Android SDK guide](https://docs.tryterra.co/mobile-sdks/android-sdk-2), [Samsung Health](https://docs.tryterra.co/mobile-sdks/samsung-health), [Android SDK reference](https://docs.tryterra.co/reference/mobile-sdks/android-sdk-2), [Android upgrade guide](https://docs.tryterra.co/mobile-sdks/android-migrating-to-2).
+
+The Kotlin package is `co.tryterra.sdk` (1.x was `co.tryterra.terra`). The Maven coordinate is unchanged, so check imports, not the dependency line, to tell the majors apart.
+
+## Requirements
+
+- `minSdk` 28 (Samsung Health add-on: 29), `compileSdk` 36, Android Gradle Plugin 8.9.1 or later.
+- Health Connect on the device.
+- Never add `terra-android` 2.x to an app still on `terra-react` or the 1.x Flutter plugin: it crashes with missing `co.tryterra.terra` classes.
 
 ## 1. Install
 
-In your `build.gradle` dependencies:
-
-```gradle
-implementation 'co.tryterra:terra-android:{VERSION_NUMBER}'
+```kotlin
+dependencies {
+    implementation("co.tryterra:terra-android:2.3.1") // or the latest 2.x on Maven Central
+}
 ```
 
-Latest version on [Maven Central](https://central.sonatype.com/artifact/co.tryterra/terra-android/). Then Sync Project with Gradle Files.
+## 2. Manifest
 
-**Requirements:** Android 28 (minSDK 28) and above; the target app (Samsung Health or Health Connect) must be installed on the device.
+The SDK's manifest declares no health permission and no component. Your app declares exactly what it uses.
 
-## Configure health permissions
+1. **One `<uses-permission>` per Health Connect permission behind each category or type you request.** Health Connect never grants an undeclared permission, refuses the whole sheet if one requested type is undeclared, and Play rejects declarations you do not use. Fetch the category table in the [Android SDK guide](https://docs.tryterra.co/mobile-sdks/android-sdk-2#configure-health-permissions) rather than guessing; `HealthConnectPermissions.readPermissions(categories)` and `HealthConnectTypes.readPermissions(types)` return the same lists for a test that keeps the manifest in step.
+2. **Optional but usually wanted:** `android.permission.health.READ_HEALTH_DATA_IN_BACKGROUND` (background sync) and `android.permission.health.READ_HEALTH_DATA_HISTORY` (more than 30 days on the first sync). The permission sheet asks for them only if declared.
+3. **The privacy-policy screen, declared twice.** Without the alias, Android 14+ fails every read with "Incorrect health permission state":
 
-Choose your route. You can start on Health Connect and switch to Samsung direct later with only a version bump.
+```xml
+<activity android:name=".PermissionsRationaleActivity" android:exported="true">
+    <intent-filter>
+        <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
+    </intent-filter>
+</activity>
 
-### Samsung Health (recommended for Samsung devices)
+<activity-alias
+    android:name=".ViewPermissionUsageActivity"
+    android:exported="true"
+    android:targetActivity=".PermissionsRationaleActivity"
+    android:permission="android.permission.START_VIEW_PERMISSION_USAGE">
+    <intent-filter>
+        <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />
+        <category android:name="android.intent.category.HEALTH_PERMISSIONS" />
+    </intent-filter>
+</activity-alias>
+```
 
-Terra API has a privileged Samsung partnership that gives direct Samsung Health SDK access with no Health Connect intermediary.
+4. **Network and visibility:** `<uses-permission android:name="android.permission.INTERNET" />` and `<queries><package android:name="com.google.android.apps.healthdata" /></queries>` (without the query, Android 13 and below report Health Connect unavailable).
+5. **Before release,** submit the Health Connect declaration in the Play Console, one sentence per data type.
 
-1. **Apply** through the [Samsung Health partnership portal](https://developer.samsung.com/SHealth/business-partner/m48wvqi1mt9w2w4c). While waiting, develop against Health Connect.
-2. **Install the Samsung-tagged SDK** after approval (look for versions with `samsung` in the name on Maven Central):
-   ```gradle
-   implementation 'co.tryterra:terra-android:{SAMSUNG_VERSION_NUMBER}'
-   ```
-3. **Add the ProGuard rule** to `proguard-rules.pro` (release builds crash without it – R8 strips the Samsung classes):
-   ```proguard
-   -keep class com.samsung.android.** { *; }
-   ```
-4. **Requirements:** Samsung Health installed; minSDK 28; enable **Developer Mode** in Samsung Health on test devices (Settings > About Samsung Health > tap the version number repeatedly). No extra manifest or Gradle changes.
+## 3. Build the client in `Application.onCreate`
 
-### Health Connect
-
-1. In the Health Connect app, grant all permissions between the source apps (Samsung Health, Google Fit, etc.) and Health Connect.
-2. In `AndroidManifest.xml`, add these intent-filters under the **privacy-policy `<activity>`** (the Activity Health Connect opens when the user taps the privacy-policy link):
-   ```xml
-   <intent-filter>
-     <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
-   </intent-filter>
-   <intent-filter>
-     <action android:name="android.intent.action.VIEW_PERMISSION_USAGE"/>
-     <category android:name="android.intent.category.HEALTH_PERMISSIONS"/>
-   </intent-filter>
-   ```
-3. **Before going live**, apply to Google for Health Connect API access using their [application form](https://developer.android.com/health-and-fitness/guides/health-connect/publish/declare-access#explain-use-data-types), declaring the data types you read. For every permission you do **not** use, add a removal line:
-   ```xml
-   <uses-permission android:name="android.permission.health.READ_HEART_RATE" tools:node="remove"/>
-   ```
-   (substitute `android.permission.health.XXX` for each unused permission).
-
-Note: Health Connect has known platform-level sync bugs (e.g. Samsung Health failing to push steps into Health Connect, or data occasionally being inaccessible). Factor this into your reliability expectations.
-
-## 2. Initialize (once on app start, and on every foreground)
-
-The SDK must be initialized every time the app is started; it is a prerequisite for all other SDK functions. `Terra.instance` is asynchronous.
+Background runs start the process with no activity, so build the client in the `Application`, never in a screen.
 
 ```kotlin
-import co.tryterra.terra.Terra
-import co.tryterra.terra.TerraManager
-import java.lang.IllegalStateException
+import co.tryterra.sdk.Terra
+import co.tryterra.sdk.background.BackgroundSync
 
-class MainActivity : AppCompatActivity() {
-    private lateinit var terra: TerraManager
+class YourApp : Application() {
+    lateinit var terra: Terra
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        Terra.instance("YOUR DEV ID", "REFERENCE ID", this) { manager, error ->
-            error?.let { throw IllegalStateException("Error initialising terra ${it.message}") }
-            terra = manager
+    override fun onCreate() {
+        super.onCreate()
+        terra = Terra(
+            this,
+            devId = BuildConfig.TERRA_DEV_ID,
+            tokenProvider = { yourBackend.mintTerraToken() },   // POST /v2/auth/tokens?reference_id=...
+        )
+        if (!BackgroundSync.register(this, terra)) {
+            Log.w("Terra", "Background sync was refused; nothing is scheduled")
         }
     }
 }
 ```
 
-## 3. Connect with initConnection
+**Name `tokenProvider`.** The factory's last parameter is `stores`, so a trailing lambda binds there and the client has no token provider.
 
-Mint the token from your backend first. Then:
+## 4. Connect and request permissions
+
+Create the `PermissionLauncher` in `onCreate`, before anything that suspends (`connect` included), and unregister it in `onDestroy`.
 
 ```kotlin
-import co.tryterra.terra.enums.Connections
+import co.tryterra.sdk.DataCategory
+import co.tryterra.sdk.EndUser
+import co.tryterra.sdk.Source
+import co.tryterra.sdk.permissions.PermissionLauncher
 
-fun initialiseUserConnection() {
-    if (!this::terra.isInitialized) {
-        throw IllegalStateException("Terra Manager not initialised yet")
+class ConnectActivity : ComponentActivity() {
+    private val terra get() = (application as YourApp).terra
+    private lateinit var launcher: PermissionLauncher
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        launcher = terra.permissions.launcher(this)
+
+        connectButton.setOnClickListener {
+            lifecycleScope.launch {
+                val connection = terra.connect(Source.HEALTH, EndUser.Reference(signedInUser.id))
+                Log.i("Terra", "user_id ${connection.userId}")
+                val granted = terra.permissions.request(
+                    read = setOf(DataCategory.DAILY, DataCategory.SLEEP, DataCategory.ACTIVITY),
+                    launcher = launcher,
+                )
+            }
+        }
     }
-    val token = "your_generated_token_from_backend"
 
-    terra.initConnection(
-        connection = Connections.SAMSUNG,     // or Connections.HEALTH_CONNECT
-        token = token,
-        context = this,
-        customPermissions = setOf(),          // empty = all available
-        schedulerOn = true,                   // foreground scheduled requests
-        startIntent = null                    // deprecated – always null
-    ) { success, error ->
-        error?.let { throw IllegalStateException("${it.message}") }
-        Log.i("MainActivity", "Auth Success status: $success")
-    }
-}
-```
-
-- `connection`: `Connections.SAMSUNG` (Samsung Health) or `Connections.HEALTH_CONNECT`.
-- `schedulerOn = true`: lets Terra API make scheduled requests while the app is in the foreground.
-- `startIntent`: **deprecated, always pass `null`**.
-- `customPermissions`: maps to Health Connect / Samsung data types – see [Permissions mapping](https://docs.tryterra.co/unified-api/mobile-only-sources).
-
-**Popup fires once.** Health Connect forbids the permission popup from appearing more than once per permission, so a second `initConnection` does nothing. It re-appears only if you expand `customPermissions`, the app is reinstalled, or you request a permission Google has not approved for release.
-
-## 4. Validate with getUserId on every re-init
-
-`getUserId` is synchronous: returns the `user_id` or `null`.
-
-```kotlin
-if (terra.getUserId(Connections.SAMSUNG) != null) {
-    // already connected
-    return
-}
-// else call initConnection to (re)connect
-```
-
-## Historical data and disconnect
-
-Getters are asynchronous; set `toWebhook = false` to receive the payload in the callback.
-
-```kotlin
-import java.time.Instant
-import java.time.temporal.ChronoUnit
-import java.util.*
-
-fun requestData() {
-    val startDate = Date.from(Instant.now().minus(1, ChronoUnit.DAYS))
-    val endDate = Date()
-    terra.getDaily(
-        type = Connections.SAMSUNG,
-        startDate = startDate,
-        endDate = endDate,
-        toWebhook = false
-    ) { success, payload, error ->
-        error?.let { throw IllegalStateException("Error requesting data ${it.message}") }
-        // process payload
+    override fun onDestroy() {
+        launcher.unregister()
+        super.onDestroy()
     }
 }
 ```
 
-Disconnect via the same backend endpoint as web integrations (`DELETE /auth/deauthenticateUser`). There is no iOS-style background-delivery setup on Android – foreground scheduled requests are controlled by `schedulerOn`. See the SDK reference on [docs.tryterra.co](https://docs.tryterra.co/unified-api/mobile-only-sources/android-kotlin) for the full function list.
+- `connect(source, forUser)` or `connect(source, forUser, token)`. `Source.HEALTH` is Health Connect (Samsung data included once Samsung Health shares with Health Connect); `Source.SAMSUNG_HEALTH` is the direct add-on. `EndUser.Reference(id)` must match the token's `reference_id`; `EndUser.Anonymous` if the backend sends none.
+- Categories: `DAILY`, `BODY`, `SLEEP`, `ACTIVITY`, `NUTRITION`, `MENSTRUATION`. Request `DAILY` for heart rate.
+- `request` returns what the sheet granted for this call. Check it. Without arguments: `permissions.status(category)`, `writeStatus(category)`, `backgroundReadStatus()`, `historyReadStatus()`, `requested()`.
+- 2.3.0+: `readTypes = setOf(HealthDataType.STEPS, HealthDataType.HEART_RATE, ...)`, Health Connect only (Samsung throws `IllegalArgumentException`). `SLEEP` as a category also reads heart rate, resting heart rate, HRV, oxygen saturation and respiratory rate; `HealthConnectTypes.types(category)` lists what a category reads before you narrow it.
+- GPS routes need `READ_EXERCISE_ROUTES`, which Health Connect grants only in Settings or its own route consent screen. The SDK never asks for it.
+
+## 5. Background sync
+
+`BackgroundSync.register` schedules a WorkManager run every 15 minutes (the platform minimum) when online, a run on each foreground and, from 2.2.1, on each time the person leaves the app, each at most every 15 minutes. A run stops after 8 minutes and continues next time. It returns `false` when another client with the same dev ID already owns background sync.
+
+OEM battery managers (Xiaomi, Redmi, POCO and others) stop background work regardless of permissions. When `diagnostics.state()` is `BackgroundRestricted(OEM_RESTRICTED)` or `BackgroundRestricted(TICKS_NOT_RUNNING)`, show the person:
+
+```kotlin
+BackgroundSetup.oemSetupIntents(context).firstOrNull()?.let { activity.startActivity(it) }
+```
+
+Do not declare `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` or `QUERY_ALL_PACKAGES`; Play restricts both and the SDK does not need them.
+
+## 6. Samsung Health directly
+
+Start on Health Connect; add this only when you need every Samsung workout or data Health Connect does not carry.
+
+1. Samsung must approve **your** app: submit a partner request with your package name and the SHA-256 of your signing certificate. Until approved, reads work only with Samsung Health developer mode on (Settings > About Samsung Health, tap the version number repeatedly).
+2. Add `co.tryterra:terra-android-samsung` (same version as `terra-android`), Samsung's `samsung-health-data-api.aar` in `libs/`, and the runtime dependencies the [Samsung Health](https://docs.tryterra.co/mobile-sdks/samsung-health) page lists. `minSdk` 29.
+3. Register the store and use its own launcher:
+
+```kotlin
+import co.tryterra.sdk.health.samsung.samsungHealth
+
+terra = Terra(this, devId = BuildConfig.TERRA_DEV_ID, tokenProvider = { yourBackend.mintTerraToken() }) {
+    samsungHealth()
+}
+
+// in onCreate
+samsungLauncher = terra.on(Source.SAMSUNG_HEALTH).permissions.launcher(this)
+// on tap
+terra.connect(Source.SAMSUNG_HEALTH, EndUser.Reference(signedInUser.id))
+terra.on(Source.SAMSUNG_HEALTH).permissions.request(
+    read = setOf(DataCategory.DAILY, DataCategory.SLEEP, DataCategory.ACTIVITY),
+    launcher = samsungLauncher,
+)
+```
+
+The Samsung store reads only. With both sources connected, the SDK sends each record once (Samsung first, Health Connect fills gaps), but daily totals can appear under both sources.
+
+## 7. Local reads, writes, troubleshooting
+
+Reads go to Health Connect, never the network: `terra.daily.steps(TimeRange.Today)`, `terra.body.heartRate(TimeRange.LastHours(6))`, `terra.sleep.segments(TimeRange.LastDays(7))`, `terra.activity.workouts(TimeRange.Between(from, to))`. Reading an unrequested category throws `TerraError.AuthorizationNotDetermined`. `daily.steps` returns one total per day **per writing app**: do not add them up. Writes are `log` on `activity`, `body`, `daily`, `nutrition` and `sleep`, with `delete` on the returned handle. The SDK never reports deletions: a record deleted in Health Connect stays in Terra API.
+
+| Symptom                                             | Fix                                                                         |
+| --------------------------------------------------- | --------------------------------------------------------------------------- |
+| `connect` throws `TokenRejected`                    | Token expired (three minutes) or reused. Mint inside the token provider     |
+| `HealthDataUnavailable`                             | Install or update Health Connect from Google Play                           |
+| `permissions.launcher` throws `TerraError.Platform` | Called after the activity started; move it to `onCreate`                    |
+| "Incorrect health permission state" on every read   | Add the Android 14 `activity-alias`                                         |
+| `BackgroundRefreshUnscheduled`                      | `BackgroundSync.register` never called or returned `false`                  |
+| `BackgroundRestricted(BACKGROUND_READ_DENIED)`      | Declare `READ_HEALTH_DATA_IN_BACKGROUND` so the sheet asks for it           |
+| `LinkRevoked`                                       | Call `connect` again with the same end user                                 |
+| First sync only reaches 30 days                     | Declare `READ_HEALTH_DATA_HISTORY`; check `permissions.historyReadStatus()` |

@@ -47,13 +47,14 @@
     },
     {
       "name": "terra-mobile-sdk",
-      "description": "Integrate the Terra API mobile SDK for on-device health sources that have no web API – Apple Health (HealthKit), Samsung Health, and Health Connect. Use when connecting Apple Health, Samsung Health, or Health Connect from a mobile app; when working with TerraiOS, TerraAndroid, terra-react, or terra_flutter_bridge; when minting a mobile SDK auth token via /auth/tokens or generateAuthToken; when configuring HealthKit background delivery, initConnection permission popups, getUserId validation, ProGuard rules for Samsung, or Health Connect manifest permissions; or when writing on-device data with postActivity/postBody/postNutrition.",
+      "description": "Integrate the Terra API mobile SDK 2.x for on-device health sources that have no web API, Apple Health (HealthKit), Health Connect and Samsung Health, on iOS (TerraSDK), Android (co.tryterra.sdk), React Native (@tryterra/react-native) and Flutter (terra_flutter_bridge 2.x). Use when connecting Apple Health, Health Connect or Samsung Health from a mobile app; when writing Terra(devID:tokenProvider:), terra.connect, permissions.request, readTypes or BackgroundSync.register; when minting a mobile SDK token via /auth/tokens or generateAuthToken; when declaring Health Connect manifest permissions or HealthKit entitlements; when data stops uploading (linkRevoked, backgroundRefreshUnscheduled, BackgroundRestricted); or when upgrading an app from the 1.x SDK (import TerraiOS, Terra.instance, initConnection, getUserId, setUpBackgroundDelivery, terra-react).",
       "files": [
         "SKILL.md",
         "references/android.md",
         "references/flutter.md",
         "references/ios.md",
-        "references/react-native.md"
+        "references/react-native.md",
+        "references/sdk-1x.md"
       ]
     },
     {

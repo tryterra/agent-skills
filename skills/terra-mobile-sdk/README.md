@@ -4,7 +4,7 @@ Integration guidance for the [Terra API](https://tryterra.co) mobile SDK – the
 
 Every other provider (Garmin, Fitbit, Oura, Whoop, Strava, Dexcom, and 500+ more) connects through the [Unified API](https://docs.tryterra.co/unified-api), covered by the `terra-unified-api` skill. This skill is for the three sources you can only reach on-device.
 
-`SKILL.md` carries the six-step workflow and every cross-platform gotcha inline; the `references/` files carry per-platform setup detail and code.
+`SKILL.md` carries the 2.x workflow, the permission and sync rules, how to detect and upgrade a 1.x app, and every cross-platform gotcha; the `references/` files carry per-platform setup detail and code.
 
 ## Installation
 
@@ -20,21 +20,22 @@ cp -r skills/terra-mobile-sdk ~/.claude/skills/
 
 ## Contents
 
-| File                         | What it covers                                                                                                                                                                  |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `SKILL.md`                   | When the SDK is the right tool, the six-step workflow, permission-popup behavior, background delivery, cross-platform gotchas, decisions left to you                            |
-| `references/ios.md`          | TerraiOS (Swift): capabilities, info.plist, `Terra.instance`, deferred prompting, `setUpBackgroundDelivery`, `setIgnoredSources`, writing data, WorkoutKit planned-workout sync |
-| `references/android.md`      | TerraAndroid (Kotlin): Gradle coordinates, minSDK 28, Samsung vs Health Connect setup, ProGuard, manifest intent-filters, deprecated `startIntent`                              |
-| `references/react-native.md` | terra-react: install, iOS + Android native setup, `initTerra`/`initConnection`, AppDelegate background delivery, `postActivity` (Apple Health only)                             |
-| `references/flutter.md`      | terra_flutter_bridge: `flutter pub`, native setup, `TerraFlutter` API, AppDelegate background delivery, getters                                                                 |
+| File                         | What it covers                                                                                                                                                     |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `SKILL.md`                   | When the SDK is the right tool, the workflow, permissions, what syncs and when, upgrading from 1.x, cross-platform gotchas, decisions left to you                  |
+| `references/ios.md`          | TerraSDK (Swift): SwiftPM install, entitlements and Info.plist, `Terra(devID:tokenProvider:)`, `BackgroundSync`, permissions, host background tasks                |
+| `references/android.md`      | terra-android 2.x (Kotlin): Gradle, the Health Connect manifest, `Application` setup, `PermissionLauncher`, Samsung add-on, OEM battery restrictions               |
+| `references/react-native.md` | @tryterra/react-native: iOS bootstrap, Android meta-data, `createTerra`, connect and permissions, error codes                                                      |
+| `references/sdk-1x.md`       | The previous major version, for maintaining a 1.x app: workflow, gotchas, and per-platform setup for TerraiOS, TerraAndroid, terra-react, terra_flutter_bridge 0.x |
+| `references/flutter.md`      | terra_flutter_bridge 2.x: iOS bootstrap, `FlutterFragmentActivity`, `createTerra`, connect and permissions                                                         |
 
 ## Highlights
 
-- The mobile SDK is **only** for Apple Health, Samsung Health, and Health Connect – Google Fit is better read via the web API for reliability
-- Mint the single-use auth token (3-minute expiry) from **your backend**, just-in-time; never ship the API key in a production client
-- The permission popup fires **once** on Apple Health and Health Connect – calling `initConnection` again is a no-op
-- `schedulerOn` has **no effect on iOS**; iOS background delivery is controlled by `setUpBackgroundDelivery()` and only pushes dashboard-enabled data types
-- Samsung Health needs an approved partnership plus the `-keep class com.samsung.android.** { *; }` ProGuard rule (release builds crash without it)
-- A new device or reinstall replaces the existing connection: Terra API issues a new `user_id`, deletes the old one, and sends a `user_reauth` webhook so you can migrate `old_user.user_id` to `new_user.user_id`
+- The mobile SDK is **only** for Apple Health, Health Connect, and Samsung Health; every other provider uses the Unified API
+- 2.x is a rebuild: `import TerraiOS`, `Terra.instance`, `initConnection` or `terra-react` mean a 1.x app that must follow its upgrade guide first
+- Build one client at launch with a token provider and register background sync there; after the permission sheet the SDK uploads on its own
+- Mint the single-use token (3-minute expiry) on **your backend** with the same `reference_id` the app passes to `connect`
+- iOS never discloses read grants; Health Connect grants nothing your manifest does not declare
+- Per-type requests (2.3.0+) make the install type-scoped for good: unrequested fields are left out, not sent as zero
 
 Full API documentation: [docs.tryterra.co](https://docs.tryterra.co) (append `.md` to any docs URL for markdown).

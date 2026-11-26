@@ -1,16 +1,23 @@
 ---
 name: terra-mobile-sdk
-description: Integrate the Terra API mobile SDK for on-device health sources that have no web API – Apple Health (HealthKit), Samsung Health, and Health Connect. Use when connecting Apple Health, Samsung Health, or Health Connect from a mobile app; when working with TerraiOS, TerraAndroid, terra-react, or terra_flutter_bridge; when minting a mobile SDK auth token via /auth/tokens or generateAuthToken; when configuring HealthKit background delivery, initConnection permission popups, getUserId validation, ProGuard rules for Samsung, or Health Connect manifest permissions; or when writing on-device data with postActivity/postBody/postNutrition.
+description: Integrate the Terra API mobile SDK 2.x for on-device health sources that have no web API, Apple Health (HealthKit), Health Connect and Samsung Health, on iOS (TerraSDK), Android (co.tryterra.sdk), React Native (@tryterra/react-native) and Flutter (terra_flutter_bridge 2.x). Use when connecting Apple Health, Health Connect or Samsung Health from a mobile app; when writing Terra(devID:tokenProvider:), terra.connect, permissions.request, readTypes or BackgroundSync.register; when minting a mobile SDK token via /auth/tokens or generateAuthToken; when declaring Health Connect manifest permissions or HealthKit entitlements; when data stops uploading (linkRevoked, backgroundRefreshUnscheduled, BackgroundRestricted); or when upgrading an app from the 1.x SDK (import TerraiOS, Terra.instance, initConnection, getUserId, setUpBackgroundDelivery, terra-react).
 license: MIT
 compatibility: Requires network access to docs.tryterra.co for full API schemas
 metadata:
   author: terra
-  version: "1.1.0"
+  version: "2.0.0"
 ---
 
 # Terra API Mobile SDK
 
-Guidance for integrating the Terra API mobile SDK on iOS, Android, React Native, and Flutter. The workflow and every cross-platform gotcha live here in SKILL.md; per-platform setup detail (capabilities, manifest entries, install coordinates, code snippets, platform quirks) lives in `references/`.
+Guidance for the Terra API mobile SDK 2.x on iOS, Android, React Native and Flutter. The workflow and the cross-platform gotchas live here; per-platform setup (native config, install, code) lives in `references/`. The current release is 2.3.1 on all four platforms, and every platform shares the version number.
+
+## Prerequisites
+
+1. **SDK 2.x, not 1.x.** Minimums: iOS 15 (React Native iOS 15.1); Android `minSdk` 28 and `compileSdk` 36 (Samsung Health add-on: `minSdk` 29); React Native 0.81 or later with the New Architecture; Flutter 3.24 and Dart 3.5 or later. Per-type permission requests and Apple Health Records need 2.3.0 or later.
+2. **New code targets 2.x.** 2.x is a rebuild: the module, entry point and every call changed, and 1.x code does not compile against it. Check an existing app with "Upgrading from 1.x" below before writing any SDK code into it.
+3. **A backend endpoint that mints Terra API auth tokens.** The app never holds the API key.
+4. **The data types you need are enabled for the environment** (see "What syncs" below). A type that is not enabled is refused on upload.
 
 ## Account tools: CLI or MCP
 
@@ -30,23 +37,19 @@ terra data-tokens list --env <dev-id> --select token_id,name,scopes,expires_at,l
 terra users list --env <dev-id> --provider APPLE --select user_id,reference_id,active
 ```
 
-`data-tokens list` is metadata only, which is what makes it the right check: it says whether a usable token exists and what it is scoped for, without re-showing any bearer. Re-showing one is the separate, `keys:read`-gated `terra data-tokens retrieve-secret`.
+`data-tokens list` is metadata only: it says whether a usable token exists and what it is scoped for, without re-showing any bearer.
 
-**Exercising the mint path by hand.** This one is not a read: it mints the short-lived token `initConnection()` takes, and prints it.
+**Exercising the mint path by hand.** This one is not a read: it mints the short-lived token the SDK's token provider returns, and prints it.
 
 ```sh
 terra data-api /auth/tokens -X POST -q reference_id=<your id>
 ```
 
-`reference_id` is a **query** parameter here, so it takes `-q`. Passing it with `-d` puts it in a JSON body the endpoint does not read, and the call still succeeds: you get back a token that is silently unbound. That matters, because binding is what stops a token attaching a device to the wrong user. Bound, the token is tied to that identifier and redemption ignores whatever the SDK sends. (`/auth/generateWidgetSession` does take a body, so `-d` is right there. Check with `terra admin-api list --data-api <path> --format json` rather than assuming.)
+`reference_id` is a **query** parameter here, so it takes `-q`. Passing it with `-d` puts it in a JSON body the endpoint does not read, and the call still succeeds: you get back a token that is silently unbound. Bound, the token is tied to that identifier and redemption ignores anything else, which is what stops a token attaching a device to the wrong user. It is still a credential on stdout, so keep it out of CI logs.
 
-Useful for checking the flow end to end before the backend exists, but it is still a credential on stdout, so keep it out of CI logs.
+The docs' code samples call `POST /auth/generateAuthToken`. That is the deprecated spelling of `/auth/tokens`, identical in parameters and response, and kept indefinitely. New code should use `/auth/tokens`.
 
-The reference files and shipped SDK versions call `POST /auth/generateAuthToken`. That is the deprecated spelling of this endpoint and is identical to it, same parameters and same response, kept indefinitely because released SDKs call that path. Either works; new code should use `/auth/tokens`.
-
-Reach for `terra environments retrieve-api-key` only when something genuinely needs the environment's API key. Nothing in the mobile flow does, and it prints the webhook signing secret alongside it.
-
-**Never ship the admin token or the environment API key in an app.** The SDK takes a short-lived auth token minted per user, and `terra data-tokens create --scopes auth:write` is the explicitly scoped, revocable credential for the backend that mints them: several coexist per environment, so rotation is mint-new then revoke-old with no cutover. Over MCP, minting a data token needs the user's approval in the dashboard and an access level the default MCP sign-in does not grant, so this one step is simpler with the CLI.
+**Never ship the admin token or the environment API key in an app.** `terra data-tokens create --scopes auth:write` is the scoped, revocable credential for the backend that mints SDK tokens: several coexist per environment, so rotation is mint-new then revoke-old with no cutover. Reach for `terra environments retrieve-api-key` only when something genuinely needs the environment's API key; nothing in the mobile flow does, and it prints the webhook signing secret alongside it.
 
 After a device connects, `terra users list --reference-id <ref>` says whether the record landed and stayed active, which separates an SDK problem from a permissions one.
 
@@ -54,73 +57,84 @@ In a coding agent (Claude Code, Codex, Cursor and the like, on the user's machin
 
 ## When the mobile SDK is the right tool
 
-The mobile SDK exists for one reason: to reach health sources that have **no web API**. Only three integrations require it:
+Only three sources need it, because they have no web API: **Apple Health** (iOS), **Health Connect** and **Samsung Health** (Android). Every other provider (Garmin, Fitbit, Oura, Whoop, Strava, Dexcom and the rest) connects through the [Unified API](https://docs.tryterra.co/unified-api/getting-started) with no SDK. Data the SDK uploads reaches the same data destination as web API data, so the receiving webhook and storage are the `terra-unified-api` skill's territory. Live per-second BLE or ANT+ streaming is the separate Real-Time SDK, covered by `terra-streaming`. No mobile app of your own? Terra Grip connects these sources for you: see [Terra Grip](https://docs.tryterra.co/mobile-sdks/terra-grip-companion-app).
 
-- **Apple Health / HealthKit** (iOS)
-- **Samsung Health** (Android)
-- **Health Connect** (Android)
+## The workflow
 
-Every other provider (Garmin, Fitbit, Oura, Whoop, Strava, Dexcom, and 500+ more) connects through the [Unified API](https://docs.tryterra.co/unified-api), not the SDK. Google Fit can be read through the SDK via Health Connect, but the web API is the preferred, more reliable route for it. If a provider you need has a web API, use the web API.
+The shape is the same on every platform; names differ only in casing (`Source.health`, `Source.HEALTH`, `'health'`).
 
-Data captured by the SDK flows to the same Data Destination (webhook) as web API data, and connections are managed with the same auth model. If you are building the receiving webhook or storing the health data, that is the `terra-unified-api` skill's territory; this skill covers the on-device connection. Live, per-second data from a BLE or ANT+ wearable is the separate Real-Time SDK, covered by `terra-streaming`.
+1. **Install and declare native config.** iOS: HealthKit entitlements, background delivery, `Info.plist` keys. Android: every Health Connect permission you read, the privacy-policy screen declared twice, the package query. See the platform reference.
+2. **Build one client at launch, with a token provider.** iOS `Terra(devID:tokenProvider:)`, Android `Terra(context, devId = ..., tokenProvider = { ... })` in `Application.onCreate`. React Native and Flutter build the native client at launch from the dev ID in native config (`TerraDevID` in `Info.plist`, `co.tryterra.sdk.DEV_ID` meta-data on Android); JavaScript or Dart then calls `createTerra({ tokenProvider })` once. The SDK calls the token provider **only** when it needs a new link: first link, after a reinstall that lost the stored link, when a different person connects, or after Terra API stops accepting the device's key. A normal launch restores the link with no network call.
+3. **Register background sync in the same place, before the first `await`.** iOS `BackgroundSync.register(terra:)`; Android `BackgroundSync.register(context, terra)`. React Native and Flutter do it inside the native bootstrap. Both return `false` when nothing was scheduled, so check the result.
+4. **Mint the token on your backend.** `POST https://api.tryterra.co/v2/auth/tokens?reference_id=<your user id>`. The token is single-use and **expires after three minutes**, so mint it inside the token provider, never ahead of time. Authenticate with the `auth:write` data token from "Account tools" (`Authorization: Bearer terra_dt_...`); the `dev-id` and `x-api-key` headers the docs show also work but are the environment's master key. Whatever credential mints tokens stays on your server.
+5. **Connect, naming the person.** `connect(source, for: EndUser)` with `.reference(id)` set to the **same** value your backend sends as `reference_id`, or `.anonymous` if it sends none. A stored link is restored only for the person it was made for; a different person signing in on the same phone retires the old link and links again. Terra API still trusts only the reference inside the token. `connect` returns the connection, whose `userID`/`userId` is the `user_id` on your webhooks. To link with a token already in hand (QR code, deep link), pass it to `connect`; that always creates a fresh link.
+6. **Request permissions.** `connect` never shows a permission sheet; only `permissions.request` does. Request by category (`read: [.daily, .sleep, .activity, .body]`) or, on 2.3.0 and later, by type (`readTypes`). After the sheet is answered the SDK uploads on its own. There is no sync call.
+7. **Check health on every launch.** `diagnostics.state()`: on `linkRevoked`, call `connect` again with the same end user and the token provider links again. `backgroundRefreshUnscheduled` or `BackgroundRestricted` means background sync is not running: the platform reference has the fixes.
 
-## The six-step workflow
+Disconnect on the device with `connection.disconnect()` (iOS) or `terra.disconnect(Source.HEALTH)` (Android) or `terra.disconnect()` (React Native, Flutter). To remove the user from Terra API, call `DELETE /auth/deauthenticateUser` from your backend.
 
-The shape is identical on every platform. Platform differences are in the `references/` files.
+## Permissions
 
-1. **Install the SDK and grant native capabilities.** Add the package, declare HealthKit/background capabilities (iOS) or manifest permissions and minSDK 28 (Android). See the per-platform reference.
-2. **Initialize the SDK on every app start and every foreground.** Create the `TerraManager` (iOS/Android) or call `initTerra` (RN/Flutter). This call is **asynchronous** and must complete before any other SDK call. Initializing is a prerequisite for everything else, so do it every time the app opens, not just once per install.
-3. **Mint a single-use auth token from YOUR BACKEND.** `POST https://api.tryterra.co/v2/auth/tokens` (the deprecated `/auth/generateAuthToken` is the same endpoint), with your user's identifier as the `reference_id` **query** parameter so the token is bound to that user. Authenticate with the `auth:write` data token from "Account tools" above, sent as `Authorization: Bearer terra_dt_...`; it is bound to one environment, so no `dev-id` header is needed. The `dev-id` and `x-api-key` pair the reference files show still works, but it is the environment's master key. The token is single-use **and expires in 3 minutes** (the response includes `expires_in`), so mint it just-in-time when the user initiates the connection, not at app start. Hand it to the client through your own channel. Never call this endpoint from the app, in development or production: whatever credential can mint tokens must stay on your server.
-4. **Open the connection with `initConnection`.** Pass the connection type, the token, and your permission set. This triggers the OS permission popup. See "Permission popup behavior" below – it is the highest-friction part of the integration.
-5. **Validate with `getUserId` on every re-initialization.** `getUserId` is synchronous and returns the `user_id` if the connection is live or `nil`/`null` if not. Call it right after every init; on `nil`, call `initConnection` again to reconnect. Re-connecting an already-connected user triggers no popup and does not interrupt the user.
-6. **iOS only: enable background delivery.** Call `Terra.setUpBackgroundDelivery()` in your `AppDelegate`'s `didFinishLaunchingWithOptions`. Without it, Apple Health data is not pushed automatically.
+- **iOS never reveals whether a read was granted.** `status(for:)` answers `.notDisclosed`, never `.granted` or `.denied`, and React Native and Flutter's `permissions.request` resolve to `undefined`/`null` on iOS. A denied read looks like no data. Write status (`writeStatus(for:)`) is real. On Android, `request` returns what the sheet granted: check it.
+- **Heart rate rides the daily upload.** On iOS its permission comes with `body`; on Android it comes with `daily`. Request both if you need heart rate everywhere.
+- **Per-type requests (`readTypes`, 2.3.0+) make the install type-scoped, permanently.** From then on the SDK reads and uploads only requested types plus whole categories; later requests add, nothing is dropped. Fields for types you did not request are **left out of the payload, not sent as zero**. A workout keeps its energy, distance and step totals only with `activeEnergy`, `distance` and `steps` requested. `workoutRoute`, `speed`, `power` and `cyclingCadence` need `workouts` (or `activity` whole), else the request throws `workoutsRequired`. Samsung Health is requested by category only. Read [Permissions](https://docs.tryterra.co/reference/mobile-sdks/permissions-mapping) before choosing types.
+- **Android categories are wider than their names.** Health Connect's `SLEEP` also reads heart rate, resting heart rate, HRV, oxygen saturation and respiratory rate; replacing it with `SLEEP_ANALYSIS` alone silently stops them.
+- **Health Connect grants nothing that is not in your manifest.** 2.x declares no health permission for you. A request for one undeclared type makes Health Connect refuse the whole sheet. Declare exactly what you request (Play rejects unused declarations), plus `READ_HEALTH_DATA_IN_BACKGROUND` for background sync and `READ_HEALTH_DATA_HISTORY` for more than 30 days of history.
+- **Apple Health Records are a separate opt-in** (`permissions.requestClinicalRecords()`, iOS, 2.3.0+); `permissions.request` ignores them. Use the `terra-clinical-records` skill if it is installed, else follow [Request Apple Health Records](https://docs.tryterra.co/mobile-sdks/ios-sdk-2#request-apple-health-records).
 
-**Deauthenticating** a user uses the same endpoint as web integrations: `DELETE /auth/deauthenticateUser`, called from your backend. See [the web API auth reference](https://docs.tryterra.co/unified-api).
+## What syncs, and when
 
-## Permission popup behavior (read before shipping)
+- **Triggers:** right after a `permissions.request` that adds an upload route, each foreground (at most every 15 minutes), background wakes (HealthKit delivery and the refresh task on iOS; a WorkManager run every 15 minutes at best on Android), and after `connect` creates a new link if access was already requested. `connect` itself uploads nothing.
+- **History:** the first sync reaches 730 days back. Health Connect serves only 30 days without `READ_HEALTH_DATA_HISTORY`. To go further, [request historical data](https://docs.tryterra.co/unified-api/requesting-historical-data) from your backend with `to_webhook=true`; the device uploads the window on its next run. The 1.x on-device `getDaily(toWebhook:)` backfill is gone.
+- **Only requested, enabled types upload.** A type not enabled for the environment is refused with `data_type_not_enabled`, and the SDK holds that route for up to a day at a time, so enabling it can take a day to show. `terra unified-api data scopes list --env <dev-id>` reads the enabled set. `terra unified-api data scopes replace` takes the **complete** set: every type you leave out is deselected, so read the list first and send it back with your additions.
+- **iOS background delivery** needs the `com.apple.developer.healthkit.background-delivery` entitlement (without it, uploads wait for whatever refresh slots iOS grants) and only runs with the phone unlocked and online.
+- **No source filtering.** 1.x `setIgnoredSources` does not exist in 2.x; the SDK uploads every app's data the person granted. Deduplicate against other connections on your backend.
 
-- **The popup fires once.** On both Apple Health and Health Connect, the OS shows the permission screen only the first time. Calling `initConnection` again is a no-op for the popup. It re-triggers **only** if: (a) you call `initConnection` with an **expanded** set of `customPermissions`, (b) the app is deleted and reinstalled, or (c) – Health Connect only – you request a permission that Google has not approved for your app on release.
-- **The HealthKit popup is a WebView.** If your app is itself WebView-based, you must interrupt your WebView, call `initConnection`, and reopen your WebView on completion. Otherwise the popup cannot render.
-- **`getUserId` returning `nil` means reconnect, not re-popup.** Reconnecting a still-authorized user is silent.
+## Upgrading from 1.x
 
-## Background delivery (iOS)
+Detect the version before writing code. Any of these means 1.x. If the app is on 1.x and the task is to maintain it rather than upgrade it, read `references/sdk-1x.md` and use only that file's calls. Otherwise recommend upgrading with the guide for its platform.
 
-`Terra.setUpBackgroundDelivery()` enables automatic Apple Health pushes, but the delivery is constrained:
+| Platform     | 1.x signs                                                                                                                                                                                  | Upgrade guide                                                                                                                     |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
+| iOS          | `import TerraiOS`, `Terra.instance(devId:referenceId:)`, `TerraManager`, `initConnection`, `getUserId`, `Terra.setUpBackgroundDelivery()`, `co.tryterra.data.post.request` in `Info.plist` | [iOS upgrade guide](https://docs.tryterra.co/mobile-sdks/ios-migrating-to-2)                                                      |
+| Android      | imports from `co.tryterra.terra`, `Terra.instance(...)`, `Connections.HEALTH_CONNECT` or `Connections.SAMSUNG`, the `co.tryterra:android-sdk` artifact                                     | [Android upgrade guide](https://docs.tryterra.co/mobile-sdks/android-migrating-to-2)                                              |
+| React Native | the `terra-react` package, `initTerra`, `initConnection`                                                                                                                                   | [React Native upgrade guide](https://docs.tryterra.co/mobile-sdks/react-native-migrating-to-2)                                    |
+| Flutter      | `terra_flutter_bridge` 0.x, `TerraFlutter.initTerra`, `TerraFlutter.initConnection`                                                                                                        | none yet: follow the [Flutter SDK guide](https://docs.tryterra.co/mobile-sdks/flutter-sdk-2); its Dart API matches React Native's |
 
-- Fires at a **much lower frequency** when the app is killed.
-- Fires **only when the phone is unlocked**.
-- Fires **only with a network connection**.
-- Delivers **only data types enabled on [the Terra API dashboard](https://dashboard.tryterra.co)**. `terra unified-api data scopes list --env <dev-id>` reads that set. To change it, `terra unified-api data scopes replace` takes the **complete** set: every type you leave out is deselected, so read the list first and send it back with your additions.
-- If you use `customPermissions`, background delivery needs specific per-category permissions enabled: **Daily** needs `STEPS`; **Sleep** needs `SLEEP_ANALYSIS`; **Body** needs `BMI` and `HEART_RATE`; **Activity** needs `WORKOUT_TYPE`; **Nutrition** needs `NUTRITION_CALORIES`.
+The package names alone do not settle it: the iOS package URL, the `TerraiOS` SwiftPM product name (an alias of `TerraSDK`) and the Maven coordinate `co.tryterra:terra-android` are the same in both majors. Check the imports and calls.
 
-`schedulerOn` has **no effect on iOS** – background delivery is controlled entirely by `setUpBackgroundDelivery()`. On Android, `schedulerOn = true` enables Terra API to make scheduled requests while the app is in the foreground.
+What every upgrade has in common:
 
-## Cross-platform gotchas
+- **Keep the same `reference_id`.** It moves from the app (`referenceId:` on `Terra.instance`) to the backend's token request, plus the `EndUser` on every `connect`. The same value keeps existing users on their `user_id`.
+- **`initConnection` splits in two:** `connect` (no token argument: the token provider supplies it) then `permissions.request`. `getUserId` becomes `connections` and `connection.userID`. `setUpBackgroundDelivery` and `schedulerOn` become `BackgroundSync.register`. `postActivity` and friends become `log` on the `activity`, `body` and `nutrition` namespaces.
+- **Native config changes.** iOS: background task identifier `co.tryterra.sdk.refresh` replaces `co.tryterra.data.post.request`, Background processing mode is no longer needed, minimum iOS 15. Android: the manifest must now declare every Health Connect permission.
+- **Never mix majors.** `terra-android` 2.x in an app still on `terra-react` or the 1.x Flutter plugin crashes with missing `co.tryterra.terra` classes. Move the wrapper first.
+- **iOS installs with Swift Package Manager only after 2.3.0.** CocoaPods trunk becomes read-only on 2 December 2026, so 2.3.0 is the last `TerraiOS` pod. Existing CocoaPods installs keep working: 1.x and 2.0 to 2.3.0 stay installable from the pod. A later release needs SwiftPM, so move a Podfile integration when you upgrade past 2.3.0.
 
-- **Samsung Health needs an approved partnership.** Terra API has a privileged Samsung partnership that bypasses Health Connect, but you must [apply for access](https://developer.samsung.com/SHealth/business-partner/m48wvqi1mt9w2w4c). While waiting, develop against Health Connect; switching to Samsung direct later is a **version bump with no code changes**. Release builds need the ProGuard rule `-keep class com.samsung.android.** { *; }` (R8 strips the Samsung classes without it and crashes at runtime), and test devices need **Developer Mode** enabled in Samsung Health.
-- **Health Connect needs manifest work and Google approval.** Your manifest needs a privacy-policy `<activity>` with the `ACTION_SHOW_PERMISSIONS_RATIONALE` and `VIEW_PERMISSION_USAGE` intent-filters. Before going live you must apply to Google for Health Connect data-type access and add `tools:node="remove"` `<uses-permission>` lines for every permission you do not use. See `references/android.md`.
-- **`setIgnoredSources` is iOS-only and not persisted.** It filters out data from specific source apps in HealthKit (useful when a user has both a cloud Terra API connection and that provider's companion app syncing into Apple Health, which produces duplicates). It resets on every app restart, so call it after every init. On Android it is a no-op.
-- **A new device or reinstall replaces the connection – handle `user_reauth`.** When an SDK auth arrives with the same `(dev-id, reference_id, provider)` as an existing connection but a new device identifier (second device, or a reinstall that reset the vendor ID), Terra API issues a **new** `user_id`, **deletes every previous connection** for that tuple, and sends a `user_reauth` webhook carrying `old_user` and `new_user`. Handle that event by migrating your stored `old_user.user_id` to `new_user.user_id`; there is only ever one active connection per `(dev-id, reference_id, provider)`. This replacement only fires when a `reference_id` is supplied – with an empty `reference_id` stale connections accumulate instead, one more reason to always set `reference_id`.
-- **`postActivity` requires `device_data` and iOS 14+.** Writing a completed activity fails without `device_data` in the payload.
+## Gotchas
+
+- **Build the client once, at launch.** iOS raises an exception and the app stops when a background task is registered after launch finishes, so `BackgroundSync.register` must run before the first `await`. On Android, background runs start the process with no activity, so a client built in a screen does not exist when they arrive.
+- **iOS: `NSHealthUpdateUsageDescription` is required even if the app never writes.** App Store Connect rejects the upload without it.
+- **Android: name the `tokenProvider` argument.** The factory's last parameter is `stores`, so a trailing lambda binds there and the client has no token provider.
+- **Android: create the `PermissionLauncher` in `onCreate`**, before anything that suspends; Android refuses the registration once the activity is started. Flutter's `MainActivity` must extend `FlutterFragmentActivity`, else `bridge.no_activity`.
+- **Android 14+: declare the privacy-policy screen twice** (the `ACTION_SHOW_PERMISSIONS_RATIONALE` activity and a `VIEW_PERMISSION_USAGE` activity-alias). Without the alias every read fails with "Incorrect health permission state", granted ones included.
+- **Samsung Health: start on Health Connect.** `Source.HEALTH` already reads Samsung data that Samsung Health shares into Health Connect. The direct route (`Source.SAMSUNG_HEALTH`) needs the `terra-android-samsung` add-on, Samsung's own `.aar`, and Samsung partner approval **for your package name and signing certificate**; Terra API's approval does not cover your app. Until approved it only works with Samsung Health developer mode on. React Native and Flutter also need `terraSamsungHealth=true` in `android/gradle.properties`.
 
 ## Decisions left to you
 
-These are your calls; the docs do not prescribe them. Make them deliberately:
-
-- **Which data types / permissions to request.** Empty `customPermissions` defaults to all available; narrowing reduces the permission surface but you must keep background-delivery categories (above) enabled.
-- **Immediate vs deferred HealthKit prompting.** `requestPermissions: false` on `Terra.instance` recognizes returning users silently and lets you gate the popup on an explicit user action. See `references/ios.md`.
-- **Device-switch handling.** A second device or reinstall replaces the existing connection and fires `user_reauth` (see above), so decide whether to let any device connect (and migrate `user_id`s on `user_reauth`) or gate `initConnection` to a single primary device.
-- **Samsung direct vs Health Connect** as your Android route (and whether to start on Health Connect while the Samsung partnership is pending).
-- **Backfill approach.** The `getDaily`/`getSleep`/etc. getters accept `toWebhook: true` (push to your destination) or `toWebhook: false` (return the payload to the client callback).
-- **How your backend hands the auth token to the client**, and your **`reference_id` scheme** (this is the join key in every webhook).
+- **Categories or types.** Types (2.3.0+) match a narrow consent screen and `NSHealthShareUsageDescription`, but the install stays type-scoped and every payload field needs its type. Default to categories unless the app must disclose exactly what it reads.
+- **When to show the sheet.** Nothing prompts until `permissions.request`, so gate it on an explicit user action.
+- **Health Connect or Samsung direct** on Android. Default to Health Connect.
+- **Your `reference_id` scheme and token endpoint.** The reference is the join key on every webhook.
 
 ## Platform references
 
 Read the file for the platform you are building on:
 
-- **`references/ios.md`** – read when integrating **TerraiOS** natively (Swift): capabilities, info.plist keys, `Terra.instance`, deferred prompting, `setUpBackgroundDelivery`, `setIgnoredSources`, writing data, planned-workout WorkoutKit sync.
-- **`references/android.md`** – read when integrating **TerraAndroid** natively (Kotlin): `build.gradle` coordinates, minSDK 28, Samsung vs Health Connect setup, ProGuard, manifest intent-filters, `startIntent` (deprecated, always null).
-- **`references/react-native.md`** – read when integrating **terra-react**: install, iOS + Android native setup, `initTerra`/`initConnection`, the AppDelegate background-delivery edit, `postActivity` (Apple Health only).
-- **`references/flutter.md`** – read when integrating **terra_flutter_bridge**: `flutter pub`, native setup, `TerraFlutter` API, AppDelegate background delivery, getters.
+- **`references/ios.md`**: read when integrating the native iOS SDK (`TerraSDK`, Swift): SwiftPM install, entitlements and `Info.plist`, client and background setup, connect and permissions code, your own background task, local reads and writes, diagnostics.
+- **`references/android.md`**: read when integrating `terra-android` 2.x (Kotlin): Gradle, the Health Connect manifest, `Application` setup, launcher and permissions code, Samsung add-on, background and OEM restrictions.
+- **`references/react-native.md`**: read when integrating `@tryterra/react-native`: iOS bootstrap and Android meta-data, `createTerra`, connect and permissions, error codes.
+- **`references/flutter.md`**: read when integrating `terra_flutter_bridge` 2.x: iOS bootstrap, `FlutterFragmentActivity`, `createTerra`, connect and permissions, error codes.
+- **`references/sdk-1x.md`**: read only when maintaining an app that stays on 1.x (`TerraiOS` 1.x, `terra-android` 1.x, `terra-react`, `terra_flutter_bridge` 0.x): the 1.x workflow, popup and background-delivery rules, and per-platform setup. Never mix it with the 2.x instructions above.
 
-Full docs: [docs.tryterra.co](https://docs.tryterra.co). Where a signature or enum is not shown here, see the SDK reference linked from [mobile-only sources](https://docs.tryterra.co/unified-api/mobile-only-sources). Ask `terra docs ask` (or `docs_ask` over MCP) before fetching a page: it answers from the docs and cites its sources. Append `.md` to any docs URL for markdown.
+Full docs: [Mobile SDKs](https://docs.tryterra.co/mobile-sdks/mobile-only-sources), [release notes](https://docs.tryterra.co/mobile-sdks/release-notes), and the SDK references for [iOS](https://docs.tryterra.co/reference/mobile-sdks/ios-sdk-2), [Android](https://docs.tryterra.co/reference/mobile-sdks/android-sdk-2), [React Native](https://docs.tryterra.co/reference/mobile-sdks/react-native-sdk-2) and [Flutter](https://docs.tryterra.co/reference/mobile-sdks/flutter-sdk-2). Where a signature or enum is not shown here, check the reference; do not guess. Ask `terra docs ask` (or `docs_ask` over MCP) before fetching a page: it answers from the docs and cites its sources. Append `.md` to any docs URL for markdown.

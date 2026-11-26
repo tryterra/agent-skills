@@ -1,166 +1,133 @@
-# React Native – terra-react
+# React Native: @tryterra/react-native 2.x
 
-Cross-platform integration for **Apple Health** (iOS), **Samsung Health**, and **Health Connect** (Android). Source: [docs.tryterra.co/unified-api/mobile-only-sources/react-native](https://docs.tryterra.co/unified-api/mobile-only-sources/react-native).
+Apple Health on iOS, Health Connect and Samsung Health on Android. Sources: [React Native SDK guide](https://docs.tryterra.co/mobile-sdks/react-native-sdk-2), [React Native SDK reference](https://docs.tryterra.co/reference/mobile-sdks/react-native-sdk-2), [React Native upgrade guide](https://docs.tryterra.co/mobile-sdks/react-native-migrating-to-2).
 
-## 1. Install and native setup
+The 2.x package is `@tryterra/react-native`. The 1.x package was `terra-react` (`initTerra`, `initConnection`): an app that still has it must follow the upgrade guide, uninstalling `terra-react` (and any Samsung-tagged build of it) first.
+
+## Requirements
+
+- React Native 0.81 or later, New Architecture.
+- iOS 15.1 or later. Android `minSdkVersion` 28, `compileSdkVersion` 36.
+
+## 1. Install
 
 ```bash
-npm install terra-react
+npm install @tryterra/react-native
+cd ios && pod install
 ```
 
-Then complete the native setup for each platform you target.
+The package carries the iOS SDK and resolves `co.tryterra:terra-android` from Maven Central; nothing else to install.
 
-### iOS setup
+## 2. iOS native setup
 
-1. `cd ios && pod install`.
-2. Add **Capabilities**: HealthKit > HealthKit Background Delivery; Background Modes > Background processing; Background Modes > Background fetch.
-3. Add to `info.plist` (via Xcode or directly):
-   ```xml
-   <key>BGTaskSchedulerPermittedIdentifiers</key>
-   <array>
-     <string>co.tryterra.data.post.request</string>
-   </array>
-   <key>NSHealthClinicalHealthRecordsShareUsageDescription</key>
-   <string>Using TerraiOS to gather health data</string>
-   <key>NSHealthShareUsageDescription</key>
-   <string>Using TerraiOS as a means of getting Health Data</string>
-   <key>NSHealthUpdateUsageDescription</key>
-   <string>Allow writing data to health kit</string>
-   ```
-   (usage-description strings must be at least 3 words).
+1. Signing & Capabilities: **HealthKit > HealthKit Background Delivery** and **Background Modes > Background fetch**.
+2. `Info.plist`:
 
-### Android setup
-
-Same as native Android (see `references/android.md`): minSDK 28, and either the Samsung route (apply for the partnership, install the Samsung-tagged package with `npm install terra-react@<samsung-version>`, add the ProGuard rule `-keep class com.samsung.android.** { *; }`, enable Developer Mode) or the Health Connect route (grant permissions in the Health Connect app, add the privacy-policy `<activity>` intent-filters to `AndroidManifest.xml`, apply to Google before release).
-
-## 2. Initialize (once on app start, and on every foreground)
-
-`initTerra` is asynchronous and a prerequisite for all other SDK calls.
-
-```tsx
-import { initTerra } from "terra-react";
-
-const initializeTerra = async () => {
-  try {
-    const successMessage = await initTerra("YOUR_DEV_ID", "YOUR_REFERENCE_ID");
-    if (successMessage.error !== null) {
-      throw new Error("Terra manager failed to initialise");
-    }
-    // ready for other terra-react methods
-  } catch (error) {
-    console.error("Failed to initialize Terra:", error);
-  }
-};
+```xml
+<key>TerraDevID</key>
+<string>YOUR_DEV_ID</string>
+<key>NSHealthShareUsageDescription</key>
+<string>We read your health data to show your activity and sleep.</string>
+<key>NSHealthUpdateUsageDescription</key>
+<string>We save your workouts to Apple Health.</string>
+<key>UIBackgroundModes</key>
+<array>
+  <string>fetch</string>
+</array>
+<key>BGTaskSchedulerPermittedIdentifiers</key>
+<array>
+  <string>co.tryterra.sdk.refresh</string>
+</array>
 ```
 
-## 3. Connect with initConnection
+`NSHealthUpdateUsageDescription` is required even if the app never writes.
 
-Mint the single-use token from your backend first (`POST https://api.tryterra.co/v2/auth/generateAuthToken` with `dev-id` + `x-api-key`). The token expires in 3 minutes, so mint it just-in-time, not at app start.
+3. Bootstrap first thing in `AppDelegate`, before React Native starts. It reads `TerraDevID`, builds the native client and registers background sync, because a HealthKit wake starts the app with no JavaScript runtime:
 
-```tsx
-import { Connections, initConnection } from "terra-react";
+```swift
+import TerraReactNative
 
-const initializeConnection = async () => {
-  try {
-    const token = "example_token"; // from your backend
-    const successMessage = await initConnection(
-      Connections.APPLE_HEALTH, // or SAMSUNG / HEALTH_CONNECT
-      token,
-      true, // schedulerOn
-      [], // customPermissions – empty = all
-    );
-    if (successMessage.error !== null) {
-      throw new Error("Error initialising a connection");
-    }
-  } catch (error) {
-    console.error("Connection failed:", error);
-  }
-};
-```
-
-- `type`: `Connections.APPLE_HEALTH`, `Connections.SAMSUNG`, or `Connections.HEALTH_CONNECT`.
-- `schedulerOn`: **no effect on iOS** (background delivery is via `setUpBackgroundDelivery`); on Android, `true` enables foreground scheduled requests.
-- `customPermissions`: see [Permissions mapping](https://docs.tryterra.co/unified-api/mobile-only-sources).
-
-Popup behavior: Apple Health and Health Connect show the popup once (re-triggers only on expanded `customPermissions`, reinstall, or – Health Connect – a permission Google has not approved). The HealthKit popup is a WebView; WebView-based apps must interrupt their WebView, call `initConnection`, then reopen.
-
-## 4. Validate with getUserId on every re-init
-
-```tsx
-import { getUserId, Connections } from "terra-react";
-// returns the user_id or null; on null, call initConnection again
-```
-
-## 5. Background delivery (iOS only)
-
-In your `/ios` `AppDelegate.m`, call `setUpBackgroundDelivery` in `didFinishLaunchingWithOptions`:
-
-```objectivec
-#import "AppDelegate.h"
-#import <React/RCTBundleURLProvider.h>
-#import <TerraiOS/TerraiOS-Swift.h>
-
-@implementation AppDelegate
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
-{
-  self.moduleName = @"AwesomeProject";
-  self.initialProps = @{};
-  [Terra setUpBackgroundDelivery];
-  return [super application:application didFinishLaunchingWithOptions:launchOptions];
+func application(
+  _ application: UIApplication,
+  didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
+) -> Bool {
+  TerraReactNative.bootstrap()
+  // ... start React Native as usual
+  return true
 }
-@end
 ```
 
-Delivery constraints and per-category `customPermissions` requirements are in SKILL.md.
+Remove any 1.x `Terra.setUpBackgroundDelivery()` call.
 
-## 6. Filtering by source app (iOS, optional)
+## 3. Android native setup
 
-`setIgnoredSources` skips named HealthKit source apps (to avoid duplicates when a cloud Terra API connection and that provider's companion app both sync into Apple Health). Call it after every `initTerra`; **not persisted across restarts**. No-op on Android.
+1. Dev ID inside `<application>`:
 
-```tsx
-import { setIgnoredSources } from "terra-react";
-setIgnoredSources(["com.whoop.app", "com.garmin.connect.mobile"]);
+```xml
+<meta-data android:name="co.tryterra.sdk.DEV_ID" android:value="YOUR_DEV_ID" />
 ```
 
-## Historical data and disconnect
+The package's `androidx.startup` initializer builds the client before `Application.onCreate`. If the app removes WorkManager's default initializer, call `TerraReactNative.bootstrap(this)` at the end of `Application.onCreate` instead. An Expo app, whose manifest is generated, sets the meta-data from a config plugin.
+
+2. The Health Connect manifest work from `references/android.md` section 2: one `<uses-permission>` per Health Connect permission the request reads (an undeclared one makes Health Connect refuse the whole sheet), `READ_HEALTH_DATA_IN_BACKGROUND`, `READ_HEALTH_DATA_HISTORY`, the `com.google.android.apps.healthdata` package query, and the rationale intent-filter on `MainActivity` plus the Android 14 `activity-alias` targeting it.
+3. Samsung Health directly: follow [Samsung Health](https://docs.tryterra.co/mobile-sdks/samsung-health) and set `terraSamsungHealth=true` in `android/gradle.properties`. Without it, `'samsungHealth'` rejects with `health_data_unavailable`.
+
+## 4. Create the client, connect, request permissions
+
+Create the client once, at module scope:
+
+```typescript
+// terra.ts
+import { createTerra } from "@tryterra/react-native";
+
+export const terra = createTerra({
+  tokenProvider: () => api.terraToken(), // your backend: POST /v2/auth/tokens?reference_id=...
+});
+```
+
+`tokenTimeoutMs` (default 30 seconds) bounds the wait for the token provider.
 
 ```tsx
-import { Connections, getDaily } from "terra-react";
+import { EndUser, TerraError } from "@tryterra/react-native";
+import { terra } from "./terra";
 
-const requestData = async () => {
-  const endDate = new Date();
-  const startDate = new Date(endDate);
-  startDate.setDate(startDate.getDate() - 1);
-  const dataMessage = await getDaily(
-    Connections.APPLE_HEALTH,
-    startDate,
-    endDate,
-    false,
-  );
-  if (dataMessage.error !== null) throw new Error("Failed to get data");
-  if (dataMessage.success) console.log("Daily data:", dataMessage.data);
+const connectHealth = async () => {
+  try {
+    await terra.connect("health", EndUser.reference(user.id));
+    const granted = await terra.permissions.request({
+      read: ["activity", "body", "daily", "sleep"],
+    }); // Android: what was granted. iOS: undefined.
+  } catch (error) {
+    if (error instanceof TerraError) console.error(error.code);
+  }
 };
 ```
 
-Set the final `toWebhook` argument to `false` to receive the payload in the response. Disconnect via the same backend endpoint as web integrations (`DELETE /auth/deauthenticateUser`).
+- Sources: `'health'` (Apple Health on iOS, Health Connect on Android) or `'samsungHealth'` (Android only; pass it as the second argument to `permissions.request` too). `EndUser.anonymous` if the backend sends no `reference_id`. `connect(source, endUser, { token })` links fresh with a token in hand.
+- Categories: `activity`, `body`, `daily`, `sleep`, `nutrition`, and from 2.2.1 `menstruation` and `athlete` (iOS). Heart rate needs `body` on iOS and `daily` on Android.
+- 2.3.0+: `permissions.request({ readTypes: ['workouts', 'steps', 'heartRate', ...] })` and `permissions.typeStatus('heartRate')` (`notDisclosed` on iOS). A type the platform cannot store, or any type for `'samsungHealth'`, rejects with `bridge.unsupported_on_platform`.
+- iOS only, 2.3.0+: `await terra.permissions.requestClinicalRecords?.()` (undefined on Android). Use the `terra-clinical-records` skill if installed.
 
-## Writing data (Apple Health only)
+## 5. Health checks and background
 
-`postActivity` writes into Apple Health (Health Connect writes are not yet supported). **`device_data` is required** – the write fails without it.
-
-```tsx
-import { Activity, postActivity, Connections } from "terra-react";
-
-const activityPayload: Activity = {
-  metadata: {
-    name: "Morning Run",
-    start_time: "...",
-    end_time: "...",
-    type: 8 /* RUNNING */,
-  },
-  device_data: { name: "Terra" }, // required
-};
-const resp = await postActivity(Connections.APPLE_HEALTH, activityPayload);
+```typescript
+const state = await terra.diagnostics.state(); // { state: 'healthy' }, { state: 'linkRevoked' }, ...
+const last = await terra.diagnostics.lastDelivery();
+const stop = terra.diagnostics.events((event) => console.log(event));
+const registered = await terra.background.isRegistered();
 ```
 
-Fetch [docs.tryterra.co/unified-api/mobile-only-sources/react-native.md](https://docs.tryterra.co/unified-api/mobile-only-sources/react-native.md) for the full payload fields, function list, and `ActivityType` enum when building the request body.
+On `{ state: 'linkRevoked' }`, call `connect` again with the same end user. Local reads take a `TimeRange` object (`{ kind: 'lastDays', days: 7 }`, `{ kind: 'today' }`), e.g. `terra.daily.steps({ kind: 'today' })`; writes are `log` on `activity`, `body`, `daily`, `nutrition` and `sleep`. Disconnect with `await terra.disconnect()`.
+
+## Errors
+
+Every rejection is a `TerraError` with a stable `code`, a `retryable` flag and `details`.
+
+| Code                                                            | Fix                                                                                                                                          |
+| --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bridge.not_bootstrapped`                                       | iOS: add `TerraReactNative.bootstrap()` and `TerraDevID`. Android: add the `co.tryterra.sdk.DEV_ID` meta-data. `details.line` names the line |
+| `bridge.token_timeout` (iOS), `token_provider_failed` (Android) | The token provider rejected or exceeded `tokenTimeoutMs`                                                                                     |
+| `token_rejected`                                                | Token expired (three minutes) or reused                                                                                                      |
+| `bridge.no_activity` (Android)                                  | Request permissions while the app is in the foreground                                                                                       |
+| `workouts_required`                                             | Add `workouts` to `readTypes`                                                                                                                |
+| Android sheet closes without asking                             | The request reads a type the manifest does not declare                                                                                       |

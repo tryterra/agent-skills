@@ -1,13 +1,18 @@
 {
-  "version": "1.1.0",
+  "version": "2.0.0",
   "organization": "Terra API",
-  "date": "July 2026",
-  "abstract": "Integration guidance for the Terra API mobile SDK, the on-device path for health sources with no web API: Apple Health (HealthKit), Samsung Health, and Health Connect. Covers the install/init/token/connect/validate/background-delivery workflow, permission-popup behavior, and per-platform setup for TerraiOS, TerraAndroid, terra-react, and terra_flutter_bridge.",
+  "date": "November 2026",
+  "abstract": "Integration guidance for the Terra API mobile SDK 2.x, the on-device path for health sources with no web API: Apple Health (HealthKit), Health Connect, and Samsung Health. Covers the build-once client with a token provider, connect and permission requests (categories and, from 2.3.0, individual types), automatic background sync, diagnostics, detecting and upgrading 1.x apps, and per-platform setup for TerraSDK (iOS), terra-android, @tryterra/react-native, and terra_flutter_bridge 2.x.",
   "references": [
-    "https://docs.tryterra.co/unified-api/mobile-only-sources",
-    "https://docs.tryterra.co/unified-api/mobile-only-sources/ios-swift",
-    "https://docs.tryterra.co/unified-api/mobile-only-sources/android-kotlin",
-    "https://docs.tryterra.co/unified-api/mobile-only-sources/react-native",
-    "https://docs.tryterra.co/unified-api/mobile-only-sources/flutter"
+    "https://docs.tryterra.co/mobile-sdks/mobile-only-sources",
+    "https://docs.tryterra.co/mobile-sdks/ios-sdk-2",
+    "https://docs.tryterra.co/mobile-sdks/android-sdk-2",
+    "https://docs.tryterra.co/mobile-sdks/react-native-sdk-2",
+    "https://docs.tryterra.co/mobile-sdks/flutter-sdk-2",
+    "https://docs.tryterra.co/mobile-sdks/samsung-health",
+    "https://docs.tryterra.co/mobile-sdks/ios-migrating-to-2",
+    "https://docs.tryterra.co/mobile-sdks/android-migrating-to-2",
+    "https://docs.tryterra.co/mobile-sdks/react-native-migrating-to-2",
+    "https://docs.tryterra.co/mobile-sdks/release-notes"
   ]
 }

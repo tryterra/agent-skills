@@ -1,137 +1,103 @@
-# Flutter – terra_flutter_bridge
+# Flutter: terra_flutter_bridge 2.x
 
-Cross-platform integration for **Apple Health** (iOS), **Samsung Health**, and **Health Connect** (Android). Source: [docs.tryterra.co/unified-api/mobile-only-sources/flutter](https://docs.tryterra.co/unified-api/mobile-only-sources/flutter).
+Apple Health on iOS, Health Connect and Samsung Health on Android. Sources: [Flutter SDK guide](https://docs.tryterra.co/mobile-sdks/flutter-sdk-2), [Flutter SDK reference](https://docs.tryterra.co/reference/mobile-sdks/flutter-sdk-2).
 
-## 1. Install and native setup
+2.x is `terra_flutter_bridge` 2.2.1 and later on pub.dev. The 1.x plugin shipped as the **0.x** versions of the same package (`TerraFlutter.initTerra`, `TerraFlutter.initConnection`). There is no Flutter upgrade guide: rebuild the integration against the Flutter SDK guide. The Dart API matches the React Native one, so the [React Native upgrade guide](https://docs.tryterra.co/mobile-sdks/react-native-migrating-to-2) maps the old calls.
 
-```bash
-flutter pub add terra_flutter_bridge
+## Requirements
+
+- Flutter 3.24 or later, Dart 3.5 or later.
+- iOS 15 or later. Android `minSdk` 28, `compileSdk` 36, Kotlin 2.0 or later, Android Gradle Plugin 8.9.1 or later.
+
+## 1. Install
+
+```yaml
+dependencies:
+  terra_flutter_bridge: ^2.3.1
 ```
 
-Then complete the native setup for each platform you target.
+The package carries the iOS SDK and resolves `co.tryterra:terra-android` from Maven Central.
 
-### iOS setup
+## 2. iOS native setup
 
-1. `cd ios && pod install`.
-2. Add **Capabilities**: HealthKit > HealthKit Background Delivery; Background Modes > Background processing; Background Modes > Background fetch.
-3. Add to `info.plist`:
-   ```xml
-   <key>BGTaskSchedulerPermittedIdentifiers</key>
-   <array>
-     <string>co.tryterra.data.post.request</string>
-   </array>
-   <key>NSHealthClinicalHealthRecordsShareUsageDescription</key>
-   <string>Using TerraiOS to gather health data</string>
-   <key>NSHealthShareUsageDescription</key>
-   <string>Using TerraiOS as a means of getting Health Data</string>
-   <key>NSHealthUpdateUsageDescription</key>
-   <string>Allow writing data to health kit</string>
-   ```
-   (usage-description strings must be at least 3 words).
+1. Signing & Capabilities: **HealthKit > HealthKit Background Delivery** and **Background Modes > Background fetch**.
+2. `ios/Runner/Info.plist`: `TerraDevID` (your dev ID), `NSHealthShareUsageDescription`, `NSHealthUpdateUsageDescription` (required even if the app never writes), `UIBackgroundModes` with `fetch`, and `BGTaskSchedulerPermittedIdentifiers` with `co.tryterra.sdk.refresh`. The XML is the same as in `references/react-native.md`.
+3. Bootstrap in `AppDelegate`, before `super`, keeping the template's plugin registration:
 
-### Android setup
+```swift
+import Flutter
+import UIKit
+import terra_flutter_bridge
 
-Same as native Android (see `references/android.md`): minSDK 28, and either the Samsung route (apply for the partnership, use the Samsung-tagged `terra_flutter_bridge` version from [pub.dev](https://pub.dev/packages/terra_flutter_bridge/versions), add the ProGuard rule `-keep class com.samsung.android.** { *; }` in `android/app/proguard-rules.pro`, enable Developer Mode) or the Health Connect route (grant permissions in the Health Connect app, add the privacy-policy `<activity>` intent-filters to `AndroidManifest.xml`, apply to Google before release).
+override func application(
+  _ application: UIApplication,
+  didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+) -> Bool {
+  TerraFlutterBridgePlugin.bootstrap()
+  // ... your template's plugin registration, unchanged
+  return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+}
+```
 
-## 2. Initialize (once on app start, and on every foreground)
+`bootstrap()` reads `TerraDevID`, builds the native client and registers background sync; a HealthKit wake starts the app with no Flutter engine.
 
-`initTerra` is asynchronous and a prerequisite for all other SDK calls.
+## 3. Android native setup
+
+1. `<meta-data android:name="co.tryterra.sdk.DEV_ID" android:value="YOUR_DEV_ID" />` inside `<application>`. The `androidx.startup` initializer builds the client; if the app removes WorkManager's default initializer, call `TerraFlutter.bootstrap(this)` at the end of `Application.onCreate`.
+2. **`MainActivity` must extend `FlutterFragmentActivity`**, not `FlutterActivity`, or `permissions.request` fails with `bridge.no_activity`:
+
+```kotlin
+import io.flutter.embedding.android.FlutterFragmentActivity
+
+class MainActivity : FlutterFragmentActivity()
+```
+
+3. The Health Connect manifest work from `references/android.md` section 2: every Health Connect permission the request reads, `READ_HEALTH_DATA_IN_BACKGROUND`, `READ_HEALTH_DATA_HISTORY`, the `com.google.android.apps.healthdata` package query, and the rationale intent-filter on `MainActivity` plus the Android 14 `activity-alias`.
+4. Samsung Health directly (optional): follow [Samsung Health](https://docs.tryterra.co/mobile-sdks/samsung-health), set `terraSamsungHealth=true` in `android/gradle.properties`, and add Samsung's `samsung-health-data-api.aar` to the app; no Terra API artifact carries it.
+
+## 4. Create the client, connect, request permissions
 
 ```dart
 import 'package:flutter/material.dart';
 import 'package:terra_flutter_bridge/terra_flutter_bridge.dart';
-import 'package:terra_flutter_bridge/models/enums.dart';
-import 'package:terra_flutter_bridge/models/responses.dart';
 
-void main() async {
+late final Terra terra;
+
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  await _initializeTerra();
-  runApp(Container());
+  terra = createTerra(tokenProvider: () => api.fetchTerraToken()); // POST /v2/auth/tokens?reference_id=...
+  runApp(const MyApp());
 }
 
-Future<void> _initializeTerra() async {
-  SuccessMessage? result = await TerraFlutter.initTerra('YOUR_DEV_ID', 'YOUR_REFERENCE_ID');
-  if (result?.error != null) {
-    throw Exception('Failed to initialise Terra ${result?.error}');
+Future<void> connectHealth(String userId) async {
+  try {
+    await terra.connect(Source.health, EndUser.reference(id: userId));
+    final granted = await terra.permissions.request(read: [
+      DataCategory.activity,
+      DataCategory.body,
+      DataCategory.daily,
+      DataCategory.sleep,
+    ]); // Android: what was granted. iOS: null.
+  } on TerraError catch (error) {
+    debugPrint('Connection failed: ${error.code.wire}');
   }
 }
 ```
 
-## 3. Connect with initConnection
+- `createTerra` attaches to the native client built at launch; it does not build a second one. `tokenTimeout` defaults to 30 seconds.
+- Sources: `Source.health` or `Source.samsungHealth` (Android only; pass `source: Source.samsungHealth` to `permissions.request` too). `const EndUser.anonymous()` if the backend sends no `reference_id`.
+- Categories: `activity`, `body`, `daily`, `sleep`, `nutrition`, `menstruation`, and `athlete` on iOS. Heart rate needs `body` on iOS and `daily` on Android.
+- 2.3.0+: `terra.permissions.request(readTypes: [HealthDataType.steps, HealthDataType.heartRate, ...])` and `terra.permissions.typeStatus(HealthDataType.heartRate)`. Platform-only types (`exerciseTime`, `bmi` are iOS only) and any type for `Source.samsungHealth` fail with `bridge.unsupported_on_platform`.
+- iOS only, 2.3.0+: `await terra.permissions.requestClinicalRecords?.call()` (null on Android). Use the `terra-clinical-records` skill if installed.
 
-Mint the single-use token from your backend first (`POST https://api.tryterra.co/v2/auth/generateAuthToken` with `dev-id` + `x-api-key`). The token expires in 3 minutes, so mint it just-in-time, not at app start.
+## 5. Health checks and background
 
 ```dart
-Future<void> _initialiseConnection() async {
-  String token = 'example_token';   // from your backend
-  SuccessMessage? result = await TerraFlutter.initConnection(
-    Connection.appleHealth,          // or Connection.samsung / Connection.healthConnect
-    token,
-    true,                            // schedulerOn
-    [],                              // customPermissions – empty = all
-  );
-  if (result?.error != null) {
-    throw Exception('Failed to initialise connection ${result?.error}');
-  }
+final state = await terra.diagnostics.state();
+if (state is DiagnosticsStateLinkRevoked) {
+  await terra.connect(Source.health, EndUser.reference(id: userId));
 }
+final registered = await terra.background.isRegistered();
 ```
 
-- `type`: `Connection.appleHealth`, `Connection.samsung`, or `Connection.healthConnect`.
-- `schedulerOn`: **no effect on iOS** (background delivery is via `setUpBackgroundDelivery`); on Android, `true` enables foreground scheduled requests.
-- `customPermissions`: see [Permissions mapping](https://docs.tryterra.co/unified-api/mobile-only-sources).
-
-Popup behavior: Apple Health and Health Connect show the popup once (re-triggers only on expanded `customPermissions`, reinstall, or – Health Connect – a permission Google has not approved). The HealthKit popup is a WebView; WebView-based apps must interrupt their WebView, call `initConnection`, then reopen.
-
-## 4. Validate with getUserId on every re-init
-
-Call `TerraFlutter.getUserId` after every init; it returns the `user_id` or null. On null, call `initConnection` again to reconnect.
-
-## 5. Background delivery (iOS only)
-
-In `ios/.../AppDelegate.swift`, call `setUpBackgroundDelivery` in `didFinishLaunchingWithOptions`:
-
-```swift
-import UIKit
-import Flutter
-import TerraiOS
-
-@main
-@objc class AppDelegate: FlutterAppDelegate {
-  override func application(
-    _ application: UIApplication,
-    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
-  ) -> Bool {
-    GeneratedPluginRegistrant.register(with: self)
-    Terra.setUpBackgroundDelivery()
-    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
-  }
-}
-```
-
-Delivery constraints and per-category `customPermissions` requirements are in SKILL.md.
-
-## 6. Filtering by source app (iOS, optional)
-
-`setIgnoredSources` skips named HealthKit source apps (to avoid duplicates when a cloud Terra API connection and that provider's companion app both sync into Apple Health). Call it after every `initTerra`; **not persisted across restarts**. No-op on Android.
-
-```dart
-await TerraFlutter.setIgnoredSources(["com.whoop.app", "com.garmin.connect.mobile"]);
-```
-
-## Historical data and disconnect
-
-```dart
-Future<void> getData() async {
-  Connection connection = Connection.appleHealth;
-  DateTime startDate = DateTime.now().subtract(Duration(days: 1));
-  DateTime endDate = DateTime.now();
-  DataMessage? dataMessage =
-      await TerraFlutter.getDaily(connection, startDate, endDate, toWebhook: false);
-  if (dataMessage?.error != null) {
-    throw Exception("Error getting data ${dataMessage?.error}");
-  }
-  // process dataMessage?.data
-}
-```
-
-Set `toWebhook: false` to receive the payload in the response instead of pushing to your destination. Disconnect via the same backend endpoint as web integrations (`DELETE /auth/deauthenticateUser`). See the SDK reference on [docs.tryterra.co](https://docs.tryterra.co/unified-api/mobile-only-sources/flutter) for the full function list.
+Local reads take a `TimeRange` (`const TimeRange.lastDays(days: 7)`), e.g. `terra.daily.steps(...)`; writes are `log` on `activity`, `body`, `daily`, `nutrition` and `sleep`. Disconnect with `await terra.disconnect()`. Error codes (`bridge.not_bootstrapped`, `token_rejected`, `workouts_required`, `bridge.no_activity`) mean the same as in `references/react-native.md`; `details['line']` names the missing bootstrap line.
